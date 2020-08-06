@@ -8,10 +8,10 @@ LDFLAGS=-Wl,-L$(API) -Wl,--gc-sections -Wl,--entry=entrypoint --specs=nano.specs
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
-app.elf: src/main.o src/lib/libgiac.a src/lib/libmpfi.a src/lib/libmpfr.a src/lib/libgmp.a
+app.elf: src/main.o src/lib/libgiac.a src/lib/libmpfi.a src/lib/libmpfr.a src/lib/libgmp.a src/lib/libmicropy.a
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
-src/lib/libgmp.a src/lib/libmpfi.a src/lib/libmpfr.a src/include/gmp.h src/include/mpfi.h src/include/mpfr.h:
+src/lib/libgmp.a src/lib/libmpfi.a src/lib/libmpfr.a src/lib/libmicropy.a src/include/gmp.h src/include/mpfi.h src/include/mpfr.h:
 	./buildDeps
 
 src/lib/libgiac.a: src/lib/libgmp.a src/lib/libmpfi.a src/lib/libmpfr.a src/include/gmp.h src/include/mpfi.h src/include/mpfr.h

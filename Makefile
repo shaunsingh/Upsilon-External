@@ -19,7 +19,7 @@ apps/KhiCAS/app.elf: api/libapi.a
 apps/Nofrendo/app.elf: api/libapi.a
 	make -C apps/Nofrendo
 
-apps/Peanut-GB/app.elf: api/libapi.a
+apps/HexEdit/app.elf: api/libapi.a
 	make -C apps/HexEdit
 
 clean:
