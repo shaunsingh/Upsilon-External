@@ -1135,7 +1135,7 @@ typedef double mp_float_t;
 
 // Whether to provide "io.BytesIO" class
 #ifndef MICROPY_PY_IO_BYTESIO
-#define MICROPY_PY_IO_BYTESIO (1)
+#define MICROPY_PY_IO_BYTESIO (0)
 #endif
 
 // Whether to provide "io.BufferedWriter" class

@@ -198,6 +198,7 @@ namespace giac {
   void gcdsmallmodpoly(const modpoly &p,const modpoly & q,int m,modpoly & d);
   void DivRem(const std::vector<int> & th, const std::vector<int> & other,int m,std::vector<int> & quo, std::vector<int> & rem,bool ck_exactquo=false);
   modpoly gcd(const modpoly & a,const modpoly &b,environment * env,bool call_ntl=false); 
+  void euclide_gcd(const modpoly &p,const modpoly & q,environment * env,modpoly &a);
   // n-var modular gcd
   bool gcd_modular(const polynome &p_orig, const polynome & q_orig, polynome & pgcd,polynome & pcofactor,polynome & qcofactor,bool compute_cofactors);
 
@@ -336,8 +337,10 @@ namespace giac {
   modpoly unmod(const modpoly & a,const gen & m);
   // resultant of P and Q modulo m, modifies P and Q, 
   int resultant_int(std::vector<int> & P,std::vector<int> & Q,std::vector<int> & tmp1,std::vector<int> & tmp2,int m,int w=0);
+#ifndef USE_GMP_REPLACEMENTS
   void vecteur2vector_ll(const vecteur & v,longlong m,std::vector<longlong> & res);
   longlong resultantll(std::vector<longlong> & P,std::vector<longlong> & Q,std::vector<longlong> & tmp1,std::vector<longlong> & tmp2,longlong m);
+#endif
 
   bool ntlresultant(const modpoly &p,const modpoly &q,const gen & modulo,gen & res,bool ntl_on_check=true);
   bool ntlxgcd(const modpoly &a,const modpoly &b,const gen & modulo,modpoly & reu,modpoly &v,modpoly & d,bool ntl_on_check=true);

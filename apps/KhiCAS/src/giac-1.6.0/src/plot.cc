@@ -41,7 +41,7 @@ using namespace std;
 #endif
 #include <iomanip>
 #endif
-#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG && !defined POCKETCAS
+#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG 
 #include <fstream>
 #endif
 #include "vector.h"
@@ -6326,7 +6326,7 @@ namespace giac {
     string mesg="Input\n";
     mesg += v[0].type==_STRNG?*v[0]._STRNGptr:v[0].print(contextptr);
     int i=EM_ASM_INT({
-	var msg = Pointer_stringify($0); // Convert message to JS string
+	var msg = UTF8ToString($0);//Pointer_stringify($0); // Convert message to JS string
 	var tst=prompt(msg,' ');
 	if (tst==null) return 0;
 	return allocate(intArrayFromString(tst), 'i8', ALLOC_NORMAL);

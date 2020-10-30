@@ -395,9 +395,9 @@ void save_sheet(tableur & t,GIAC_CONTEXT){
 void sheet_status(tableur & t,GIAC_CONTEXT){
   string st;
   if (python_compat(contextptr))
-    st="Py ";
+    st="tabl Py ";
   else
-    st="Xcas ";
+    st="tabl Xcas ";
   if (t.var.type==_IDNT)
     st += t.var.print(contextptr);
   else
@@ -480,6 +480,8 @@ bool sheet_display(tableur &t,GIAC_CONTEXT){
     for (int j=t.disp_col_begin;j<J;++j){
       draw_line(x,y,x,y+row_height,_BLACK);
       gen vj=v[j];
+      if (vj.type<_IDNT)
+	vj=makevecteur(vj,vj,0);
       if (vj.type==_VECT && vj._VECTptr->size()==3){
 	bool iscur=i==t.cur_row && j==t.cur_col;
 	string s;
@@ -510,12 +512,14 @@ bool sheet_display(tableur &t,GIAC_CONTEXT){
   drawRectangle(0,y,LCD_WIDTH_PX,LCD_HEIGHT_PX-y,_WHITE); // clear cmdline
   draw_line(0,y,LCD_WIDTH_PX,y,_BLACK);
   // commandline
+  int p=python_compat(contextptr); python_compat(0,contextptr);
+  int xpe=xcas_python_eval; xcas_python_eval=0;
   s=t.cmdline;
   int dx=os_draw_string(0,0,0,0,s.c_str(),true),xend=2; // find width
   bool small=t.keytooltip || dx>=LCD_WIDTH_PX-50;
   int sheety=LCD_HEIGHT_PX-2*row_height,xtooltip=0;
   if (t.cmd_row>=0 && t.cmd_pos>=0 && t.cmd_pos<=s.size()){
-    xend=os_draw_string(xend,LCD_HEIGHT_PX-2*row_height,_BLUE,_WHITE,printcell(t.cmd_row,t.cmd_col).c_str())+5;
+    xend=os_draw_string(xend,sheety,_BLUE,_WHITE,printcell(t.cmd_row,t.cmd_col).c_str())+5;
     string s1=s.substr(0,t.cmd_pos);
 #if 1
     xtooltip=xend=print_color(xend,sheety,s1.c_str(),_BLACK,false,small,contextptr);
@@ -525,7 +529,7 @@ bool sheet_display(tableur &t,GIAC_CONTEXT){
     else
       xend=os_draw_string(xend,sheety,_BLACK,_WHITE,s1.c_str(),false);
 #endif
-    drawRectangle(xend+1,y+4,2,13,_BLACK);
+    drawRectangle(xend+1,sheety+2,2,small?10:13,_BLACK);
     xend+=4;
     s=s.substr(t.cmd_pos,s.size()-t.cmd_pos);
     if (has_sel){
@@ -550,9 +554,10 @@ bool sheet_display(tableur &t,GIAC_CONTEXT){
 #endif
   if (t.keytooltip)
     t.keytooltip=tooltip(xtooltip,sheety,t.cmd_pos,t.cmdline.c_str(),contextptr);
+  python_compat(p,contextptr); xcas_python_eval=xpe;
   // fast menus
   string menu("shift-1 stat1d|2 2d|3 seq|4 edit|5 view|6 graph|7 R|8 list| ");
-  bg=52832;
+  bg=65039;// bg=52832;
   drawRectangle(0,205,LCD_WIDTH_PX,17,bg);
   os_draw_string_small(0,205,_BLACK,bg,menu.c_str());
   return true;
@@ -720,9 +725,9 @@ void sheet_menu_setup(tableur & t,GIAC_CONTEXT){
 	continue;
       }
       if (smallmenu.selection == 3){
-	double d=t.nrows;
-	if (inputdouble((lang==1?"Nombre de lignes?":"Rows?"),d,contextptr) && d==int(d) && d>0){
-	  t.nrows=d;
+	double d=t.ncols;
+	if (inputdouble((lang==1?"Nombre de colonnes?":"Colonnes?"),d,contextptr) && d==int(d) && d>0){
+	  t.ncols=d;
 	}
 	continue;
       }
@@ -1254,9 +1259,15 @@ giac::gen sheet(GIAC_CONTEXT){
     if ( (key >= KEY_CTRL_F1 && key <= KEY_CTRL_F6) ||
 	  (key >= KEY_CTRL_F7 && key <= KEY_CTRL_F14) 
 	 ){
-      const char tmenu[]= "F1 stat1d\nsum(\nmean(\nstddev(\nmedian(\nhistogram(\nbarplot(\nboxwhisker(\nF2 stat2d\nlinear_regression_plot(\nlogarithmic_regression_plot(\nexponential_regression_plot(\npower_regression_plot(\npolynomial_regression_plot(\nsin_regression_plot(\nscatterplot(\npolygonscatterplot(\nF3 seq\nrange(\nseq(\ntableseq(\nplotseq(\ntablefunc(\nrandvector(\nrandmatrix(\nF4 edt\nedit_cell\ncopy_down\ncopy_right\ninsert_row\ninsert_col\nerase_row\nerase_col\nF6 graph\nreserved\nF= poly\nproot(\npcoeff(\nquo(\nrem(\ngcd(\negcd(\nresultant(\nGF(\nF: arit\n mod \nirem(\nifactor(\ngcd(\nisprime(\nnextprime(\npowmod(\niegcd(\nF8 list\nmakelist(\nrange(\nseq(\nlen(\nappend(\nranv(\nsort(\napply(\nF; plot\nplot(\nplotseq(\nplotlist(\nplotparam(\nplotpolar(\nplotfield(\nhistogram(\nbarplot(\nF7 real\nexact(\napprox(\nfloor(\nceil(\nround(\nsign(\nmax(\nmin(\nF< prog\n:\n&\n#\nhexprint(\nbinprint(\nf(x):=\ndebug(\npython(\nF> cplx\nabs(\narg(\nre(\nim(\nconj(\ncsolve(\ncfactor(\ncpartfrac(\nF= misc\n!\nrand(\nbinomial(\nnormald(\nexponentiald(\n\\\n % \n\n";
+      const char tmenu[]= "F1 stat1d\nsum(\nmean(\nstddev(\nmedian(\nhistogram(\nbarplot(\nboxwhisker(\nF2 stat2d\nlinear_regression_plot(\nlogarithmic_regression_plot(\nexponential_regression_plot(\npower_regression_plot(\npolynomial_regression_plot(\nsin_regression_plot(\nscatterplot(\npolygonscatterplot(\nF3 seq\nrange(\nseq(\ntableseq(\nplotseq(\ntablefunc(\nrandvector(\nrandmatrix(\nF4 edt\nedit_cell\nundo\ncopy_down\ncopy_right\ninsert_row\ninsert_col\nerase_row\nerase_col\nF6 graph\nreserved\nF= poly\nproot(\npcoeff(\nquo(\nrem(\ngcd(\negcd(\nresultant(\nGF(\nF: arit\n mod \nirem(\nifactor(\ngcd(\nisprime(\nnextprime(\npowmod(\niegcd(\nF8 list\nmakelist(\nrange(\nseq(\nlen(\nappend(\nranv(\nsort(\napply(\nF; plot\nplot(\nplotseq(\nplotlist(\nplotparam(\nplotpolar(\nplotfield(\nhistogram(\nbarplot(\nF7 real\nexact(\napprox(\nfloor(\nceil(\nround(\nsign(\nmax(\nmin(\nF< prog\n:\n&\n#\nhexprint(\nbinprint(\nf(x):=\ndebug(\npython(\nF> cplx\nabs(\narg(\nre(\nim(\nconj(\ncsolve(\ncfactor(\ncpartfrac(\nF= misc\n!\nrand(\nbinomial(\nnormald(\nexponentiald(\n\\\n % \n\n";
       const char * s=console_menu(key,(char *)tmenu,0);
       if (s && strlen(s)){
+	if (strcmp(s,"undo")==0){
+	  t.cmd_pos=t.cmd_row=t.sel_row_begin=-1;
+	  std::swap(t.m,t.undo);
+	  sheet_eval(t,contextptr);
+	  continue;
+	}
 	if (strcmp(s,"copy_down")==0){
 	  t.cmd_pos=t.cmd_row=t.sel_row_begin=-1;
 	  copy_down(t,contextptr);
@@ -1311,6 +1322,15 @@ giac::gen sheet(GIAC_CONTEXT){
 	  t.cmdline="";
 	sheet_cmd(t,s);
       }
+      continue;
+    }
+    if (key==KEY_CHAR_CROCHETS || key==KEY_CHAR_ACCOLADES){
+      if (t.cmd_row<0)
+	t.cmdline="";
+      activate_cmdline(t);
+      t.cmdline.insert(t.cmdline.begin()+t.cmd_pos,key==KEY_CHAR_CROCHETS?'[':'{');
+      ++t.cmd_pos;
+      t.cmdline.insert(t.cmdline.begin()+t.cmd_pos,key==KEY_CHAR_CROCHETS?']':'}');
       continue;
     }
     if (key>=32 && key<128){

@@ -10,6 +10,7 @@ CC = emcc -g4
 LD = emcc -g4
 
 INC += -I.
+INC += -I../../py
 INC += -I$(TOP)
 INC += -I$(BUILD)
 
@@ -17,12 +18,15 @@ CPP = clang -E
 
 ifdef EMSCRIPTEN
     CPP += -isystem $(EMSCRIPTEN)/system/include/libc -cxx-isystem $(EMSCRIPTEN)/system/include/libcxx
+else
+	EMCC=/home/parisse/emsdk/fastcomp/emscripten
+	CPP += -I$(EMCC)/system/include/libc -I$(EMCC)/system/include/libcxx
 endif
 
-CFLAGS = -m32 -Wall -Werror $(INC) -std=c99 $(COPT)
-LDFLAGS = -m32 -Wl,-Map=$@.map,--cref -Wl,--gc-sections
+CFLAGS = -m32 -Wall -Werror $(INC)  $(COPT)
+LDFLAGS = -m32 -Wl,-Map=$@.map,--cref -Wl,--gc-sections -s ERROR_ON_UNDEFINED_SYMBOLS=0
 
-CFLAGS += -O0 -DNDEBUG
+CFLAGS += -O0 -DNDEBUG -DMICROPY_LIB -DEMCC
 CFLAGS += -fdata-sections -ffunction-sections
 
 ifneq ($(FROZEN_MPY_DIR),)
@@ -43,6 +47,7 @@ SRC_C = \
 	main.c \
 	mphalport.c \
 	modutime.c \
+	graphic.c file.c \
 
 SRC_QSTR += $(SRC_C)
 

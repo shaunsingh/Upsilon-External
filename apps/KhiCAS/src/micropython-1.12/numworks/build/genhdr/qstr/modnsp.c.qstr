@@ -1,0 +1,6 @@
+Q(__name__)
+Q(nsp)
+Q(waitKeypress)
+Q(readRTC)
+Q(monotonic)
+Q(time)

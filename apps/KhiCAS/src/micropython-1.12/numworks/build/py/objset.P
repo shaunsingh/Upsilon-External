@@ -1,0 +1,72 @@
+build/py/objset.o: ../py/objset.c \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include/stdbool.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/string.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/_ansi.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/newlib.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/_newlib_version.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/config.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/machine/ieeefp.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/features.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/reent.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/_ansi.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include/stddef.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_types.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/machine/_types.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/machine/_default_types.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/lock.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/cdefs.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_locale.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/strings.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/string.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/assert.h \
+ ../py/runtime.h ../py/mpstate.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include/stdint.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/stdint.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_intsup.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_stdint.h \
+ ../py/mpconfig.h mpconfigport.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/alloca.h \
+ ../py/mpthread.h ../py/misc.h ../py/nlr.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include-fixed/limits.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include-fixed/syslimits.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/limits.h \
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/syslimits.h \
+ ../py/obj.h ../py/qstr.h build/genhdr/qstrdefs.generated.h \
+ ../py/mpprint.h ../py/runtime0.h ../py/objlist.h ../py/objexcept.h \
+ ../py/objtuple.h ../py/pystack.h ../py/builtin.h
+../py/objset.c :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include/stdbool.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/string.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/_ansi.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/newlib.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/_newlib_version.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/config.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/machine/ieeefp.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/features.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/reent.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/_ansi.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include/stddef.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_types.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/machine/_types.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/machine/_default_types.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/lock.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/cdefs.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_locale.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/strings.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/string.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/assert.h :
+ ../py/runtime.h ../py/mpstate.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include/stdint.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/stdint.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_intsup.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/_stdint.h :
+ ../py/mpconfig.h mpconfigport.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/alloca.h :
+ ../py/mpthread.h ../py/misc.h ../py/nlr.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include-fixed/limits.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/lib/gcc/arm-none-eabi/9.3.1/include-fixed/syslimits.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/limits.h :
+ /opt/gcc-arm-none-eabi-9-2020-q2-update/arm-none-eabi/include/sys/syslimits.h :
+ ../py/obj.h ../py/qstr.h build/genhdr/qstrdefs.generated.h :
+ ../py/mpprint.h ../py/runtime0.h ../py/objlist.h ../py/objexcept.h :
+ ../py/objtuple.h ../py/pystack.h ../py/builtin.h :

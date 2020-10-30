@@ -21,7 +21,7 @@ using namespace std;
 #include <stdexcept>
 #include <cmath>
 #include <cstdlib>
-#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG && !defined POCKETCAS
+#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG 
 #include <fstream>
 #endif
 #include "gen.h"
@@ -223,6 +223,7 @@ namespace giac {
     }
 #endif
     for (char c='a';c<='z';c++){
+      if (c=='e' || c=='i') continue; // skip exp(1) and sqrt(-1)
       purgenoassume(gen(string(1,c),contextptr),contextptr);
     }
     return args;
@@ -7525,7 +7526,17 @@ namespace giac {
 
 
   string version(){
-    return string("giac ")+GIAC_VERSION+string(", (c) B. Parisse and R. De Graeve, Institut Fourier, Universite de Grenoble I");
+    return
+#ifdef NUMWORKS
+      string("giac for Numworks ")
+#else
+#ifdef NSPIRE_NEWLIB
+      string("giac for TI Nspire CX ")
+#else
+      string("giac ")
+#endif
+#endif
+      +GIAC_VERSION+string(", (c) B. Parisse and R. De Graeve, Institut Fourier, Universite de Grenoble I");
   }
   gen _version(const gen & a,GIAC_CONTEXT){
     if ( a.type==_STRNG && a.subtype==-1) return  a;
@@ -8567,7 +8578,7 @@ namespace giac {
     if (n<-1)
       return gensizeerr(contextptr);
     if (n==-1)
-      return Gamma(x,contextptr);
+      return ln(Gamma(x,contextptr),contextptr);
     if (n==0)
       return Psi(x,contextptr);
     if (is_integer(x) && is_positive(-x,contextptr))
@@ -8694,6 +8705,8 @@ namespace giac {
   // compute an approx value of sum((-1)^k*a(k),k,0,+infinity)
   // using Chebychev polynomials
   gen alternate_series(const gen & a,const gen & x,int n,GIAC_CONTEXT){
+    if (n>1e6)
+      return gensizeerr(contextptr);
     gen d=normal((pow(3+2*sqrt(2,contextptr),n)+pow(3-2*sqrt(2,contextptr),n))/2,contextptr);
     gen p=1;
     gen c=d-p;
@@ -8734,6 +8747,8 @@ namespace giac {
       double y=absdouble(ix._DOUBLE_val);
       int ndigits=16; // FIXME? use decimal_digits;
       double n=(std::log10(3*(1+2*y)*std::exp(y*M_PI/2))+ndigits)/std::log10(3.+std::sqrt(8.));
+      if (is_inf(n))
+	return gensizeerr(contextptr);
       identificateur idx(" ");
       gen x(idx);
       gen res=alternate_series(inv(pow(idx+1,s,contextptr),contextptr)*pow(-ln(idx+1,contextptr),ndiff,contextptr),idx,int(std::ceil(n)),contextptr);
@@ -10250,7 +10265,14 @@ namespace giac {
   }
   gen _Ei(const gen & args,GIAC_CONTEXT){
     if ( args.type==_STRNG && args.subtype==-1) return  args;
-    if (args.type==_VECT) return apply(args,_Ei,contextptr);
+    if (args.type==_VECT){
+      if (args.subtype==_SEQ__VECT){
+	if (args._VECTptr->size()!=2 || args._VECTptr->back().type!=_INT_)
+	  return gentypeerr(contextptr);
+	return Ei(args._VECTptr->front(),args._VECTptr->back().val,contextptr);
+      }
+      return apply(args,_Ei,contextptr);
+    }
     if (args.type==_FLOAT_)
       return evalf2bcd(_Ei(get_double(args._FLOAT_val),contextptr),1,contextptr);
     if (args.type!=_VECT){

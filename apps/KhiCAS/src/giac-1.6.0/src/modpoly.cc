@@ -4192,6 +4192,7 @@ namespace giac {
     return q%p;
   }
 
+#ifndef USE_GMP_REPLACEMENTS
   void vecteur2vector_ll(const vecteur & v,longlong m,vector<longlong> & res){
     vecteur::const_iterator it=v.begin(),itend=v.end();
     res.clear();
@@ -4208,6 +4209,7 @@ namespace giac {
       res.push_back(r);
     }
   } 
+#endif
 
   // longlong fft
   // exemple of Fourier primes (with 2^53-roots of unity)
@@ -5493,6 +5495,10 @@ namespace giac {
     int s=a.size();
     res.resize(s);
     for (int i=0;i<s;++i){
+      if (a[i]==0){
+	res[i]=0;
+	continue;
+      }
       int bi=invmod(b[i],p);
       bi += (bi>>31)&p;
       res[i]=(longlong(a[i])*bi)%p;
@@ -6681,6 +6687,22 @@ namespace giac {
     }
   }
 
+  void euclide_gcd(const modpoly &p,const modpoly & q,environment * env,modpoly &a){
+    a=p;
+    modpoly b(q);
+    modpoly quo,rem;
+    while (!b.empty()){
+      gen s=b.front();
+      mulmodpoly(b,invenv(s,env),env,b);
+      DivRem(a,b,env,quo,rem);
+      // COUT << "a:" << a << "b:" << b << "q:" << quo << "r:" << rem << '\n';
+      swap(a,b); // newa=b,  
+      swap(b,rem); // newb=rem
+    }
+    if (!a.empty())
+      mulmodpoly(a,invenv(a.front(),env),env,a);
+  }
+
   bool gcdmodpoly(const modpoly &p,const modpoly & q,environment * env,modpoly &a){
     if (!env){
 #ifndef NO_STDEXCEPT
@@ -6747,19 +6769,7 @@ namespace giac {
 	return true;
     }
 #endif
-    a=p;
-    modpoly b(q);
-    modpoly quo,rem;
-    while (!b.empty()){
-      gen s=b.front();
-      mulmodpoly(b,invenv(s,env),env,b);
-      DivRem(a,b,env,quo,rem);
-      // COUT << "a:" << a << "b:" << b << "q:" << quo << "r:" << rem << '\n';
-      swap(a,b); // newa=b,  
-      swap(b,rem); // newb=rem
-    }
-    if (!a.empty())
-      mulmodpoly(a,invenv(a.front(),env),env,a);
+    euclide_gcd(p,q,env,a);
     return true;
   }
 
@@ -8488,8 +8498,8 @@ namespace giac {
     d=gcd(a,b,0);
     if (d.size()>1){
       modpoly D;
-      bool b=egcd_z(a/d,b/d,u,v,D,deterministic);
-      if (!b) return false;
+      bool bb=egcd_z(a/d,b/d,u,v,D,deterministic);
+      if (!bb) return false;
       u=u*d;
       v=v*d;
       d=D*d;
@@ -9845,7 +9855,7 @@ namespace giac {
       // CERR << CLOCK()*1e-6 << " " << m << "\n";
       if (m && (is_multiple(P0,m)||is_multiple(Q0,m)))
 	continue;
-#ifdef INT128
+#if defined INT128 && !defined USE_GMP_REPLACEMENTS
       if (m<(1<<30) 
 	  && m!=p3
 	  ){
@@ -9912,7 +9922,7 @@ namespace giac {
 #endif
       if (D!=1)
 	r=(r*longlong(invmod(smod(D,m).val,m)))%m;
-#if 1 // ndef USE_GMP_REPLACEMENTS
+#ifndef USE_GMP_REPLACEMENTS
       if (pim.type==_ZINT && res.type==_ZINT){
 	if (debug_infolevel>1)
 	  CERR << CLOCK()*1e-6 << " ichinrem start\n";
@@ -11431,11 +11441,11 @@ namespace giac {
     for (;it!=itend;){
       mpz_set(tmpqz,*it->_ZINTptr);
       mpz_set(*it->_ZINTptr,*f->_ZINTptr);
-      mpz_set(*f._ZINTptr,tmpqz);
+      mpz_set(*f->_ZINTptr,tmpqz);
       ++it; ++f;
       mpz_set(tmpqz,*itn->_ZINTptr);
       mpz_set(*itn->_ZINTptr,*f->_ZINTptr);
-      mpz_set(*f._ZINTptr,tmpqz);
+      mpz_set(*f->_ZINTptr,tmpqz);
       ++itn; ++f;
     }
 #else

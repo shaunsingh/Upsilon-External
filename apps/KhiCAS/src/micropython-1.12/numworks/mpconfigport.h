@@ -24,7 +24,9 @@
  * THE SOFTWARE.
  */
 
+int micropython_port_vm_hook_loop() ;
 // options to control how Micro Python is built
+#define MICROPY_VM_HOOK_LOOP micropython_port_vm_hook_loop();
 
 #define MICROPY_ALLOC_PATH_MAX      (128)
 #define MICROPY_EMIT_ARM            (1)
@@ -43,11 +45,11 @@
 #define MICROPY_PY_BUILTINS_FROZENSET (1)
 #define MICROPY_PY_BUILTINS_COMPILE (1)
 #define MICROPY_PY_SYS_EXIT         (1)
-#define MICROPY_PY_SYS_PLATFORM     "nspire"
+#define MICROPY_PY_SYS_PLATFORM     "numworks"
 #define MICROPY_PY_SYS_MAXSIZE      (1)
 #define MICROPY_PY_SYS_STDFILES     (1)
 #define MICROPY_PY_CMATH            (1)
-#define MICROPY_PY_IO_FILEIO        (1)
+#define MICROPY_PY_IO_FILEIO        (0)
 #define MICROPY_PY_GC_COLLECT_RETVAL (1)
 #define MICROPY_COMP_MODULE_CONST   (1)
 #define MICROPY_COMP_TRIPLE_TUPLE_ASSIGN (1)
@@ -111,18 +113,20 @@ extern const struct _mp_obj_module_t mp_module_matplotl;
 extern const struct _mp_obj_module_t mp_module_linalg;
 
 #define MICROPY_PORT_BUILTIN_MODULES \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR__os), (mp_obj_t) &mp_module_os }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_nsp), (mp_obj_t) &mp_module_nsp }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_cas), (mp_obj_t) &mp_module_cas }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_arit), (mp_obj_t) &mp_module_arit }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_linalg), (mp_obj_t) &mp_module_linalg }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_matplotl), (mp_obj_t) &mp_module_matplotl }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_matplotlib), (mp_obj_t) &mp_module_matplotl }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pylab), (mp_obj_t) &mp_module_matplotl }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_turtle), (mp_obj_t) &mp_module_turtle }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_casioplot), (mp_obj_t) &mp_module_graphic }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_kandinsky), (mp_obj_t) &mp_module_graphic }, \
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_graphic), (mp_obj_t) &mp_module_graphic }
+	{ MP_ROM_QSTR(MP_QSTR__os), (mp_obj_t) &mp_module_os }, \
+	{ MP_ROM_QSTR(MP_QSTR_nsp), (mp_obj_t) &mp_module_nsp }, \
+	{ MP_ROM_QSTR(MP_QSTR_time), (mp_obj_t) &mp_module_nsp }, \
+	{ MP_ROM_QSTR(MP_QSTR_cas), (mp_obj_t) &mp_module_cas }, \
+	{ MP_ROM_QSTR(MP_QSTR_arit), (mp_obj_t) &mp_module_arit }, \
+	{ MP_ROM_QSTR(MP_QSTR_linalg), (mp_obj_t) &mp_module_linalg }, \
+	{ MP_ROM_QSTR(MP_QSTR_matplotl), (mp_obj_t) &mp_module_matplotl }, \
+	{ MP_ROM_QSTR(MP_QSTR_matplotlib), (mp_obj_t) &mp_module_matplotl }, \
+	{ MP_ROM_QSTR(MP_QSTR_pylab), (mp_obj_t) &mp_module_matplotl }, \
+	{ MP_ROM_QSTR(MP_QSTR_pyplot), (mp_obj_t) &mp_module_matplotl }, \
+	{ MP_ROM_QSTR(MP_QSTR_turtle), (mp_obj_t) &mp_module_turtle }, \
+	{ MP_ROM_QSTR(MP_QSTR_casioplot), (mp_obj_t) &mp_module_graphic }, \
+	{ MP_ROM_QSTR(MP_QSTR_kandinsky), (mp_obj_t) &mp_module_graphic }, \
+	{ MP_ROM_QSTR(MP_QSTR_graphic), (mp_obj_t) &mp_module_graphic }
 
 #ifdef __x86_64__
 typedef long mp_int_t;
@@ -141,7 +145,7 @@ typedef void *machine_ptr_t; // must be of pointer size
 typedef const void *machine_const_ptr_t; // must be of pointer size
 
 #define MICROPY_PORT_BUILTINS \
-    { MP_OBJ_NEW_QSTR(MP_QSTR_input), (mp_obj_t)&mp_builtin_input_obj }, \
-    { MP_OBJ_NEW_QSTR(MP_QSTR_open), (mp_obj_t)&mp_builtin_open_obj },
+    { MP_ROM_QSTR(MP_QSTR_input), (mp_obj_t)&mp_builtin_input_obj }, \
+    { MP_ROM_QSTR(MP_QSTR_open), (mp_obj_t)&mp_builtin_open_obj },
 
 #include <alloca.h>

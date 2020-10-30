@@ -1260,6 +1260,15 @@ namespace giac {
 	  testval=(l+m)/2;
       }
       gen test=eval(subst(e0,x,testval,false,contextptr),eval_level(contextptr),contextptr);
+      // additional numeric check
+      if (e0.type==_SYMB && e0._SYMBptr->feuille.type==_VECT && e0._SYMBptr->feuille._VECTptr->size()==2){
+	gen a=e0._SYMBptr->feuille[0];
+	gen b=e0._SYMBptr->feuille[1];
+	a=a-b;
+	gen testnum=subst(a,x,evalf(testval,1,contextptr),false,contextptr);
+	if (testnum.type==_CPLX)
+	  continue;
+      }
       if (is_undef(test)){
 	if (e0.type==_SYMB && e0._SYMBptr->feuille.type==_VECT && e0._SYMBptr->feuille._VECTptr->size()==2){
 	  gen a=e0._SYMBptr->feuille[0];
@@ -1313,7 +1322,7 @@ namespace giac {
 	  )
 	symb_inf=symb_superieur_strict(x,lsymb);
       else {
-	if (equalposcomp(excluded_not_singu,l) || (test!=1 && equalposcomp(singu,l)))
+	if (is_undef(testeq) || equalposcomp(excluded_not_singu,l) || (test!=1 && equalposcomp(singu,l)))
 	  symb_inf=symb_superieur_strict(x,lsymb);
 	else
 	  symb_inf=symb_superieur_egal(x,lsymb);
@@ -1347,7 +1356,7 @@ namespace giac {
 	  )
 	symb_sup=symb_inferieur_strict(x,msymb);
       else {
-	if (equalposcomp(excluded_not_singu,m) || (test!=1 && equalposcomp(singu,m)))
+	if (is_undef(testeq) || equalposcomp(excluded_not_singu,m) || (test!=1 && equalposcomp(singu,m)))
 	  symb_sup=symb_inferieur_strict(x,msymb);
 	else
 	  symb_sup=symb_inferieur_egal(x,msymb);
@@ -1496,6 +1505,43 @@ namespace giac {
     return true;
   }
   
+  bool remove_neg(gen & g){
+    if (g.type!=_SYMB || g._SYMBptr->sommet!=at_neg)
+      return false;
+    g=g._SYMBptr->feuille;
+    return true;
+  }
+
+  bool is_rewritable_as_trigprod(gen & expr,GIAC_CONTEXT){
+    if (expr.is_symb_of_sommet(at_plus) && expr._SYMBptr->feuille.type==_VECT && expr._SYMBptr->feuille._VECTptr->size()==2){
+      const vecteur & v = *expr._SYMBptr->feuille._VECTptr;
+      gen a=v[0],b=v[1];
+      bool nega=remove_neg(a);
+      bool negb=remove_neg(b);
+      if (nega)
+	negb=!negb;
+      bool cosa=a.type==_SYMB && a._SYMBptr->sommet==at_cos;
+      bool sina=a.type==_SYMB && a._SYMBptr->sommet==at_sin;
+      bool cosb=b.type==_SYMB && b._SYMBptr->sommet==at_cos;
+      bool sinb=b.type==_SYMB && b._SYMBptr->sommet==at_sin;
+      if ( (cosa || sina) && (cosb || sinb)){
+	a=a._SYMBptr->feuille;
+	if (negb)
+	  b=b._SYMBptr->feuille+cst_pi;
+	else
+	  b=b._SYMBptr->feuille;
+	if (sina)
+	  a=a-cst_pi/2;
+	if (sinb)
+	  b=b-cst_pi/2;
+	// cos(a)+cos(b)=0 equivalent to cos((a+b)/2)*cos((a-b)/2)=0
+	expr=cos((a+b)/2,contextptr)*cos((a-b)/2,contextptr);
+	return true;
+      }
+    }
+    return false;
+  }
+
   static void clean(gen & e,const identificateur & x,GIAC_CONTEXT){
     if (e.type!=_SYMB)
       return;
@@ -1513,6 +1559,11 @@ namespace giac {
 	  e=es;
 	  return;
 	}
+      }
+      es=rationalize(e,x,contextptr);
+      if (lvarx(es,x).size()==1){
+	e=es;
+	return;
       }
       es=simplify(e,contextptr);
       if (lvarx(es,x).size()==1){
@@ -1785,13 +1836,6 @@ namespace giac {
     }
   }
 
-  bool remove_neg(gen & g){
-    if (g.type!=_SYMB || g._SYMBptr->sommet!=at_neg)
-      return false;
-    g=g._SYMBptr->feuille;
-    return true;
-  }
-
   gen rationalize(const gen & g,const gen & x,GIAC_CONTEXT){
     gen expr=g;
     vecteur lv(lvarx(expr,x));
@@ -1804,32 +1848,8 @@ namespace giac {
     if (s==1)
       return expr;
     // solve(sin(3x)=cos(x))
-    if (expr.is_symb_of_sommet(at_plus) && expr._SYMBptr->feuille.type==_VECT && expr._SYMBptr->feuille._VECTptr->size()==2){
-      const vecteur & v = *expr._SYMBptr->feuille._VECTptr;
-      gen a=v[0],b=v[1];
-      bool nega=remove_neg(a);
-      bool negb=remove_neg(b);
-      if (nega)
-	negb=!negb;
-      bool cosa=a.type==_SYMB && a._SYMBptr->sommet==at_cos;
-      bool sina=a.type==_SYMB && a._SYMBptr->sommet==at_sin;
-      bool cosb=b.type==_SYMB && b._SYMBptr->sommet==at_cos;
-      bool sinb=b.type==_SYMB && b._SYMBptr->sommet==at_sin;
-      if ( (cosa || sina) && (cosb || sinb)){
-	a=a._SYMBptr->feuille;
-	if (negb)
-	  b=b._SYMBptr->feuille+cst_pi;
-	else
-	  b=b._SYMBptr->feuille;
-	if (sina)
-	  a=a-cst_pi/2;
-	if (sinb)
-	  b=b-cst_pi/2;
-	// cos(a)+cos(b)=0 equivalent to cos((a+b)/2)*cos((a-b)/2)=0
-	expr=cos((a+b)/2,contextptr)*cos((a-b)/2,contextptr);
-	return expr;
-      }
-    }
+    if (is_rewritable_as_trigprod(expr,contextptr))
+      return expr;
     gen tmp;
     if (lv.size()==2 && lv[0].type==_SYMB && lv[1].type==_SYMB && lv[0]._SYMBptr->feuille==lv[1]._SYMBptr->feuille)
       tmp=expr;
@@ -2030,6 +2050,7 @@ namespace giac {
 	continue;
       vecteur res;
       gen ee=subst(expr,*itla,g,false,contextptr);
+      ee=simplifier(ee,contextptr);
       vecteur v1=solve(ee,x,isolate_mode,contextptr);
       const_iterateur it=v1.begin(),itend=v1.end();
       for (;it!=itend;++it){
@@ -6211,6 +6232,20 @@ namespace giac {
     return gen2vecteur(g);
   }
 
+  // Max number of attempt to find a random separation form in rur computation
+  int rur_separate_max_tries=100;
+  gen _rur_separate_max_tries(const gen & g,GIAC_CONTEXT){
+    if ( g.type==_STRNG &&  g.subtype==-1) return  g;
+    if (g.type==_VECT && g._VECTptr->empty())
+      return rur_separate_max_tries;
+    if (g.type==_INT_ && g.val>0)
+      return rur_separate_max_tries=g.val;
+    return gensizeerr(contextptr);
+  }
+  static const char _rur_separate_max_tries_s []="rur_separate_max_tries";
+  static define_unary_function_eval2 (__rur_separate_max_tries,&_rur_separate_max_tries,_rur_separate_max_tries_s,&printasDigits);
+  define_unary_function_ptr5( at_rur_separate_max_tries ,alias_at_rur_separate_max_tries ,&__rur_separate_max_tries,0,true);
+
   vecteur gsolve(const vecteur & eq_orig,const vecteur & var_orig,bool complexmode,int evalf_after,GIAC_CONTEXT){
     // replace variables in var_orig by true identificators
     vecteur var(var_orig);
@@ -7434,8 +7469,21 @@ namespace giac {
     read_gbargs(*args._VECTptr,2,int(args._VECTptr->size()),o,with_cocoa,with_f5,modular,gbasis_param);
     vecteur eqs=gen2vecteur(remove_equal(args._VECTptr->front()));
     vecteur elim=gen2vecteur((*args._VECTptr)[1]);
-    if (elim.empty())
+    vecteur eqsidnt=lidnt(eqs);
+    for (int i=0;i<elim.size();++i){
+      if (!equalposcomp(eqsidnt,elim[i])){
+	elim.erase(elim.begin()+i);
+	--i;
+      }
+    }
+    if (elim.empty()){
+      for (int i=0;i<eqs.size();++i){
+	if (eqs[i].type<_POLY)
+	  eqs[i]=1;
+      }
+      comprim(eqs);
       return eqs;
+    }
     vecteur l(elim);
     if (args._VECTptr->size()>2 && (*args._VECTptr)[2].type==_VECT)
       lvar((*args._VECTptr)[2],l);

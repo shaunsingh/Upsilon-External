@@ -116,7 +116,7 @@ namespace giac {
 #ifdef EMCC
     EM_ASM_ARGS({
 	if (UI.warnpy){
-          var msg = Pointer_stringify($0); // Convert message to JS string
+          var msg = UTF8ToString($0);// Pointer_stringify($0); // Convert message to JS string
           alert(msg);                      // Use JS version of alert          
         }
       }, s.c_str());
@@ -188,7 +188,11 @@ namespace giac {
   }
 
   gen check_secure(){
-    if (secure_run)
+    if (secure_run
+#ifdef KHICAS
+	|| exam_mode || nspire_exam_mode
+#endif
+	)
       return gensizeerr(gettext("Running in secure mode"));
     return 0;
   }
@@ -931,7 +935,8 @@ namespace giac {
       if (xcas_mode(contextptr)==3)
 	return res+":Func "+fb.print(contextptr)+"\n:EndFunc\n";
       if (fb.is_symb_of_sommet(at_local)){
-	gen fb0=fb._SYMBptr->feuille[0][0];
+	gen fb0=fb._SYMBptr->feuille[0];
+	//fb0=fb0[0];
 	if (fb0.type==_VECT && fb0._VECTptr->empty())
 	  return res+'{'+fb.print(contextptr)+'}';
       }
@@ -1494,7 +1499,7 @@ namespace giac {
       return res;
     }
 #else
-#if !defined(WIN32) && defined HAVE_PTHREAD_H
+#if !defined(WIN32) && defined HAVE_LIBPTHREAD
     if (contextptr){
       // CERR << &slevel << " " << thread_param_ptr(contextptr)->stackaddr << '\n';
       if ( ((size_t) &res) < ((size_t) thread_param_ptr(contextptr)->stackaddr)+8192){
@@ -5737,13 +5742,13 @@ namespace giac {
     // need a way to pass w to EM_ASM like environment and call HTML5 prompt
 #if 0
     EM_ASM_ARGS({
-        var msg = Pointer_stringify($0); // Convert message to JS string
+        var msg = UTF8ToString($0);//Pointer_stringify($0); // Convert message to JS string
         alert(msg);                      // Use JS version of alert          
       }, (progs+evals).c_str());
 #else
     while (1){
       int i=EM_ASM_INT({
-	  var msg = Pointer_stringify($0); // Convert message to JS string
+	  var msg = UTF8ToString($0);//Pointer_stringify($0); // Convert message to JS string
 	  var tst=prompt(msg,'n');             // Use JS version of alert
 	  if (tst==null) return -4;
 	  if (tst=='next' || tst=='n' || tst=='sst') return -1;
@@ -6259,7 +6264,54 @@ namespace giac {
     return g;
   }
 
+  int (*micropy_ptr) (cstcharptr)=0;
   gen _python(const gen & args,GIAC_CONTEXT){
+#if defined MICROPY_LIB
+    if (micropy_ptr && args.type==_VECT && args._VECTptr->size()==2){
+      gen a=args._VECTptr->front(),b=args._VECTptr->back();
+      if (a.type==_STRNG && b==at_python){
+	const char * ptr=a._STRNGptr->c_str();
+	(*micropy_ptr)(ptr);
+	return string2gen("Done",false);
+      }
+    }
+#endif
+#if defined HAVE_LIBMICROPYTHON
+    if (micropy_ptr && args.type==_VECT && args._VECTptr->size()==2){
+      gen a=args._VECTptr->front(),b=args._VECTptr->back();
+      if (a.type==_STRNG && b==at_python){
+	const char * ptr=a._STRNGptr->c_str();
+	while (*ptr==' ')
+	  ++ptr;
+	bool gr= strcmp(ptr,"show()")==0 || strcmp(ptr,",")==0;
+	bool pix =strcmp(ptr,";")==0;
+	bool turt=strcmp(ptr,".")==0;
+	bool xc=strcmp(ptr,"xcas")==0;
+	python_contextptr=contextptr;
+	python_console="";
+	gen g;
+	if (!gr && !xc && !turt && !pix ){
+	  (*micropy_ptr)(ptr);
+	}
+	context * cascontextptr=(context *)caseval("caseval contextptr");
+	if (freezeturtle || turt){
+	  // copy caseval turtle to this context
+	  turtle(contextptr)=turtle(cascontextptr);
+	  turtle_stack(contextptr)=turtle_stack(cascontextptr);
+	  return _avance(0,contextptr);
+	}
+	if (freeze || pix)
+	  return _show_pixels(0,contextptr);
+	if (gr)
+	  return history_plot(cascontextptr);
+	if (python_console.empty())
+	  return string2gen("Done",false);
+	if (python_console[python_console.size()-1]=='\n')
+	  python_console=python_console.substr(0,python_console.size()-1);
+	return string2gen(python_console.empty()?"Done":python_console,false);
+      }
+    }
+#endif
     return python_xcas(args,1,contextptr);
   }
   static const char _python_s []="python";
@@ -6481,7 +6533,7 @@ namespace giac {
       args=int(g._DOUBLE_val);    
     if (args.type!=_INT_)
       return eval_level(contextptr);
-    eval_level(contextptr)=args.val;
+    eval_level(contextptr)=giacmax(args.val,1);
     DEFAULT_EVAL_LEVEL=args.val;
     return args;
   }
@@ -7203,6 +7255,7 @@ namespace giac {
   }
   gen _simplifier(const gen & g,GIAC_CONTEXT){
     if ( g.type==_STRNG &&  g.subtype==-1) return  g;
+    if (g.type<_IDNT) return g;
     if (is_equal(g))
       return apply_to_equal(g,_simplifier,contextptr);
     if (g.type!=_VECT)
@@ -8205,16 +8258,21 @@ namespace giac {
   }
   bool is_address(const gen & g,size_t & addr){
     if (g.type==_INT_){
-      addr=g.val;
+      addr=(g.val/4)*4; // align
       return true;
     }
     if (g.type!=_ZINT)
       return false;
     addr = modulo(*g._ZINTptr,(unsigned)0x80000000);
+    addr = (addr/4)*4;
     addr += 0x80000000;
     return true;
   }
   gen _read(const gen & args,GIAC_CONTEXT){
+#ifdef KHICAS
+    if (exam_mode || nspire_exam_mode)
+      return gensizeerr("Exam mode");
+#endif
     if ( args.type==_STRNG &&  args.subtype==-1) return  args;
     size_t addr;
     if (is_address(args,addr))
@@ -8247,6 +8305,38 @@ namespace giac {
     size_t addr;
     if (is_address(args,addr))
       return (int) *(unsigned short *) addr;
+    if (args.type==_STRNG){
+#ifdef KHICAS
+      if (exam_mode || nspire_exam_mode)
+	return gensizeerr("Exam mode");
+#endif
+      FILE * f=fopen(args._STRNGptr->c_str(),"r");
+      if (!f)
+	return undef;
+      vecteur v,l; char buf[9]; buf[8]=0; int i;
+      for (i=0;;++i){
+	unsigned char c=fgetc(f);
+	buf[i&7]=(c>=32 && c<=127)?c:'.';
+	if (feof(f))
+	  break;
+	l.push_back(c);
+	if ((i&0x7)==0x7){
+	  l.insert(l.begin(),string2gen(buf,false));
+	  l.insert(l.begin(),i-7);
+	  v.push_back(l);
+	  l.clear();
+	}
+      }
+      if (!l.empty()){
+	for (int j=l.size();j<8;++j)
+	  l.push_back(-1);
+	l.insert(l.begin(),string2gen(buf,false));
+	l.insert(l.begin(),int(i&0xfffffff8));
+	v.push_back(l);
+      }
+      fclose(f);
+      return v;
+    }
     return gensizeerr(contextptr);
   }
   static const char _read16_s []="read16";
@@ -8256,6 +8346,17 @@ namespace giac {
   gen _read32(const gen & args,GIAC_CONTEXT){
     if ( args.type==_STRNG &&  args.subtype==-1) return  args;
     size_t addr;
+    if (args.type==_VECT && args._VECTptr->size()==2 && args._VECTptr->back().type==_INT_){
+      int n=args._VECTptr->back().val;
+      if (n<=0 || !is_address(args._VECTptr->front(),addr)) 
+	return undef;
+      vecteur res;
+      for (int i=0;i<n;++i){
+	res.push_back(makevecteur((longlong) addr,(longlong) *(unsigned *) addr));
+	addr += 4;
+      }
+      return res;
+    }
     if (is_address(args,addr))
       return (longlong) *(unsigned *) addr;
     return gensizeerr(contextptr);
@@ -8339,9 +8440,11 @@ namespace giac {
   gen _write32(const gen & args,GIAC_CONTEXT){
     if ( args.type==_STRNG &&  args.subtype==-1) return  args;
 #ifdef KHICAS
-    if (exam_mode)
+    if (exam_mode || nspire_exam_mode)
       return gensizeerr("Exam mode");
 #endif
+    if (args.type!=_VECT)
+      return _read32(args,contextptr);
     if (args.type==_VECT){
       vecteur v=*args._VECTptr;
       size_t addr;
@@ -8368,7 +8471,7 @@ namespace giac {
   gen _write16(const gen & args,GIAC_CONTEXT){
     if ( args.type==_STRNG &&  args.subtype==-1) return  args;
 #ifdef KHICAS
-    if (exam_mode)
+    if (exam_mode || nspire_exam_mode)
       return gensizeerr("Exam mode");
 #endif
     if (args.type==_VECT){
@@ -9794,6 +9897,34 @@ namespace giac {
 
 #ifndef KHICAS // see kadd.cc
   gen current_sheet(const gen & g,GIAC_CONTEXT){
+#if defined EMCC && !defined GIAC_GGB
+    if (ckmatrix(g,true)){
+      matrice m=*g._VECTptr;
+      int R=m.size(),C=m.front()._VECTptr->size();
+      CERR << "current1 " << R << " " << C << '\n';
+      R=giacmin(R,EM_ASM_INT({ return UI.assistant_matr_maxrows; },0));
+      C=giacmin(C,EM_ASM_INT({ return UI.assistant_matr_maxcols; },0));
+      CERR << "current2 " << R << " " << C << '\n';
+      int save_r=printcell_current_row(contextptr);
+      int save_c=printcell_current_col(contextptr);
+      for (int i=0;i<R;++i){
+	printcell_current_row(contextptr)=i;
+	for (int j=0;j<C;++j){
+	  printcell_current_col(contextptr)=j;
+	  string s=m[i][j].print(contextptr);
+	  CERR << "current3 " << s << " " << i << " " << j << '\n';
+	  EM_ASM_ARGS({
+	      var s=UTF8ToString($0);//Pointer_stringify($0);//
+	      console.log(s);
+	      UI.sheet_set_ij(s,$1,$2);
+	    },s.c_str(),i,j);
+	}
+      }
+      printcell_current_col(contextptr)=save_c;
+      printcell_current_row(contextptr)=save_r;
+      EM_ASM_ARGS({var s=' ';UI.sheet_recompute(s.substr(0,0)); UI.open_sheet(true);},0);
+    }
+#endif
     if (interactive_op_tab && interactive_op_tab[5])
       return interactive_op_tab[5](g,contextptr);
     return zero;
@@ -12926,7 +13057,8 @@ namespace giac {
   // Create an operator with a given syntax
   vector<unary_function_ptr> user_operator_list;   // GLOBAL VAR
   gen user_operator(const gen & g,GIAC_CONTEXT){
-    if (g.type!=_VECT || g._VECTptr->size()<3)
+    int nargs=0;
+    if (g.type!=_VECT || (nargs=g._VECTptr->size())<2)
       return gensizeerr(contextptr);
     vecteur & v=*g._VECTptr;
     // int s=signed(v.size());
@@ -12944,12 +13076,22 @@ namespace giac {
       const unary_function_user * ptr=dynamic_cast<const unary_function_user *>(ptr0);
       if (!ptr)
 	return zero;
-      if (ptr->f==v[1]){
-	// if (v[2].type==_INT_ && v[2].subtype==_INT_MUPADOPERATOR && v[2].val==_DELETE_OPERATOR) user_operator_list.erase(it); // does not work...
-	return plus_one;
+      if ( (nargs==3 && ptr->f==v[1] && v[2].type==_INT_ && v[2].subtype==_INT_MUPADOPERATOR && v[2].val==_DELETE_OPERATOR) ||
+	   (nargs==2 && v[1].type==_INT_ && v[1].subtype==_INT_MUPADOPERATOR && v[1].val==_DELETE_OPERATOR) ){
+	map_charptr_gen::const_iterator i,iend;
+	bool ok=true;
+	i = lexer_functions().find(v[0]._STRNGptr->c_str());
+	iend=lexer_functions().end();
+	if (i==iend)
+	  ok=false;
+	else
+	  lexer_functions().erase(v[0]._STRNGptr->c_str());
+	user_operator_list.erase(it); 
       }
-      return zero;
+      return plus_one;
     }
+    if (nargs<3)
+      return 1;
     if (v[2].type==_INT_){ 
       int token_value=v[2].val;
       unary_function_user * uf;

@@ -17,13 +17,29 @@
  */
 #include "config.h"
 #include "giacPCH.h"
+#if defined HAVE_UNISTD_H && !defined NUMWORKS
+#include <dirent.h>
+#endif
 #ifdef NSPIRE_NEWLIB
+#include <fstream>
+#include <libndls.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <os.h>
 #include <syscall.h>
+#include "sha256.h"
+#endif
+#ifndef is_cx2
+#define is_cx2 false
 #endif
 #ifdef KHICAS
+#ifndef NSPIRE_NEWLIB
+extern "C" {
+  short int nspire_exam_mode=0;
+}
+#endif
+#define XWASPY 1 // save .xw file as _xw.py (to be recognized by Numworks workshop)
+const int xwaspy_shift=33; // must be between 32 and 63, reflect in xcas.js and History.cc
 #include "kdisplay.h"
 #include <string.h>
 #include <stdio.h>
@@ -35,9 +51,10 @@
 //giac::context * contextptr=0;
 int clip_ymin=0;
 int lang=1;
-bool warn_nr=true;
+short int nspirelua=0;
+bool warn_nr=true; 
 bool xthetat=false;
-bool freezeturtle=false;
+//bool freezeturtle=false;
 bool global_show_axes=true;
 int esc_flag=0;
 int xcas_python_eval=0;
@@ -67,6 +84,7 @@ int python_init(int stack_size,int heap_size){
 
 int micropy_ck_eval(const char *line){
 #if 1 // def NUMWORKS
+  giac::ctrl_c=giac::interrupted=false;
   if (python_heap && line[0]==0)
     return 1;
   if (!python_heap){
@@ -141,7 +159,7 @@ namespace giac {
   }
 
   void set_xcas_status(){
-    statusline(1);
+    statusline(1+2*xcas_python_eval);
   }
   int GetSetupSetting(int mode){
     return 0;
@@ -1411,11 +1429,11 @@ const catalogFunc completeCaten[] = { // list of all functions (including some n
 
   const char aide_khicas_string[]="Aide Khicas";
 #ifdef NUMWORKS
-  const char shortcuts_fr_string[]="Raccourcis clavier (shell et editeur)\nshift-/: %\nalpha shift \": '\nshift--: \\\nshift-*: factor\nshift-+: normal\nshift-1 a 6: selon bandeau en bas\nshift-7: matrices\nshift-8: listes\nshift-9:arithmetique\nshift-0: polynomes\nshift-.: reels\nshift-10^: programme\nvar: liste des variables (shell) ou dessin tortue (editeur)\n\nshift-x^y (sto) renvoie =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: Editeur 2d ou graphique ou texte selon objet\nshift-6: editeur texte\n+ ou - modifie un parametre en surbrillance\n\nEditeur d'expressions\nshift-cut: defaire/refaire (1 fois)\npave directionnel: deplace la selection dans l'arborescence de l'expression\nshift-droit/gauche echange selection avec argument a droite ou a gauche\nalpha-droit/gauche dans une somme ou un produit: augmente la selection avec argument droit ou gauche\nshift-4: Editer selection, shift-5: taille police + ou - grande\nEXE: evaluer la selection\nshift-6: valeur approchee\nBackspace: supprime l'operateur racine de la selection\n\nEditeur de scripts\nEXE: passage a la ligne\nshift-CUT: defaire/refaire (1 fois)\nshift-COPY: marque le debut de la selection, deplacer le curseur vers la fin puis Backspace pour effacer ou shift-COPY pour copier sans effacer. shift-PASTE pour coller.\nHome-6 recherche seule: entrer un mot puis EXE puis EXE. Taper EXE pour l'occurence suivante, Back pour annuler.\nHome-6 remplacer: entrer un mot puis EXE puis le remplacement et EXE. Taper EXE ou Back pour remplacer ou non et passer a l'occurence suivante, AC pour annuler\nOK: tester syntaxe\n\nRaccourcis Graphes:\n+ - zoom\n(-): zoomout selon y\n*: autoscale\n/: orthonormalisation\nOPTN: axes on/off";
-  const char shortcuts_en_string[]="Keyboard shortcuts (shell and editor)\nshift-/: %\nalpha shift \": '\nshift--: \\\nshift-*: factor\nshift-+: normal\nshift-1 to 6: cf. screen bottom\nshift-7: matrices\nshift-8: lists\nshift-9:arithmetic\nshift-0: polynomials\nshift-.: reals\nshift-10^: programs\nvar: variables list (shell) or turtle screen (editor)\n\nshift-x^y (sto) returns =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: 2d editor or graph or text\nshift-6: text edit\n+ ou - modifies selected slider\n\nExpressions editor\nshift-cut: undo/redo (1 fois)\nkeypad: move selection inside expression tree\nshift-right/left exchange selection with right or left argument\nalpha-right/left: inside a sum or product: increase selection with right or left argument\nshift-4: Edit selection, shift-5: change fontsize\nEXE: eval selection\nshift-6: approx value\nBackspace: suppress selection's rootnode operator\n\nScript Editor\nEXE: newline\nshift-CUT: undo/redo (1 time)\nshift-COPY: marks selection begin, move the cursor to the end, then hit Backspace to erase or shift-COPY to copy (no erase). shift-PASTE to paste.\nHome-6 search: enter a word then EXE then again EXE. Type EXE for next occurence, Back to cancel.\nHome-6 replace: enter a word then EXE then replacement word then EXE. Type EXE or Back to replace or ignore and go to next occurence, AC to cancel\nOK: test syntax\n\nGraph shortcuts:\n+ - zoom\n(-): zoomout along y\n*: autoscale\n/: orthonormalization\nOPTN: axes on/off";
+  const char shortcuts_fr_string[]="Raccourcis clavier (shell et editeur)\nshift-/: %\nalpha shift \": '\nshift--: \\\nshift-ans: completion\nshift-*: factor\nshift-+: normal\nshift-1 a 6: selon bandeau en bas\nshift-7: matrices\nshift-8: complexes\nshift-9:arithmetique entiere\nshift-0: probas\nshift-.: reels\nshift-10^: polynomes\nvar: liste des variables\nans: figure tortue (editeur)\n\nshift-x^y (sto) renvoie =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: Editeur 2d ou graphique ou texte selon objet\nshift-6: editeur texte\n+ ou - modifie un parametre en surbrillance\n\nEditeur d'expressions\nshift-cut: defaire/refaire (1 fois)\npave directionnel: deplace la selection dans l'arborescence de l'expression\nshift-droit/gauche echange selection avec argument a droite ou a gauche\nalpha-droit/gauche dans une somme ou un produit: augmente la selection avec argument droit ou gauche\nshift-4: Editer selection, shift-5: taille police + ou - grande\nEXE: evaluer la selection\nshift-6: valeur approchee\nBackspace: supprime l'operateur racine de la selection\n\nEditeur de scripts\nEXE: passage a la ligne\nshift-CUT: documentation\nshift COPY (ou shift et deplacement curseur simultanement): marque le debut de la selection, deplacer le curseur vers la fin puis Backspace pour effacer ou shift-COPY pour copier sans effacer. shift-PASTE pour coller.\nHome-6 recherche seule: entrer un mot puis EXE puis EXE. Taper EXE pour l'occurence suivante, Back pour annuler.\nHome-6 remplacer: entrer un mot puis EXE puis le remplacement et EXE. Taper EXE ou Back pour remplacer ou non et passer a l'occurence suivante, AC pour annuler\nOK: tester syntaxe\n\nRaccourcis Graphes:\n+ - zoom\n(-): zoomout selon y\n*: autoscale\n/: orthonormalisation\nOPTN: axes on/off";
+  const char shortcuts_en_string[]="Keyboard shortcuts (shell and editor)\nshift-/: %\nalpha shift \": '\nshift--: \\\nshift ans: completion\nshift-*: factor\nshift-+: normal\nshift-1 to 6: cf. screen bottom\nshift-7: matrices\nshift-8: complexes\nshift-9:arithmetic\nshift-0: proba\nshift-.: reals\nshift-10^: polynomials\nvar: variables list\nans: turtle screen (editor)\n\nshift-x^y (sto) returns =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: 2d editor or graph or text\nshift-6: text edit\n+ ou - modifies selected slider\n\nExpressions editor\nshift-cut: undo/redo (1 fois)\nkeypad: move selection inside expression tree\nshift-right/left exchange selection with right or left argument\nalpha-right/left: inside a sum or product: increase selection with right or left argument\nshift-4: Edit selection, shift-5: change fontsize\nEXE: eval selection\nshift-6: approx value\nBackspace: suppress selection's rootnode operator\n\nScript Editor\nEXE: newline\nshift-CUT: documentation\nshift-COPY: marks selection begin, move the cursor to the end, then hit Backspace to erase or shift-COPY to copy (no erase). shift-PASTE to paste.\nHome-6 search: enter a word then EXE then again EXE. Type EXE for next occurence, Back to cancel.\nHome-6 replace: enter a word then EXE then replacement word then EXE. Type EXE or Back to replace or ignore and go to next occurence, AC to cancel\nOK: test syntax\n\nGraph shortcuts:\n+ - zoom\n(-): zoomout along y\n*: autoscale\n/: orthonormalization\nOPTN: axes on/off";
 #else
-  const char shortcuts_fr_string[]="Raccourcis clavier (shell et editeur)\nlivre: aide/complete\ntab: complete (shell)/indente (editeur)\nshift-/: %\nshift *: '\nctrl-/: \\\nshift-1 a 6: selon bandeau en bas\nshift-7: matrices\nshift-8: listes\nshift-9:arithmetique\nshift-0: complexes\nshift-.: reels\nctrl P: programme\nvar: liste des variables (shell) ou dessin tortue (editeur)\n\nctrl-var (sto) renvoie =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: Editeur 2d ou graphique ou texte selon objet\nshift-4: editeur texte\n+ ou - modifie un parametre en surbrillance\n\nEditeur d'expressions\nctrl z: defaire/refaire (1 fois)\npave directionnel: deplace la selection dans l'arborescence de l'expression\nshift-droit/gauche echange selection avec argument a droite ou a gauche\nctrl droit/gauche dans une somme ou un produit: augmente la selection avec argument droit ou gauche\nshift-4: Editer selection, shift-5: taille police + ou - grande\nenter: evaluer la selection\nshift-6: valeur approchee\nDel: supprime l'operateur racine de la selection\n\nEditeur de scripts\nenter: passage a la ligne\nctrl z: defaire/refaire (1 fois)\nctrl c: marque le debut de la selection, deplacer le curseur vers la fin puis Del pour effacer ou ctrl c pour copier sans effacer. ctrl v pour coller.\nMenu-6 recherche seule: entrer un mot puis enter puis enter. Taper enter pour l'occurence suivante, esc pour annuler.\nMenu-6 remplacer: entrer un mot puis enter puis le remplacement et enter. Taper enter ou esc pour remplacer ou non et passer a l'occurence suivante, ctrl del pour annuler\nvalidation (a droite de U): tester syntaxe\n\nRaccourcis Graphes:\n+ - zoom\n(-): zoomout selon y\n*: autoscale\n/: orthonormalisation\nOPTN: axes on/off";
-  const char shortcuts_en_string[]="Keyboard shortcuts (shell and editor)\nbook: help or completion\ntab: completion (shell), indent (editor)\nshift-/: %\nalpha shift *: '\nctrl-/: \\\nshift-1 a 6: see at bottom\nshift-7: matrices\nshift-8: listes\nshift-9:arithmetic\nshift-0: complexes\nshift-.: reals\nctrl P: program\nvar: variables list (shell) or turtle screen (editor)\n\nctrl var (sto) returns =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: 2d editor or graph or text\nshift-4: text edit\n+ ou - modifies selected slider\n\nExpressions editor\nctrl z: undo/redo (1 fois)\nkeypad: move selection inside expression tree\nshift-right/left exchange selection with right or left argument\nalpha-right/left: inside a sum or product: increase selection with right or left argument\nshift-4: Edit selection, shift-5: change fontsize\nenter: eval selection\nshift-6: approx value\nDel: suppress selection's rootnode operator\n\nScript Editor\nenter: newline\nctrl z: undo/redo (1 time)\nctrl c: marks selection begin, move the cursor to the end, then hit Del to erase or ctrl c to copy (no erase). ctrl v to paste.\nMenu-6 search: enter a word then enter then again enter. Type enter for next occurence, esc to cancel.\nMenu-6 replace: enter a word then enter then replacement word then enter. Type enter or esc to replace or ignore and go to next occurence, AC to cancel\nOK: test syntax\n\nGraph shortcuts:\n+ - zoom\n(-): zoomout along y\n*: autoscale\n/: orthonormalization\nOPTN: axes on/off";
+  const char shortcuts_fr_string[]="Raccourcis clavier (shell et editeur)\nlivre: aide/complete\ntab: complete (shell)/indente (editeur)\nshift-/: %\nshift *: '\nctrl-/: \\\nshift-1 a 6: selon bandeau en bas\nshift-7: matrices\nshift-8: complexes\nshift-9:arithmetique\nshift-0: probas\nshift-.: reels\nctrl P: programme\nvar: liste des variables\nans (shift (-)): figure tortue (editeur)\n\nctrl-var (sto) renvoie =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: Editeur 2d ou graphique ou texte selon objet\nshift-4: editeur texte\n+ ou - modifie un parametre en surbrillance\n\nEditeur d'expressions\nctrl z: defaire/refaire (1 fois)\npave directionnel: deplace la selection dans l'arborescence de l'expression\nshift-droit/gauche echange selection avec argument a droite ou a gauche\nctrl droit/gauche dans une somme ou un produit: augmente la selection avec argument droit ou gauche\nshift-4: Editer selection, shift-5: taille police + ou - grande\nenter: evaluer la selection\nshift-6: valeur approchee\nDel: supprime l'operateur racine de la selection\n\nEditeur de scripts\nenter: passage a la ligne\nctrl z: defaire/refaire (1 fois)\nctrl c ou shift et touche curseur simultanement: marque le debut de la selection, deplacer le curseur vers la fin puis Del pour effacer ou ctrl c pour copier sans effacer. ctrl v pour coller.\nMenu-6 recherche seule: entrer un mot puis enter puis enter. Taper enter pour l'occurence suivante, esc pour annuler.\nMenu-6 remplacer: entrer un mot puis enter puis le remplacement et enter. Taper enter ou esc pour remplacer ou non et passer a l'occurence suivante, ctrl del pour annuler\nvalidation (a droite de U): tester syntaxe\n\nRaccourcis Graphes:\n+ - zoom\n(-): zoomout selon y\n*: autoscale\n/: orthonormalisation\nOPTN: axes on/off";
+  const char shortcuts_en_string[]="Keyboard shortcuts (shell and editor)\nbook: help or completion\ntab: completion (shell), indent (editor)\nshift-/: %\nalpha shift *: '\nctrl-/: \\\nshift-1 a 6: see at bottom\nshift-7: matrices\nshift-8: complexes\nshift-9:arithmetic\nshift-0: probas\nshift-.: reals\nctrl P: program\nvar: variables list\n ans (shift (-)): turtle screen (editor)\n\nctrl var (sto) returns =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: 2d editor or graph or text\nshift-4: text edit\n+ ou - modifies selected slider\n\nExpressions editor\nctrl z: undo/redo (1 fois)\nkeypad: move selection inside expression tree\nshift-right/left exchange selection with right or left argument\nalpha-right/left: inside a sum or product: increase selection with right or left argument\nshift-4: Edit selection, shift-5: change fontsize\nenter: eval selection\nshift-6: approx value\nDel: suppress selection's rootnode operator\n\nScript Editor\nenter: newline\nctrl z: undo/redo (1 time)\nctrl c or shift + cursor key simultaneously: marks selection begin, move the cursor to the end, then hit Del to erase or ctrl c to copy (no erase). ctrl v to paste.\nMenu-6 search: enter a word then enter then again enter. Type enter for next occurence, esc to cancel.\nMenu-6 replace: enter a word then enter then replacement word then enter. Type enter or esc to replace or ignore and go to next occurence, AC to cancel\nOK: test syntax\n\nGraph shortcuts:\n+ - zoom\n(-): zoomout along y\n*: autoscale\n/: orthonormalization\nOPTN: axes on/off";
 #endif
   
   const char apropos_fr_string[]="Giac/Xcas 1.6.0, (c) 2020 B. Parisse et R. De Graeve, www-fourier.univ-grenoble-alpes.fr/~parisse.\nKhicas, interface pour calculatrices par B. Parisse, license GPL version 2, adaptee de l'interface d'Eigenmath pour Casio, G. Maia (http://gbl08ma.com), Mike Smith, Nemhardy, LePhenixNoir, ...\nPortage sur Numworks par Damien Nicolet. Remerciements a Jean-Baptiste Boric et Maxime Friess\nPortage sur Nspire grace a Fabian Vogt (firebird-emu, ndless...).\nTable periodique d'apres Maxime Friess\nRemerciements au site tiplanet, en particulier Xavier Andreani, Adrien Bertrand, Lionel Debroux";
@@ -5900,7 +5918,7 @@ namespace xcas {
       GetKey(&key);
       if (key==KEY_SHUTDOWN)
 	return key;
-      if (key==KEY_CTRL_EXIT || key==KEY_CTRL_OK || key==KEY_PRGM_ACON || key==KEY_CTRL_MENU || key==KEY_CTRL_EXE || key==KEY_CTRL_VARS)
+      if (key==KEY_CTRL_EXIT || key==KEY_CTRL_OK || key==KEY_PRGM_ACON || key==KEY_CTRL_MENU || key==KEY_CTRL_EXE || key==KEY_CTRL_VARS || key==KEY_CHAR_ANS)
 	break;
       if (key==KEY_CTRL_UP){ t.turtley += 10; redraw=true; }
       if (key==KEY_CTRL_PAGEUP) { t.turtley += 100; redraw=true;}
@@ -6707,12 +6725,286 @@ namespace xcas {
     giac::kbd_interrupted=giac::interrupted=false;
   }
 
+#ifdef NSPIRE_NEWLIB
+  const unsigned char rsa_n_tab[]=
+  {
+   0xf2,0x0e,0xd4,0x9d,0x44,0x04,0xc4,0xc8,0x6a,0x5b,0xc6,0x9a,0xd6,0xdf,
+   0x9c,0xf5,0x56,0xf2,0x0d,0xad,0x6c,0x34,0xb4,0x48,0xf7,0xa7,0xa8,0x27,0xa0,
+   0xc8,0xbe,0x36,0xb1,0xc0,0x95,0xf8,0xc2,0x72,0xfb,0x78,0x0f,0x3f,0x15,0x22,
+   0xaf,0x51,0x96,0xe3,0xdc,0x39,0xb4,0xc6,0x40,0x6d,0x58,0x56,0x1f,0xad,0x55,
+   0x55,0x08,0xf1,0xde,0x5a,0xbc,0xd3,0xcc,0x16,0x3d,0x33,0xee,0x83,0x3f,0x32,
+   0xa7,0xa7,0xb8,0x95,0x2f,0x35,0xeb,0xf6,0x32,0x4d,0x22,0xd9,0x60,0xb7,0x5e,
+   0xbd,0xea,0xa5,0xcb,0x9c,0x69,0xeb,0xfd,0x9f,0x2b,0x5f,0x3d,0x38,0x5a,0xe1,
+   0x2b,0x63,0xf8,0x92,0x35,0x91,0xea,0x77,0x07,0xcc,0x4b,0x7a,0xbc,0xe0,0xa0,
+   0x8b,0x82,0x98,0xa2,0x87,0x10,0x2c,0xe2,0x23,0x53,0x2f,0x70,0x03,0xec,0x2d,
+   0x22,0x34,0x72,0x57,0x4d,0x24,0x2e,0x97,0xc9,0xfb,0x23,0xb0,0x05,0xff,0x87,
+   0x6e,0xbf,0x94,0x2d,0xf0,0x36,0xed,0xd7,0x9a,0xac,0x0c,0x21,0x94,0xa2,0x75,
+   0xfc,0x39,0x9b,0xba,0xf2,0xc6,0xc9,0x34,0xa0,0xb2,0x66,0x5a,0xcc,0xc9,0x5c,
+   0xc7,0xdb,0xce,0xfb,0x3a,0x10,0xee,0xc1,0x82,0x9a,0x43,0xef,0xed,0x87,0xbd,
+   0x6c,0xe4,0xc1,0x36,0xd0,0x0a,0x85,0x6e,0xca,0xcd,0x13,0x29,0x65,0xb5,0xd4,
+   0x13,0x4a,0x14,0xaa,0x65,0xac,0x0e,0x6f,0x19,0xb0,0x62,0x47,0x65,0x0e,0x40,
+   0x82,0x37,0xd6,0xf0,0x17,0x48,0xaa,0x8c,0x7b,0xc4,0x5e,0x4a,0x72,0x26,0xa6,
+   0x08,0x2e,0xff,0x2d,0x9d,0x0e,0x2e,0x19,0xe9,0x6a,0x4c,0x7c,0x3e,0xe9,0xbc,
+   0x78,0x95
+  };
+
+  gen tabunsignedchar2gen(const unsigned char tab[],int len){
+    gen res=0;
+    for (int i=0;i<len;++i){
+      res=256*res;
+      res+=tab[i];
+    }
+    return res;
+  }
+  // rsa_check will return a number of keys if the file is made of encrypted sha256
+  // fingerprints, and will set the list of keys accordingly
+  // decrypted sha256 keys must be written in basis 256
+  // as decimal strings of 3 digits
+  // a key has 32 bytes -> 96 digits -> crypted as a 96 hexadecimal BCD number
+  // 96 bytes = 768 bits + 1280 leadings bits ignored
+  // if after decryption one byte is not in '0'..'9' then the key file is wrong
+  int rsa_check(const char * filename,int maxkeys,BYTE hash[][SHA256_BLOCK_SIZE]){
+    // 2048 bits key
+    //gen rsa_n("30556983006074777238153119417050033796377803388439527860005340326999902386793820226251074714511561407075812479599501874865302578278319769475202313110451510448783794266461205935851713896070734772609406958034158877973097041361961511770051269836310307170258399115935233789006376756279696914861909994161265089406023979340582770078210602481999222884431385627202086122099546391904669923221616360112943964540439315592530076604901633280666259500385969154248745363924897530806256116825070881718288938659701112718863366914419207811508217802754887145264781681001930842410022363032920896943814827354941650810105635438172850387093",context0);
+    gen rsa_n(tabunsignedchar2gen(rsa_n_tab,sizeof(rsa_n_tab)));
+    gen N=pow(gen(2),768),q;
+    // read by blocks of 2048 bits=256 bytes
+    FILE * f=fopen(filename,"r");
+    if (!f)
+      return -1;
+    for (int i=0;;++i){
+      gen key=0;
+      // skip 0x prefix
+      for (;;){
+	unsigned char c=fgetc(f);
+	if (feof(f))
+	  break;
+	if (c=='\n' || c==' ' || c=='0')
+	  continue;
+	if (c=='x')
+	  break;
+	// invalid char
+	unlink(filename);
+	return -2;
+      }
+      if (feof(f)){
+	fclose(f);
+	return i;
+      }
+      for (int j=0;j<256;++j){
+	key = 256*key;
+	unsigned char c=fgetc(f);
+	if (feof(f)){
+	  fclose(f);
+	  if (j!=0){ unlink(filename); return 0; }
+	  return i;
+	}
+	if (c==' ' || c=='\n')
+	  break;
+	if (c>='0' && c<='9')
+	  c=c-'0';
+	else {
+	  if (c>='a' && c<='f')
+	    c=10+c-'a';
+	  else {
+	    fclose(f);
+	    unlink(filename);
+	    return -3;
+	  }
+	}
+	unsigned char d=fgetc(f);
+	if (feof(f)){
+	  fclose(f);
+	  unlink(filename);
+	  return -4;
+	}
+	if (d==' ' || d=='\n'){
+	  key = key/16+int(c);
+	  break;
+	}
+	if (d>='0' && d<='9')
+	  d=d-'0';
+	else {
+	  if (d>='a' && d<='f')
+	    d=10+d-'a';
+	  else {
+	    fclose(f);
+	    unlink(filename);
+	    return -5;
+	  }
+	}
+	key = key+int(c)*16+int(d);
+      }
+      // public key decrypt and keep only 768 low bits
+      //std::cout << key << '\n' ;
+      key=powmod(key,65537,rsa_n);
+      key=irem(key,N,q); // q should be irem(rsa_n,12345)
+      if (q!=12345){
+	fclose(f);
+	//unlink(filename);
+	return -6;
+      }
+      // check that key is valid and write in hash[i]
+      for (int j=0;j<32;++j){
+	// divide 3 times by 256, remainder must be in '0'..'9'
+	int o=0;
+	int tab[]={1,10,100};
+	for (int k=0;k<3;++k){
+	  gen r=irem(key,256,q);
+	  key=q;
+	  if (r.type!=_INT_ || r.val>'9' || r.val<'0'){
+	    fclose(f);
+	    unlink(filename);
+	    return -7;
+	  }
+	  o+=(r.val-'0')*tab[k];
+	}
+	if (o<0 || o>255){
+	  fclose(f);
+	  unlink(filename);
+	  return -8;
+	}
+	if (i<maxkeys)
+	  hash[i][31-j]=o;
+      }
+    }
+    fclose(f);
+    return maxkeys;
+  }
+
+  bool sha_check(const char * filename,int nkeys,BYTE hash[][SHA256_BLOCK_SIZE]){
+    // must contain sha256 hash for ndless and khicas files (max 32 hash keys)
+    // if more keys are needed modify maxkeys here and in buildsha.cc
+    // Keys are generated with buildsha.cc (private program)
+    // ./a.out ndless/* khicas*tns luagiac.luax.tns 
+    BYTE buf[SHA256_BLOCK_SIZE];
+    SHA256_CTX ctx;
+    string text;
+    FILE * f=fopen(filename,"r");
+    if (!f)
+      return false;
+    for (;;){
+      unsigned char c=fgetc(f);
+      if (feof(f))
+	break;
+      text += c;
+    }
+    fclose(f);
+    unsigned char * ptr=(unsigned char *)text.c_str();
+    sha256_init(&ctx);
+    sha256_update(&ctx, ptr, text.size());
+    sha256_final(&ctx, buf);
+    for (int i=0;i<nkeys;++i){
+      if (!memcmp(hash[i], buf, SHA256_BLOCK_SIZE))
+	return true;
+    }
+    return false;
+  }
+  
+  DIR * nspire_clear_data(const char * dirname,int nkeys,BYTE hash[][SHA256_BLOCK_SIZE],GIAC_CONTEXT){
+    bool toplevel=strcmp(dirname,"/exammode/usr")==0;
+    bool ndless=strcmp(dirname,"/exammode/usr/ndless")==0;
+    DIR *dp;
+    struct dirent *ep;
+    dp = opendir (dirname);
+    if (!dp)
+      return dp;
+    string s;
+    int t;
+    while ( (ep = readdir (dp)) ){
+      s=ep->d_name;
+      t=s.size();
+      if (s=="." || s==".." || s=="NspireLogs.zip" || s=="themes.csv")
+	continue;
+      int res=0;
+      if (t<4 || s.substr(t-4,4)!=".tns"){ // dev, tmp, phoenix, documents, logs, widgets, ptt, metric, wlan, temp_ccp, images
+	s=dirname+("/"+s);
+	DIR * ptr=nspire_clear_data(s.c_str(),nkeys,hash,contextptr);
+	if (ptr && s!="/exammode/usr/ndless" && s!="/exammode/usr/Press-to-Test")
+	  res=rmdir(s.c_str());
+	// else *logptr(contextptr) << s << '\n'; //
+      }
+      else {
+	if (toplevel || ndless){
+	  if (ndless && s=="shakeys.tns")
+	    continue;
+	  if ( (s=="khicas.tns" || s=="luagiac.luax.tns" || s=="khicaslua.tns" || s=="ptt.tns")){
+	    string ss=dirname+("/"+s);
+	    if (sha_check(ss.c_str(),nkeys,hash))
+	      continue;
+	  }
+	}
+	if (ndless){
+	  if ((s.substr(0,17)=="ndless_installer_" || s=="ndless_resources.tns" || s=="ndless.cfg.tns") ){
+	    string ss=dirname+("/"+s);
+	    if (sha_check(ss.c_str(),nkeys,hash))
+	      continue;
+	  }
+	}
+	s=dirname+("/"+s);
+	res=unlink(s.c_str());//*logptr(contextptr) << s << '\n'; //
+      }
+    }
+    closedir (dp);
+    return dp;
+  }
+  
+  void nspire_clear_data(GIAC_CONTEXT){
+    int maxkeys=32;
+    BYTE hash[maxkeys][SHA256_BLOCK_SIZE]={
+    };
+    int nkeys=rsa_check("/exammode/usr/ndless/shakeys.tns",maxkeys,hash);
+    if (nkeys<=0)
+      nkeys=rsa_check("/documents/ndless/shakeys.tns",maxkeys,hash);
+    if (lang==1)
+      *logptr(contextptr) << "Il y a " << nkeys << " empreintes cryptees de fichiers autorises\n";
+    else
+      *logptr(contextptr) << "Found " << nkeys << " valid crypted keys of secure files\n";
+    for (int i=0;i<nkeys;++i){
+      *logptr(contextptr) << "{";
+      for (int j=0;j<SHA256_BLOCK_SIZE;j++){
+	*logptr(contextptr) << hash[i][j] <<",";
+      }
+      *logptr(contextptr) << (lang==1?"Teste et efface les fichiers non autorisess\n":"}\nChecking and clearing non secure files\n");
+    }
+    nspire_clear_data("/exammode/usr",nkeys,hash,contextptr);
+    *logptr(contextptr) << (lang==1?"Fichiers non autorises effaces\nTapez menu menu pour relancer le mode examen\n":"Filesystem checked.\nPress menu menu to restart exam mode\n");
+  }
+#endif
+
+  // maybe we should use int nl_exec(const char *prgm_path, int argsn, char *args[])
 #ifdef NSPIRE_LED
 #include "kled.cc"
+#else
+#ifdef NSPIRE_NEWLIB
+  // #include "ptt"
+  void set_exam_mode(int i,GIAC_CONTEXT){
+    unsigned NSPIRE_RTC_ADDR=0x90090000;
+    unsigned t1= * (volatile unsigned *) NSPIRE_RTC_ADDR;
+    gen n=tabunsignedchar2gen(rsa_n_tab,sizeof(rsa_n_tab));
+    gen key=powmod(longlong(t1),65537,n);
+    key.uncoerce();
+    // char exec[]="/documents/ndless/ptt.tns";
+    char exec[]="/exammode/usr/ndless/ptt.tns";
+    char clef[]="/documents/rtc.tns";
+    char mode[2]="0";
+    char * args[]={clef,mode};
+    mode[0] += i;
+    FILE * f=fopen(clef,"w");
+    mpz_out_str(f,10,*key._ZINTptr);
+    fclose(f);
+    // main_ptt(1,0);
+    int res=nl_exec(exec,2,args);
+    //int res=nl_exec(exec,1,0);
+    // int res=nl_exec("/documents/ndless/ptt.tns",1,filenames);
+    unlink(clef);
+    exam_mode=i;
+  }
 #else
   void set_exam_mode(int i,GIAC_CONTEXT){
     exam_mode=i;
   }
+#endif
 #endif
   string print_duration(double & duration){
     if (duration<=0)
@@ -6743,7 +7035,7 @@ namespace xcas {
 
   const char conf_standard[] = "F1 algb\nsimplify(\nfactor(\npartfrac(\ntcollect(\ntexpand(\nsum(\noo\nproduct(\nF2 calc\n'\ndiff(\nintegrate(\nlimit(\nseries(\nsolve(\ndesolve(\nrsolve(\nF5  2d \nreserved\nF4 menu\nreserved\nF6 reg\nlinear_regression_plot(\nlogarithmic_regression_plot(\nexponential_regression_plot(\npower_regression_plot(\npolynomial_regression_plot(\nsin_regression_plot(\nscatterplot(\nmatrix(\nF< poly\nproot(\npcoeff(\nquo(\nrem(\ngcd(\negcd(\nresultant(\nGF(\nF9 arit\n mod \nirem(\nifactor(\ngcd(\nisprime(\nnextprime(\npowmod(\niegcd(\nF7 lin\nmatrix(\ndet(\nmatpow(\nranm(\nrref(\ntran(\negvl(\negv(\nF= list\nmakelist(\nrange(\nseq(\nlen(\nappend(\nranv(\nsort(\napply(\nF3 plot\nplot(\nplotseq(\nplotlist(\nplotparam(\nplotpolar(\nplotfield(\nhistogram(\nbarplot(\nF; real\nexact(\napprox(\nfloor(\nceil(\nround(\nsign(\nmax(\nmin(\nF> prog\n:\n&\n#\nhexprint(\nbinprint(\nf(x):=\ndebug(\npython(\nF8 cplx\nabs(\narg(\nre(\nim(\nconj(\ncsolve(\ncfactor(\ncpartfrac(\nF: misc\n!\nrand(\nbinomial(\nnormald(\nexponentiald(\n\\\n % \nperiodic_table\n";
 
-  const char python_conf_standard[] = "F1 misc\nprint(\ninput(\n;\n:\n[]\ndef f(x): return \ncaseval(\"\nfrom cas import *\nF2 math\nfloor(\nceil(\nround(\nmin(\nmax(\nabs(\nsqrt(\nfrom math import *\nF3 c&rand\nrandint(\nrandom()\nchoice(\nfrom random import *\n.real\n.imag\nphase(\nfrom cmath import *;i=1j\nF4 menu\nreserved\nF5  2d\nreserved\nF6 tortue\nforward(\nbackward(\nleft(\nright(\npencolor(\ncircle(\nreset()\nfrom turtle import *\nF7 linalg\nmatrix(\nadd(\nsub(\nmul(\ninv(\nrref(\ntranspose(\nfrom linalg import *;i=1j\nF8 numpy\narray(\nreshape(\narange(\nlinspace(\nsolve(\neig(\ninv(\nfrom numpy import *;i=1j\nF9 arit\npow(\nisprime(\nnextprime(\nifactor(\ngcd(\nlcm(\niegcd(\nfrom arit import *\nF< color\nred\nblue\ngreen\ncyan\nyellow\nmagenta\nblack\nwhite\nF; draw\nclear_screen();\nshow_screen();\nset_pixel(\ndraw_line(\ndraw_rectangle(\n\ndraw_circle(\ndraw_string(\nfrom graphic import *\nF: plot\nclf()\nplot(\ntext(\narrow(\nscatter(\nbar(\nshow()\nfrom matplotl import *\nF= list\nlist(\nrange(\nlen(\nappend(\nzip(\nsorted(\nmap(\nreversed(\nF> prog\n|\n&\n#\nhex(\nbin(\ndebug(\npython\nxcas\n";
+  const char python_conf_standard[] = "F1 misc\nprint(\ninput(\n;\n:\n[]\ndef f(x): return \ntime()\nfrom time import *\nF2 math\nfloor(\nceil(\nround(\nmin(\nmax(\nabs(\nsqrt(\nfrom math import *\nF3 c&rand\nrandint(\nrandom()\nchoice(\nfrom random import *\n.real\n.imag\nphase(\nfrom cmath import *;i=1j\nF4 menu\nreserved\nF5  2d\nreserved\nF6 tortue\nforward(\nbackward(\nleft(\nright(\npencolor(\ncircle(\nreset()\nfrom turtle import *\nF7 linalg\nmatrix(\nadd(\nsub(\nmul(\ninv(\nrref(\ntranspose(\nfrom linalg import *;i=1j\nF8 numpy\narray(\nreshape(\narange(\nlinspace(\nsolve(\neig(\ninv(\nfrom numpy import *;i=1j\nF9 arit\npow(\nisprime(\nnextprime(\nifactor(\ngcd(\nlcm(\niegcd(\nfrom arit import *\nF< color\nred\nblue\ngreen\ncyan\nyellow\nmagenta\nblack\nwhite\nF; draw\nclear_screen();\nshow_screen();\nset_pixel(\ndraw_line(\ndraw_rectangle(\n\ndraw_circle(\ndraw_string(\nfrom graphic import *\nF: plot\nclf()\nplot(\ntext(\narrow(\nscatter(\nbar(\nshow()\nfrom matplotl import *\nF= list\nlist(\nrange(\nlen(\nappend(\nzip(\nsorted(\nmap(\nreversed(\nF> prog\n|\n&\n#\nhex(\nbin(\ndebug(\nfrom cas import *\ncaseval(\"\")\n";
   
   int eqws(char * s,bool eval,GIAC_CONTEXT){ // s buffer must be at least 512 char
     gen g,ge;
@@ -6907,12 +7199,12 @@ namespace xcas {
 #ifdef NSPIRE_NEWLIB
 	DefineStatusMessage((char*)((lang==1)?"Ecran fige. Taper esc":"Screen freezed. Press esc."), 1, 0, 0);
 #else
-	DefineStatusMessage((char*)((lang==1)?"Ecran fige. Taper EXIT":"Screen freezed. Press EXIT."), 1, 0, 0);
+	DefineStatusMessage((char*)((lang==1)?"Ecran fige. Taper clear":"Screen freezed. Press clear."), 1, 0, 0);
 #endif
 	DisplayStatusArea();
 	int key;
 	GetKey(&key);
-	if (key==KEY_CTRL_EXIT)
+	if (key==KEY_CTRL_EXIT || key==KEY_CTRL_AC)
 	  break;
       }
     }
@@ -7264,7 +7556,7 @@ namespace xcas {
     if (text->editable && text->clipline>=0)
       DefineStatusMessage((char *)"PAD: select, COPY: copy, DEL: cut",1,0,0);
     else {
-      std::string status;
+      std::string status("edit ");
 #ifdef GIAC_SHOWTIME
       int d=(int(millis()/60000) +time_shift) % (24*60); // minutes
       int heure=d/60;
@@ -7338,6 +7630,8 @@ namespace xcas {
   }
 
   int check_leave(textArea * text){
+    if (nspire_exam_mode==2)
+      return 0;
     if (text->editable && text->filename.size()){
       if (text->changed){
 	// save or cancel?
@@ -8020,7 +8314,7 @@ namespace xcas {
     if (editable){
       waitforvblank();
       drawRectangle(0,205,LCD_WIDTH_PX,17,44444);
-      PrintMiniMini(0,205,text->python?"shift-1 test|2 loop|3 undo|4 misc|5 +-|6 logo|7 lin|8 list|9plot":"shift-1 test|2 loop|3 undo|4 misc|5 +-|6 logo|7 matr|8 list",4,44444,giac::_BLACK);
+      PrintMiniMini(0,205,text->python?"shift-1 test|2 loop|3 undo|4 misc|5 +-|6 logo|7 lin|8 list|9arit":"shift-1 test|2 loop|3 undo|4 misc|5 +-|6 logo|7 matr|8 cplx",4,44444,giac::_BLACK);
       //draw_menu(1);
     }
 #ifdef SCROLLBAR
@@ -8088,6 +8382,8 @@ namespace xcas {
   }
 
   void save_script(const char * filename,const string & s){
+    if (nspire_exam_mode==2)
+      return;
 #ifdef NUMWORKS
     char buf[s.size()+2];
     buf[0]=1;
@@ -8099,14 +8395,16 @@ namespace xcas {
 #ifdef NSPIRE_NEWLIB
     char filenametns[strlen(filename)+5];
     strcpy(filenametns,filename);
-    strcpy(filenametns+strlen(filename),".tns");
+    int l=strlen(filenametns);
+    if (l<4 || strncmp(filename+l-4,".tns",4))
+      strcpy(filenametns+strlen(filename),".tns");
     write_file(filenametns,buf);
 #else
     write_file(filename,buf);
 #endif
   }
 
-  bool textedit(char * s,int bufsize,bool OKparse,const giac::context * contextptr){
+  bool textedit(char * s,int bufsize,bool OKparse,const giac::context * contextptr,const char * filename){
     if (!s)
       return false;
     int ss=strlen(s);
@@ -8120,7 +8418,7 @@ namespace xcas {
     ta.editable=true;
     ta.clipline=-1;
     ta.changed=false;
-    ta.filename="temp.py";
+    ta.filename=filename?filename:"temp.py";
     ta.y=0;
     ta.python=true;
     ta.allowEXE=false;//true; // set back to true later
@@ -8335,7 +8633,7 @@ namespace xcas {
     if (l1>0 && has_static_help(cmdname,lang | 0x100,howto,syntax,related,examples) && examples){
       // display tooltip
       if (x<0)
-	x=os_draw_string(0,y,_BLACK,1234,cmdline,true); // fake print -> x position
+	x=os_draw_string(0,y,_BLACK,1234,editline,true); // fake print -> x position // replaced cmdline by editline so that tooltip is at end
       x+=2;
       y+=4;
       drawRectangle(x,y,6,10,65529);
@@ -8396,7 +8694,7 @@ namespace xcas {
 	    b=text->pos;
 	  if (b>s.size())
 	    b=s.size();
-	  s=s.substr(0,text->pos-b)+s.substr(b,s.size()-b);
+	  s=s.substr(0,text->pos-b)+s.substr(text->pos,s.size()-text->pos);//+s.substr(b,s.size()-b);
 	}
 	insert(text,adds.c_str(),false);
       }
@@ -8434,7 +8732,7 @@ namespace xcas {
 	  continue;
 	if (key==KEY_CTRL_DOWN || key==KEY_CTRL_VARS)
 	  key=KEY_BOOK;
-	if (key==KEY_CTRL_OK || key==KEY_CHAR_ANS){
+	if (key==KEY_CTRL_OK ){
 	  textarea_help_insert(text,key,contextptr);
 	  continue;
 	}
@@ -8507,16 +8805,8 @@ namespace xcas {
 	  textpos -= diff;
 	  continue;
 	}
-	if (key==KEY_CTRL_VARS){
+	if (key==KEY_CHAR_ANS){
 	  displaylogo();
-	  continue;
-	}
-	if (0 && key==KEY_CHAR_ANS){ // lack of keys, ANS -> menu
-	  int err=check_parse(text,v,text->python,contextptr);
-	  if (err==KEY_SHUTDOWN)
-	    return err;
-	  if (err) // move cursor to the error line
-	    textline=err-1;
 	  continue;
 	}
 	if (key>=KEY_SELECT_LEFT && key<=KEY_SELECT_RIGHT){
@@ -8843,7 +9133,9 @@ namespace xcas {
 	  }
 	}
 	break;
-      case KEY_SAVE: 
+      case KEY_SAVE:
+	if (nspire_exam_mode==2)
+	  continue;
 	save_script(text->filename.c_str(),merge_area(v));
 	text->changed=false;
 	char status[256];
@@ -8868,7 +9160,8 @@ namespace xcas {
 	  smallmenuitems[0].text = (char*)((lang==1)?"Tester syntaxe":"Check syntax");
 	  smallmenuitems[1].text = (char*)((lang==1)?"Sauvegarder":"Save");
 	  smallmenuitems[2].text = (char*)((lang==1)?"Sauvegarder comme":"Save as");
-	  if (exam_mode) smallmenuitems[2].text = (char*)"";
+	  if (nspire_exam_mode==2) smallmenuitems[1].text = (char*)(lang==1?"Sauvegarde desactivee":"Saving disabled");
+	  if (exam_mode || nspire_exam_mode==2) smallmenuitems[2].text = (char*)"";
 	  smallmenuitems[3].text = (char*)((lang==1)?"Inserer":"Insert");
 	  smallmenuitems[4].text = (char*)((lang==1)?"Effacer":"Clear");
 	  smallmenuitems[5].text = (char*)((lang==1)?"Chercher,remplacer":"Search, replace");
@@ -8921,14 +9214,14 @@ namespace xcas {
 	      if (err) // move cursor to the error line
 		textline=err-1;
 	    } 
-	    if (sres==3 && exam_mode==0){
+	    if (sres==3 && exam_mode==0 && nspire_exam_mode!=2){
 	      char filename[MAX_FILENAME_SIZE+1];
 	      if (get_filename(filename,".py")){
 		text->filename=filename;
 		sres=2;
 	      }
 	    }
-	    if(sres == 2) {
+	    if(sres == 2 && nspire_exam_mode!=2) {
 	      save_script(text->filename.c_str(),merge_area(v));
 	      text->changed=false;
 	      char status[256];
@@ -9097,17 +9390,17 @@ namespace xcas {
 
   void console_disp_status(GIAC_CONTEXT){
     int i=python_compat(contextptr);
-    string msg;
+    string msg("shell ");
     if (i&4)
-      msg="MicroPython";
+      msg+="MicroPython";
     else {
       if (i==0)
-	msg="Xcas";
+	msg+="Xcas";
       else {
 	if (i==1)
-	  msg="Py ^=**";
+	  msg+="Py ^=**";
 	else
-	  msg="Py ^=xor";
+	  msg+="Py ^=xor";
       }
     }
     if (angle_radian(contextptr))
@@ -9134,7 +9427,7 @@ namespace xcas {
       unsigned poweraddr=0x900b0028;
       unsigned u=*(unsigned *)poweraddr;
       //*logptr(contextptr) << "power " << u << '\n';
-      if ( (u&0xff0000)==0x070000) // connected 0x11070114, disconnected 0x11110114
+      if ( is_cx2 || (u&0xff0000)==0x070000) // connected 0x11070114, disconnected 0x11110114
 	chk=0;
 #endif
 #if 0 /// check connection, works only if graph link connection before
@@ -9185,6 +9478,7 @@ namespace xcas {
       confirm((lang==1)?"Fin du mode examen":"End exam mode","enter: OK");
   }    
 
+  
   void menu_setup(GIAC_CONTEXT){
     Menu smallmenu;
     smallmenu.numitems=15;
@@ -9277,8 +9571,10 @@ namespace xcas {
 		  do_restart(contextptr);
 	      }
 	      else {
+#ifdef MICROPY_LIB
 		if (do_confirm((lang==1)?"Effacer le tas MicroPython?":"Clear MicroPython heap?"))
 		  python_free();
+#endif
 	      }
 	    }
 	    warn_python(p,false);
@@ -9291,7 +9587,7 @@ namespace xcas {
 	if (smallmenu.selection == 3){
 	  giac::angle_radian(!giac::angle_radian(contextptr),contextptr);
 	  os_set_angle_unit(giac::angle_radian(contextptr)?0:1);
-	  statusline();
+	  statusline(2*xcas_python_eval);
 	  continue;
 	}
 	if (smallmenu.selection == 4){
@@ -9304,6 +9600,42 @@ namespace xcas {
 	  break;
 	}
 	if (smallmenu.selection == 11){
+#ifdef NSPIRE_NEWLIB
+	  if (nspire_exam_mode==1){
+	    if (confirm((lang==1?"Quitter Xcas pour relancer le mode examen":"Leave Xcas to re-enter exam mode"),(lang==1?"!enter OK, esc annul":"enter OK, esc cancel."))!=KEY_CTRL_F1)
+	      break;
+	    do_restart(contextptr);
+	    clear_turtle_history(contextptr);
+	    Console_Init(contextptr);
+	    Console_Clear_EditLine();
+	    console_changed=0;
+	    nspire_clear_data(contextptr);
+	    nspire_exam_mode=2;
+	    set_exam_mode(0,contextptr);
+	    break;
+	  }
+	  else {
+	    //nspire_clear_data(contextptr);
+	    //set_exam_mode(0,contextptr);
+	    if (1
+		|| is_cx2
+		){
+	      textArea text;
+	      text.editable=false;
+	      text.clipline=-1;
+	      text.title = lang==1?"KhiCAS et mode examen":"KhiCAS and exam mode";
+	      add(&text,(lang==1)?
+		  "Attention, verifiez que le calcul formel est autorise avant d'utiliser KhiCAS en mode examen. En France, c'est en principe autorise lorsque la calculatrice graphique l'est (par exemple au bac)":
+		  "Warning! Check that CAS is allowed before running KhiCAS in exam mode.");
+	      const char exam_mode_fr_string[]="Pour utiliser KhiCAS en mode examen, il faut effectuer une preparation chez soi quelques heures avant avec une connection PC ou quelques minutes avant l'examen avec un autre etudiant ayant une Nspire CX ou CX II.\nLancer le mode examen sur la calculatrice cible (esc-on), recopier ndless et khicas.tns (ou luagiac.luax.tns et khicaslua.tns) sur la calculatrice cible en mode examen. Avec 2 calculatrices, recommencez sur l'autre calculatrice (mettre l'autre calculatrice en mode examen et copiez dessus ndless et khicas).\nActiver ndless (cable debranche) puis lancez KhiCAS puis touche calculatrice (en-dessous de esc) puis selectionner l'item 11. mode examen, valider : ceci va effacer les donnees et desactiver le clignotement des leds.\n\nAu debut de l'examen, lorsque le surveillant demande d'activer le mode examen, quittez KhiCAS en tapant menu menu (ou appuyez sur reset), le mode examen sera a nouveau actif et les leds clignoteront. Vous pouvez activer ndless et lancez KhiCAS.\nPour les institutions n'acceptant pas KhiCAS en mode examen: demandez a vos etudiants de redemarrer la calculatrice, puis faire esc-on et reinitialiser le mode examen.";
+	      const char exam_mode_en_string[]="Running KhiCAS in exam mode requires preparation at home with a PC or a few minutes with another student having a Nspire CX/CXII.\nActivate exam mode on the target calculator (esc-on), connect the PC or the other calculator, copy ndless and khicas.tns (or luagiac.luax.tns and khicaslua.tns) to the target calc (kept in exam mode). With 2 calculators, repeat on the other calculator.\n Activate ndless (disconnect the link) and run KhiCAS. Type the calculator key below esc then select 11. Exam mode. This will desactivate leds blinking and clear data. When exam begins, quit KhiCAS (menu menu) or press reset, exam mode will be active again and leds will blink. Activate ndless and run KhiCAS.\n\nFor institutions who do not want to allow KhiCAS, ask your students to reset their calculator, press esc-on and restart exam mode, this will clear ndless and KhiCAS.";
+	      add(&text,(lang==1)?exam_mode_fr_string:exam_mode_en_string);
+	      if (doTextArea(&text,contextptr)==KEY_SHUTDOWN)
+		return ;
+	      break;
+	    }
+	  }
+#endif // NSPIRE_NEWLIB
 	  if (!exam_mode && confirm((lang==1?"Verifiez que le calcul formel est autorise.":"Please check that the CAS is allowed."),(lang==1?"France: autorise au bac. Enter: ok, esc: annul":"enter: yes, esc: no"))!=KEY_CTRL_F1)
 	    break;
 #ifdef NUMWORKS
@@ -9353,13 +9685,13 @@ namespace xcas {
 	      exam_start=0;
 	      exam_duration=1;
 #endif
-	      set_exam_mode(1,contextptr);
 	      do_restart(contextptr);
 	      clear_turtle_history(contextptr);
 	      Console_Init(contextptr);
 	      Console_Clear_EditLine();
-	      console_changed=0;
+	      set_exam_mode(1,contextptr);
 	      strcpy(session_filename,"session.xw");
+	      console_changed=0;
 	      save_session(contextptr);
 	      if (edptr){
 		edptr->elements.resize(1);
@@ -9373,6 +9705,7 @@ namespace xcas {
 	  }
 	  break;
 	}
+#ifdef MICROPY_LIB
 	if (smallmenu.selection==13){
 	  double d=python_heap_size/1024;
 	  if (inputdouble(
@@ -9389,9 +9722,7 @@ namespace xcas {
 #endif
 	      ){
 	    python_heap_size=d*1024;
-#ifdef MICROPY_LIB
 	    python_free();
-#endif
 	  }
 	  continue;
 	}
@@ -9412,12 +9743,11 @@ namespace xcas {
 #endif
 	      ){
 	    python_stack_size=d*1024;
-#ifdef MICROPY_LIB
 	    python_free();
-#endif
 	  }
 	  continue;
 	}
+#endif // MICROPY_LIB
 	if (smallmenu.selection == 15){
 	  if (exam_mode)
 	    leave_exam_mode(contextptr);
@@ -9461,7 +9791,7 @@ namespace xcas {
 			 (s[0]=='/' && (s[1]=='/' || s[1]=='*'))
 			 ))
       return 0;
-    if (strlen(s)>=4 && strlen(s)<6 && strncmp(s,"xcas",4)==0){
+    if (strcmp(s,"caseval(\"\")")==0 || strcmp(s,"eval_expr(\"\")")==0 || (strlen(s)>=4 && strlen(s)<6 && strncmp(s,"xcas",4)==0)){
       xcas_python_eval=0;
       int p=python_compat(contextptr)&3;
       python_compat(p,contextptr);
@@ -9663,7 +9993,7 @@ namespace xcas {
     buf[1]= n & 0xff;
     buf += 2;
   }
-  void save_console_state_smem(const char * filename,GIAC_CONTEXT){
+  void save_console_state_smem(const char * filename,bool xwaspy,GIAC_CONTEXT){
     console_changed=0;
     string state(khicas_state(contextptr));
     int statesize=state.size();
@@ -9718,7 +10048,56 @@ namespace xcas {
     savebuf[0]=1;
 #endif
     int len=hFile-savebuf;
-    write_file(filename,savebuf,len);
+    if (
+#ifdef XWASPY
+	xwaspy && len<8192
+#else
+	0
+#endif
+	){
+      // save as an ascii file beginning with #xwaspy
+#ifdef NUMWORKS 
+      --len;
+      char * buf=savebuf+1;
+      int newlen=4*(len+2)/3+11; // 4/3 oldlen + 8(#swaspy\n) +1 + 2 for ending  zeros
+      char newbuf[newlen];
+      strcpy(newbuf,"##xwaspy\n");
+      newbuf[0]=1;
+      hFile=newbuf+9;
+#else
+      char * buf=savebuf;
+      int newlen=4*(len+2)/3+10;
+      char newbuf[newlen];
+      strcpy(newbuf,"#xwaspy\n");
+      hFile=newbuf+8;
+#endif
+      for (int i=0;i<len;i+=3,hFile+=4){
+	// keep space \n and a..z chars
+	char c;
+	while (i<len && ((c=buf[i])==' ' || c=='\n' || c=='{' || c==')' || c==';' || c==':' || c=='\n' || (c>='a' && c<='z')) ){
+	  if (c==')')
+	    c='}';
+	  if (c==':')
+	    c='~';
+	  if (c==';')
+	    c='|';
+	  *hFile=c;
+	  ++hFile;
+	  ++i;
+	}
+	unsigned char a=buf[i],b=i+1<len?buf[i+1]:0,C=i+2<len?buf[i+2]:0;
+	hFile[0]=xwaspy_shift+(a>>2);
+	hFile[1]=xwaspy_shift+(((a&3)<<4)|(b>>4));
+	hFile[2]=xwaspy_shift+(((b&0xf)<<2)|(C>>6));
+	hFile[3]=xwaspy_shift+(C&0x3f);
+      }
+      //*hFile=0; ++hFile; 
+      //*hFile=0; ++hFile; 
+      write_file(filename,newbuf,hFile-newbuf);
+    }
+    else {
+      write_file(filename,savebuf,len);
+    }
   }
 
   size_t Bfile_ReadFile_OS4(const char * & hf_){
@@ -9743,6 +10122,31 @@ namespace xcas {
   bool load_console_state_smem(const char * filename,GIAC_CONTEXT){
     const char * hf=read_file(filename);
     if (!hf) return false;
+    string str;
+    if (strncmp(hf,"#xwaspy\n",8)==0){
+      hf+=8;
+      const char * source=hf;
+      for (;*source;source+=4){
+	while (*source=='\n' || *source==' ' || (*source>='a' && *source<='~')){
+	  char c=*source;
+	  if (c=='}')
+	    c=')';
+	  if (c=='|')
+	    c=';';
+	  if (c=='~')
+	    c=':';
+	  str += c;
+	  ++source;
+	}
+	if (!*source)
+	  break;
+	unsigned char a=source[0]-xwaspy_shift,b=source[1]-xwaspy_shift,c=source[2]-xwaspy_shift,d=source[3]-xwaspy_shift;
+	str += (a<<2)|(b>>4);
+	str += (b<<4)|(c>>2);
+	str += (c<<6)|d;
+      }
+      hf=str.c_str();
+    }
     size_t L=Bfile_ReadFile_OS4(hf);
     char BUF[L+4];
     BUF[1]=BUF[0]='/'; // avoid trying python compat.
@@ -9815,6 +10219,8 @@ namespace xcas {
 	check_parse(edptr,edptr->elements,python_compat(contextptr),contextptr);
       }
     }
+    else
+      xcas_python_eval=0;
     Console_FMenu_Init(contextptr); // insure the menus are sync-ed
     return true;
   }
@@ -10444,31 +10850,105 @@ namespace xcas {
 
 
   void save(const char * fname,GIAC_CONTEXT){
+    if (nspire_exam_mode==2)
+      return;
     clear_abort();
 #if 0
     return;
 #else
     string filename(remove_path(remove_extension(fname)));
-    filename+=".xw";
+#if defined NUMWORKS && defined XWASPY
+    bool xwaspy=filename!="session"; // xw will be saved as a fake .py file
+#else
+    bool xwaspy=false;
+#endif
+    if (xwaspy){
+      if (filename.size()>3 && filename.substr(filename.size()-3,3)=="_xw")
+	filename += ".py";
+      else
+	filename += "_xw.py";
+    }
+    else
+      filename+=".xw";
 #ifdef NSPIRE_NEWLIB
     filename+=".tns";
 #endif
-    save_console_state_smem(filename.c_str(),contextptr); // call before save_khicas_symbols_smem(), because this calls create_data_folder if necessary!
+    save_console_state_smem(filename.c_str(),xwaspy,contextptr); // call before save_khicas_symbols_smem(), because this calls create_data_folder if necessary!
     // save_khicas_symbols_smem(("\\\\fls0\\"+filename+".xw").c_str());
     if (edptr)
       check_leave(edptr);
 #endif
   }
 
-  int restore_session(const char * fname,GIAC_CONTEXT){
-#if 0
-    return 0;
-#else
-    // cout << "0" << fname << endl; Console_Disp(1); GetKey(&key);
-    string filename(remove_path(remove_extension(fname)));
-    filename+=string(".xw");
+  int restore_script(string &filename,bool msg,GIAC_CONTEXT){
+    // it's not a session, but a script, restore last session settings and load script
 #ifdef NSPIRE_NEWLIB
-    filename+=string(".tns");
+    const char sessionname[]="session.xw.tns";
+#else
+    const char sessionname[]="session.xw";
+#endif 
+    if (file_exists(sessionname)){
+      load_console_state_smem(sessionname,contextptr);
+      Console_Init(contextptr);
+      Console_Clear_EditLine();
+    }
+    else python_compat(1,contextptr);
+    //return 1;
+    string s;
+    filename=remove_path(remove_extension(filename));
+    if (msg && filename!="session"){
+      *logptr(contextptr) << (lang==1?"shift ) 8 ou python/xcas pour changer d'interpreteur\n":"shift ) 8 or python/xcas to change interpreter\n");
+      *logptr(contextptr) << (lang==1?"Taper esc pour editeur ou avec Micropython executez\n":"Press esc for editor or in MicroPython exec\n");
+      *logptr(contextptr) << "from "+filename+" import *\n";
+    }
+#ifdef NSPIRE_NEWLIB
+    filename += ".py.tns";
+#else
+    filename += ".py";
+#endif
+    load_script(filename.c_str(),s);
+    if (s.empty())
+      s="\n";
+    if (edptr==0)
+      edptr=new textArea;
+    edptr->filename=filename;
+    edptr->editable=true;
+    edptr->changed=false;
+    edptr->python=python_compat(contextptr);
+    edptr->elements.clear();
+    edptr->y=7;
+    add(edptr,s);
+    edptr->line=0;
+    edptr->pos=0;
+    return 2;
+  }
+
+  int restore_session(const char * fname,GIAC_CONTEXT){
+    // cout << "0" << fname << endl; Console_Disp(1); GetKey(&key);
+    string filename(fname); //filename="mandel.py.tns";
+    if (filename.size()>4 && filename.substr(filename.size()-4,4)==".tns")
+      filename=filename.substr(0,filename.size()-4);
+    if (filename.size()>3 && filename.substr(filename.size()-3,3)==".py")
+      return restore_script(filename,true,contextptr);
+    filename=remove_path(remove_extension(fname));
+#ifdef NSPIRE_NEWLIB
+    if (file_exists((filename+".xw.tns").c_str())){
+      strcpy(session_filename,filename.c_str());
+      filename += ".xw.tns";
+    }
+    else {
+      if (file_exists((filename+".py.tns").c_str()))
+	return restore_script(filename,true,contextptr);
+    }
+#else
+    if (file_exists((filename+".xw").c_str())){
+      strcpy(session_filename,filename.c_str());
+      filename += ".xw";
+    }
+    else {
+      if (file_exists((filename+".py").c_str()))
+	return restore_script(filename,true,contextptr);
+    }
 #endif
     if (!load_console_state_smem(filename.c_str(),contextptr)){
       int x=0,y=0;
@@ -10514,7 +10994,7 @@ namespace xcas {
       }
 #endif
       Bdisp_AllClr_VRAM();
-#ifdef GIAC_SHOWTIME
+#if defined GIAC_SHOWTIME || defined NSPIRE_NEWLIB
       Console_Output("Reglage de l'heure, exemple");
       Console_NewLine(LINE_TYPE_OUTPUT, 1);          
       Console_Output("12,37=>,");
@@ -10524,7 +11004,6 @@ namespace xcas {
       return 0;
     }
     return 1;
-#endif
   }
 
   string extract_name(const char * s){
@@ -10546,9 +11025,46 @@ namespace xcas {
 
   int giac_filebrowser(char * filename,const char * extension,const char * title){
     const char * filenames[MAX_NUMBER_OF_FILENAMES+1];
+#if 1 // def XWASPY
+    int n,choix;
+    bool isxw=strcmp(extension,"xw")==0,ispy=strcmp(extension,"py")==0;
+    if (isxw || ispy){
+      n=os_file_browser(filenames,MAX_NUMBER_OF_FILENAMES,"py");
+      if (n==0 && ispy) return 0;
+      int N=0;
+      // isxw: keep only filenames ending with _xw
+      // ispy: remove filenames ending with _xw
+      const char * fnames[MAX_NUMBER_OF_FILENAMES+1];
+      for (int i=0;i<n;++i){
+	const char * f=filenames[i];
+	f+=strlen(f)-6;
+	bool isfxw=strcmp(f,"_xw.py")==0;
+	if (isxw?isfxw:!isfxw){
+	  fnames[N]=filenames[i];
+	  ++N;
+	}
+      }
+      if (isxw){ // add regular .xw extensions
+	n=os_file_browser(filenames,MAX_NUMBER_OF_FILENAMES,"xw");
+	if (n+N>MAX_NUMBER_OF_FILENAMES)
+	  n=MAX_NUMBER_OF_FILENAMES-N;
+	for (int i=0;i<n;++i,++N){
+	  fnames[N]=filenames[i];
+	}
+      }
+      fnames[N]=0;
+      choix=select_item(fnames,title?title:"Scripts");
+      if (choix<0 || choix>=N) return 0;
+      strcpy(filename,fnames[choix]);
+      return choix+1;
+    }
+    else 
+      choix=select_item(filenames,title?title:"Scripts");
+#else
     int n=os_file_browser(filenames,MAX_NUMBER_OF_FILENAMES,extension);
     if (n==0) return 0;
     int choix=select_item(filenames,title?title:"Scripts");
+#endif
     if (choix<0 || choix>=n) return 0;
     strcpy(filename,filenames[choix]);
     return choix+1;
@@ -10658,22 +11174,27 @@ namespace xcas {
 	  strcmp(session_filename,"session")==0 ||
 	  confirm((lang==1)?"Session courante perdue?":"Current session will be lost",
 #ifdef NSPIRE_NEWLIB
-		  (lang==1)?"enter: annul, esc: ok":"enter: cancel, esc: ok"
+		  (lang==1)?"enter: ok, esc: annul":"enter: ok, esc: cancel"
 #else
-		  (lang==1)?"OK: annul, Back: ok":"OK: cancel, Back: ok"
+		  (lang==1)?"OK: ok, Back: annul":"OK: ok, Back: cancel"
 #endif
-		  )==KEY_CTRL_F6){
+		  )==KEY_CTRL_F1){
+#ifndef NUMWORKS
 	giac::_restart(giac::gen(giac::vecteur(0),giac::_SEQ__VECT),contextptr);
+#endif
 	restore_session(filename,contextptr);
 	clip_pasted=true;
 	strcpy(session_filename,remove_path(giac::remove_extension(filename)).c_str());
-#ifdef NSPIRE_NEWLIB
 	static bool ctrl_r=true;
 	if (ctrl_r){
+#ifdef NSPIRE_NEWLIB
 	  confirm((lang==1)?"Taper ctrl puis r pour executer session ":"Type ctrl then r to run session","Enter: OK");
+#endif
+#ifdef NUMWORKS
+	  confirm((lang==1)?"Taper shift EXE pour executer session ":"Type shift then EXE to run session","Enter: OK");
+#endif
 	  ctrl_r=false;
 	}
-#endif
 	Console_Disp(0,contextptr);
 	// reload_edptr(session_filename,edptr);
       }     
@@ -10704,7 +11225,25 @@ namespace xcas {
     Console_Disp(1,contextptr);
     return true;
   }
-  
+
+#ifdef NSPIRE_NEWLIB
+  void check_nspire_exam_mode(GIAC_CONTEXT){
+    refresh_osscr();
+    if (nspire_exam_mode==2){
+      // reset
+      if (is_cx2)
+	*(unsigned *) 0x90140020=8*16;
+      else
+	*(unsigned *) 0x900a0008=2;
+    }
+    if (nspire_exam_mode==1){
+      set_exam_mode(3,contextptr); exam_mode=0;
+    }
+  }
+#else
+  void check_nspire_exam_mode(GIAC_CONTEXT){}
+#endif
+
   int Console_GetKey(GIAC_CONTEXT){
     int key;
     bool keytooltip=false;
@@ -10871,9 +11410,12 @@ namespace xcas {
 	while(1) {
 	  // moved inside the loop because lang might change
 	  smallmenuitems[0].text = (char*)"Applications (shift ANS)";
-	  smallmenuitems[1].text = (char *) ((lang==1)?"Enregistrer session":"Save session ");
+	  string sess=(lang==1)?"Enregistrer ":"Save ";
+	  sess += session_filename;
+	  smallmenuitems[1].text = (char *) (sess.c_str());
 	  smallmenuitems[2].text = (char *) ((lang==1)?"Enregistrer sous":"Save session as");
-	  if (exam_mode)
+	  if (nspire_exam_mode==2) smallmenuitems[1].text = (char*)(lang==1?"Sauvegarde desactivee":"Saving disabled");
+	  if (exam_mode || nspire_exam_mode==2)
 	    smallmenuitems[2].text = (char *) "";
 	  smallmenuitems[3].text = (char*) ((lang==1)?"Charger session":"Load session");
 	  smallmenuitems[4].text = (char*)((lang==1)?"Nouvelle session":"New session");
@@ -10895,11 +11437,15 @@ namespace xcas {
 #endif
 	  if (exam_mode)
 	    smallmenuitems[16].text = (char*)((lang==1)?"Quitter le mode examen":"Quit exam mode");
+	  if (nspire_exam_mode==2)
+	    smallmenuitems[16].text = (char*)((lang==1)?"Relancer le mode examen":"Restart exam mode");
 	  if (shutdown_state)
 	    return KEY_SHUTDOWN;
 	  int sres = doMenu(&smallmenu);
 	  if(sres == MENU_RETURN_SELECTION || sres==KEY_CTRL_EXE) {
 	    if (smallmenu.selection==smallmenu.numitems){
+	      if (nspire_exam_mode==2)
+		check_nspire_exam_mode(contextptr);
 	      if (!exam_mode)
 		return KEY_CTRL_MENU;
 	      leave_exam_mode(contextptr);
@@ -10918,7 +11464,7 @@ namespace xcas {
 		break;
 	      }
 	    }
-	    if (smallmenu.selection==3 && !exam_mode){
+	    if (smallmenu.selection==3 && !exam_mode && nspire_exam_mode!=2){
 	      char buf[270];
 	      if (get_filename(buf,".xw")){
 		save(buf,contextptr);
@@ -11138,6 +11684,18 @@ namespace xcas {
 	Console_Disp(1,contextptr);
 	keytooltip=Console_tooltip(contextptr);
 	continue;
+      }
+      if (key==KEY_CTRL_PAGEDOWN){
+	int j=0;
+	for (int i=0;i<10;++i)
+	  j=Console_MoveCursor(CURSOR_DOWN);
+	return j;
+      }
+      if (key==KEY_CTRL_PAGEUP){
+	int j=0;
+	for (int i=0;i<10;++i)
+	  j=Console_MoveCursor(CURSOR_UP);
+	return j;
       }
       if (key == KEY_CTRL_UP)
 	return Console_MoveCursor(alph?CURSOR_ALPHA_UP:CURSOR_UP);
@@ -11932,9 +12490,11 @@ namespace xcas {
       menu += string(menu_f2);
       menu += "|3 ";
       menu += string(menu_f3);
-      menu += xcas_python_eval==1?"|4 edt|5 2d|6 logo|7 lin|8 list|9plot|0 C":"|4 edt|5 2d|6 regr|7 matr|8 list|9 arit|0 C";
-      drawRectangle(0,205,LCD_WIDTH_PX,17,_BLACK);
-      PrintMiniMini(0,205,menu.c_str(),4);
+      menu += xcas_python_eval==1?"|4 edt|5 2d|6 logo|7 lin|8 matr|9arit|0 plt":"|4 edt|5 2d|6 regr|7 matr|8 cplx|9 arit|0 rand";
+      int xcas_color=65055,python_color=52832;
+      int interp_color=xcas_python_eval?python_color:xcas_color;
+      drawRectangle(0,205,LCD_WIDTH_PX,17,interp_color);
+      PrintMiniMini(0,205,menu.c_str(),0,giac::_BLACK,interp_color);
     }
   
     // status, clock,
@@ -11972,6 +12532,8 @@ namespace xcas {
   }
 
   void save_session(GIAC_CONTEXT){
+    if (nspire_exam_mode==2)
+      return;
     if (strcmp(session_filename,"session") && console_changed){
       string tmp(session_filename);
       tmp += (lang==1)?" a ete modifie!":" was modified!";
@@ -12030,20 +12592,31 @@ namespace xcas {
   extern "C" void mp_stack_set_top(void *);
   extern "C" void mp_stack_set_limit(size_t);
 #endif
-  
-  int console_main(GIAC_CONTEXT){
+
+  int console_main(GIAC_CONTEXT,const char * sessionname){
 #ifdef NUMWORKS
-#ifdef MICROPY_LIB
     mp_stack_ctrl_init();
     //volatile int stackTop;
     //mp_stack_set_top((void *)(&stackTop));
     //mp_stack_set_limit(24*1024);
 #endif
-#endif
+    giac::micropy_ptr=micropy_ck_eval;
     python_heap=0;
     sheetptr=0;
     shutdown=do_shutdown;
 #ifdef NSPIRE_NEWLIB
+    // detect if leds are blinking
+    unsigned green=*(unsigned *) 0x90110b04;
+    unsigned red=*(unsigned *) 0x90110b0c;
+    if (green || red){
+      nspire_exam_mode=1;
+      if (is_cx2){
+	if (!do_confirm(lang?"Le CAS est-il autorise en examen?":"Is CAS allowed during exam?"))
+	  return 0;
+      }
+    }
+    // CX and CX II we should modify the led colors to match CAS exam mode
+    // red value should be the same as green value -> yellow
     // try to detect emulator or real calc
     unsigned NSPIRE_SPEED=0x900B0000;
     unsigned speed=*(unsigned *)NSPIRE_SPEED;
@@ -12068,10 +12641,13 @@ namespace xcas {
     Console_Init(contextptr);
     Bdisp_AllClr_VRAM();
     rand_seed(millis(),contextptr);
-    restore_session("session",contextptr);
+    restore_session(sessionname,contextptr);
     giac::angle_radian(os_get_angle_unit()==0,contextptr);
     //GetKey(&key);
     Console_Disp(1,contextptr);
+    if (nspire_exam_mode){ // must save LED state for restoration at end
+      set_exam_mode(2,contextptr); exam_mode=0;
+    }
     // GetKey(&key);
     char *expr=0;
 #ifndef NO_STDEXCEPT
@@ -12083,6 +12659,7 @@ namespace xcas {
 #ifdef NUMWORKS
 	return 0;
 #endif
+	check_nspire_exam_mode(contextptr);
 #ifdef MICROPY_LIB
 	python_free();
 #endif
@@ -12098,11 +12675,11 @@ namespace xcas {
       if (strcmp((const char *)expr,"restart")==0){
 	if (confirm((lang==1)?"Effacer variables?":"Clear variables?",
 #ifdef NSPIRE_NEWLIB
-		    (lang==1)?"enter: annul,  esc: confirmer":"enter: cancel,  esc: confirm"
+		    (lang==1)?"enter: confirmer,  esc: annuler":"enter: confirm,  esc: cancel"
 #else
-		    (lang==1)?"OK: annul,  Back: confirmer":"OK: cancel,  Back: confirm"
+		    (lang==1)?"OK: confirmer,  Back: annuler":"OK: confirm,  Back: cancel"
 #endif
-		    )!=KEY_CTRL_F6){
+		    )!=KEY_CTRL_F1){
 	  Console_Output(" cancelled");
 	  Console_NewLine(LINE_TYPE_OUTPUT,1);
 	  //GetKey(&key);
@@ -12129,6 +12706,7 @@ namespace xcas {
 #ifdef NUMWORKS
     return 0;
 #endif
+    check_nspire_exam_mode(contextptr);
     Console_Free();
     release_globals();
 #ifdef MICROPY_LIB
@@ -12821,7 +13399,7 @@ void c_sprint_double(char * s,double d){
 
 // auto-shutdown
 int do_shutdown(){
-  xcas::save_console_state_smem("session.xw.tns",giac::context0);
+  xcas::save_console_state_smem("session.xw.tns",false,giac::context0);
 #ifdef NO_STDEXCEPT
   return 1;
 #else

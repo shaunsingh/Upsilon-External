@@ -18,6 +18,13 @@
  */
 
 using namespace std;
+#ifdef HAVE_UNISTD_H
+#ifndef NUMWORKS
+#include <dirent.h>
+#endif
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
 #include <fstream>
 #include <string>
 #include "misc.h"
@@ -635,7 +642,11 @@ namespace giac {
   static define_unary_function_eval_quoted (__clear,&_clear,_clear_s);
   define_unary_function_ptr5( at_clear ,alias_at_clear,&__clear,_QUOTE_ARGUMENTS,true);
 
-#ifndef KHICAS
+#ifdef KHICAS
+  gen _show_pixels(const gen & args,GIAC_CONTEXT){
+    return undef;
+  }
+#else
   gen _show_pixels(const gen & args,GIAC_CONTEXT){
 #ifdef GIAC_HAS_STO_38
     static gen FREEZE(identificateur("FREEZE"));
@@ -645,13 +656,13 @@ namespace giac {
     return pixel_v();
 #else
     return makesequence(symb_equal(change_subtype(_AXES,_INT_PLOT),0),pixel_v());
-#endif
-#endif
+#endif // EMCC
+#endif // STO_38
   }
+#endif // KHICAS
   static const char _show_pixels_s []="show_pixels";
   static define_unary_function_eval (__show_pixels,&_show_pixels,_show_pixels_s);
   define_unary_function_ptr5( at_show_pixels ,alias_at_show_pixels,&__show_pixels,0,true);
-#endif
 
   gen _show(const gen & args,GIAC_CONTEXT){
     return history_plot(contextptr);
@@ -741,6 +752,29 @@ namespace giac {
       int s=int(v.size());
       if (!s)
 	return minus_inf;
+      if (s==2 && is_integer(v[0]) && is_integer(v[1])){
+	if (is_zero(v[0]))
+	  return plus_inf;
+	mpz_t a,b,q,r;
+	mpz_init(q); mpz_init(r);
+	if (v[0].type==_INT_)
+	  mpz_init_set_si(a,v[0].val);
+	else
+	  mpz_init_set(a,*v[0]._ZINTptr);
+	if (v[1].type==_INT_)
+	  mpz_init_set_si(b,v[1].val);
+	else
+	  mpz_init_set(b,*v[1]._ZINTptr);
+	int res=0;
+	for (;;++res){
+	  mpz_fdiv_qr(q,r,a,b);
+	  if (mpz_cmp_si(r,0)!=0){
+	    mpz_clear(r); mpz_clear(q); mpz_clear(a); mpz_clear(b);
+	    return res;
+	  }
+	  mpz_set(a,q);
+	}
+      }
       if ( (args.subtype==_POLY1__VECT) || (s!=2) || (v[1].type!=_IDNT) ){
 	int j=s;
 	for (;j;--j){
@@ -9722,6 +9756,12 @@ static define_unary_function_eval (__os_version,&_os_version,_os_version_s);
     vecteur v(*a._VECTptr);
     if (v.size()<3 || v.size()>5)
       return gendimerr(contextptr);
+    if (v[2].type==_STRNG){
+      gen g=v[2];
+      v[2]=v[1];
+      v[1]=v[0];
+      v[0]=g;
+    }
     if (v[0].type!=_STRNG || !is_integral(v[1]) || !is_integral(v[2]))
       return gensizeerr(contextptr);
     gen s=v[0];
@@ -9916,6 +9956,233 @@ static define_unary_function_eval (__os_version,&_os_version,_os_version_s);
   static define_unary_function_eval (__modf,&_modf,_modf_s);
   define_unary_function_ptr5( at_modf ,alias_at_modf,&__modf,0,true);
 
+#if defined HAVE_UNISTD_H && !defined NUMWORKS
+  void locate_files(const char * dirname,const char * ext_,vector<string> & v,bool recurse,GIAC_CONTEXT){
+    DIR *dp;
+    struct dirent *ep;
+    string ext(".");
+    ext += ext_;
+    int taille=ext.size();
+    dp = opendir (dirname);
+    bool root=strcmp(dirname,"/")==0;
+    if (dp != NULL){
+      string s;
+      int t;
+      while ( (ep = readdir (dp)) ){
+	s=ep->d_name;
+	t=s.size();
+	if (s=="." || s=="..")
+	  continue;
+	s="/"+s;
+	if (!root)
+	  s=dirname+s;
+#ifdef NSPIRE_NEWLIB
+	if (recurse && (t<4 || s.substr(t-4,4)!=".tns") )
+	  locate_files(s.c_str(),ext_,v,recurse,contextptr);
+#else
+	if (recurse && ep->d_type==DT_DIR)
+	  locate_files(s.c_str(),ext_,v,recurse,contextptr);
+#endif
+	// *logptr(contextptr) << s << '\n';
+	if (taille==1 || (t>taille && s.substr(t-taille,taille)==ext))
+	  v.push_back(s);
+      }
+      closedir (dp);
+    }
+  }
+
+  gen _locate(const gen & args,GIAC_CONTEXT){
+    vector<string> v;
+    if (args.type!=_STRNG)
+      locate_files("..","",v,true,contextptr);
+    else {
+      if (args.type==_STRNG)
+	return gensizeerr(contextptr);      
+      locate_files("..",args._STRNGptr->c_str(),v,true,contextptr);
+    }
+    return args;
+  }
+  static const char _locate_s []="locate";
+  static define_unary_function_eval (__locate,&_locate,_locate_s);
+  define_unary_function_ptr5( at_locate ,alias_at_locate,&__locate,0,true);
+
+  gen _ls(const gen & args,GIAC_CONTEXT){
+    vector<string> v;
+    if (args.type==_VECT && args._VECTptr->empty())
+      locate_files("..","",v,false,contextptr);
+    else {
+      if (args.type!=_STRNG)
+	return gensizeerr(contextptr);
+      string s=args._STRNGptr->c_str();
+      bool recurse=s.size()>1 && s[s.size()-1]=='/';
+      if (recurse)
+	s=s.substr(0,s.size()-1);
+      locate_files(s.c_str(),"",v,recurse,contextptr);
+    }
+    vecteur res;
+    for (int i=0;i<v.size();++i){
+      res.push_back(string2gen(v[i],false));
+    }
+    return res;
+  }
+  static const char _ls_s []="ls";
+  static define_unary_function_eval (__ls,&_ls,_ls_s);
+  define_unary_function_ptr5( at_ls ,alias_at_ls,&__ls,0,true);
+
+  int cp(const char * sourcename,const char * targetname){
+    DIR *dp;
+    struct dirent *ep;
+    dp = opendir (sourcename);
+    if (dp != NULL){
+      while ( (ep = readdir (dp)) ){
+	const char * s=ep->d_name;
+	if (strcmp(s,".")==0 || strcmp(s,"..")==0)
+	  continue;
+	string dest(targetname+string("/")+s);
+	if (!cp((sourcename+string("/")+s).c_str(),dest.c_str())) {
+	  closedir(dp);
+	  return 0;
+	}
+      }
+      closedir(dp);
+      return 1;
+    }
+    dp = opendir (targetname);
+    if (dp!=NULL){ // target is a directory, use same filename
+      closedir(dp);
+      return cp(sourcename,(targetname+("/"+remove_path(sourcename))).c_str());
+    }
+    FILE * source=fopen(sourcename,"r");
+    if (!source)
+      return 0;
+    FILE * target=fopen(targetname,"w");
+    if (!target){ // make path and try again
+      string path=get_path(targetname);
+      mkdir(path.c_str(),0755);
+      target=fopen(targetname,"w");
+    }
+    if (target){
+      while (1){
+	unsigned char c=fgetc(source);
+	if (feof(source))
+	  break;
+	fputc(c,target);
+      }
+      fclose(target);
+    }
+    fclose(source);
+    return target?1:0;
+  }
+  gen _cp(const gen & args,GIAC_CONTEXT){
+    if (is_undef(check_secure())) return undef;
+    if (args.type!=_VECT && args._VECTptr->size()!=2)
+      return gensizeerr(contextptr);
+    gen s=args._VECTptr->front(),t=args._VECTptr->back();
+    if (s.type!=_STRNG || t.type!=_STRNG)
+      return gentypeerr(contextptr);    
+    return cp(s._STRNGptr->c_str(),t._STRNGptr->c_str());
+  }
+  static const char _cp_s []="cp";
+  static define_unary_function_eval (__cp,&_cp,_cp_s);
+  define_unary_function_ptr5( at_cp ,alias_at_cp,&__cp,0,true);
+
+  gen _more(const gen & args,GIAC_CONTEXT){
+    if (is_undef(check_secure())) return undef;
+    vector<string> v;
+    if (args.type!=_STRNG)
+      return gensizeerr(contextptr);
+    string s=args._STRNGptr->c_str();
+#if defined KHICAS && !defined NSPIRE_NEWLIB
+    if (!file_exists(s.c_str()))
+      return undef;
+    const char * ptr=read_file(s.c_str());
+    return string2gen(ptr,false);
+#else
+    FILE * f=fopen(args._STRNGptr->c_str(),"r");
+    if (!f)
+      return undef;
+    string S;
+    while (!feof(f)){
+      unsigned char c=fgetc(f);
+      S += (c>=32 && c<=127)?c:'.';
+    }
+    fclose(f);
+    return string2gen(S,false);
+#endif
+  }
+  static const char _more_s []="more";
+  static define_unary_function_eval (__more,&_more,_more_s);
+  define_unary_function_ptr5( at_more ,alias_at_more,&__more,0,true);
+
+  int rm(const char * filename){
+    DIR *dp;
+    dp = opendir (filename);
+    if (dp){
+      struct dirent *ep;
+      while ( (ep = readdir (dp)) ){
+	const char * s=ep->d_name;
+	if (strcmp(s,".")==0 || strcmp(s,"..")==0)
+	  continue;
+	string dest(filename+string("/")+s);
+	if (!rm(dest.c_str())){
+	  closedir(dp);
+	  return 0;
+	}
+      }
+      closedir(dp);
+      return !rmdir(filename);
+    }
+    return !unlink(filename);
+  }
+  gen _rm(const gen & args,GIAC_CONTEXT){
+    if (args.type!=_STRNG)
+      return gensizeerr(contextptr);
+    string s=args._STRNGptr->c_str();
+    return rm(s.c_str());
+  }
+  static const char _rm_s []="rm";
+  static define_unary_function_eval (__rm,&_rm,_rm_s);
+  define_unary_function_ptr5( at_rm ,alias_at_rm,&__rm,0,true);
+
+  gen _mkdir(const gen & args,GIAC_CONTEXT){
+    if (args.type!=_STRNG)
+      return gensizeerr(contextptr);
+    string s=args._STRNGptr->c_str();
+    return !mkdir(s.c_str(),0755);
+  }
+  static const char _mkdir_s []="mkdir";
+  static define_unary_function_eval (__mkdir,&_mkdir,_mkdir_s);
+  define_unary_function_ptr5( at_mkdir ,alias_at_mkdir,&__mkdir,0,true);
+
+#else
+  gen _locate(const gen & args,GIAC_CONTEXT){
+    return undef;
+  }
+  static const char _locate_s []="locate";
+  static define_unary_function_eval (__locate,&_locate,_locate_s);
+  define_unary_function_ptr5( at_locate ,alias_at_locate,&__locate,0,true);
+  static const char _ls_s []="ls";
+  static define_unary_function_eval (__ls,&_locate,_ls_s);
+  define_unary_function_ptr5( at_ls ,alias_at_ls,&__ls,0,true);
+
+  static const char _more_s []="more";
+  static define_unary_function_eval (__more,&_locate,_more_s);
+  define_unary_function_ptr5( at_more ,alias_at_more,&__more,0,true);
+
+  static const char _cp_s []="cp";
+  static define_unary_function_eval (__cp,&_locate,_cp_s);
+  define_unary_function_ptr5( at_cp ,alias_at_cp,&__cp,0,true);
+
+  static const char _rm_s []="rm";
+  static define_unary_function_eval (__rm,&_locate,_rm_s);
+  define_unary_function_ptr5( at_rm ,alias_at_rm,&__rm,0,true);
+  
+  static const char _mkdir_s []="mkdir";
+  static define_unary_function_eval (__mkdir,&_locate,_mkdir_s);
+  define_unary_function_ptr5( at_mkdir ,alias_at_mkdir,&__mkdir,0,true);
+  
+#endif // UNISTD
+
 #ifdef EMCC
 #ifdef EMCC_FETCH
   // with emscripten 1.37.28, it does not work
@@ -9958,7 +10225,7 @@ static define_unary_function_eval (__os_version,&_os_version,_os_version_s);
     const int bufsize=512*1024;
     buf=(char *)malloc(bufsize);
     EM_ASM_ARGS({
-	var url=Module.Pointer_stringify($0);
+	var url=UTF8ToString($0);//Module.Pointer_stringify($0);
 	console.log("url:"+url);
 	var req = new XMLHttpRequest();
 	var bufsize=$2;

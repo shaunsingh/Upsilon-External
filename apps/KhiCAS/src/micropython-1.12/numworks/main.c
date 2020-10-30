@@ -58,6 +58,8 @@ void console_output(const char *,int);
 const char * read_file(const char * filename);
 bool file_exists(const char * filename);
 
+
+#if 0
 const char numpy_script[]=R"(import linalg
 import math
 class array: 
@@ -264,7 +266,10 @@ def linspace(a,b,c):
 def arange(a,b,c=1):
     return array(linalg.arange(a,b,c))
 
-def reshape(a,n,m):
+def reshape(a,n,m=0):
+    if type(n)==tuple:
+        m=n[1]
+        n=n[0]
     if type(a)==array:
         return array(linalg.matrix(n,m,a.a))
     return linalg.matrix(n,m,a)
@@ -279,6 +284,7 @@ mp_lexer_t * mp_lexer_new_from_file(const char * filename) {
   else
     mp_raise_OSError(MP_ENOENT);
 }
+#endif
 
 mp_import_stat_t mp_import_stat(const char *path) {
   if (strcmp(path,"numpy.py")==0 || file_exists(path)) {

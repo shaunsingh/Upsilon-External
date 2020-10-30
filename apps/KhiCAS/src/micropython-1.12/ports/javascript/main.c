@@ -37,16 +37,19 @@
 #include "lib/utils/pyexec.h"
 
 #include "library.h"
+#if defined EMCC && !defined NO_QSTR
+#include <emscripten.h>
+#endif
 
 #if MICROPY_ENABLE_COMPILER
-int do_str(const char *src, mp_parse_input_kind_t input_kind) {
+int do_str(const char *src, mp_parse_input_kind_t input_kind,bool is_repl) {
     int ret = 0;
     nlr_buf_t nlr;
     if (nlr_push(&nlr) == 0) {
         mp_lexer_t *lex = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
         qstr source_name = lex->source_name;
         mp_parse_tree_t parse_tree = mp_parse(lex, input_kind);
-        mp_obj_t module_fun = mp_compile(&parse_tree, source_name, false);
+        mp_obj_t module_fun = mp_compile(&parse_tree, source_name, is_repl);
         mp_call_function_0(module_fun);
         nlr_pop();
     } else {
@@ -73,7 +76,18 @@ int do_str(const char *src, mp_parse_input_kind_t input_kind) {
 static char *stack_top;
 
 int mp_js_do_str(const char *code) {
-    return do_str(code, MP_PARSE_FILE_INPUT);
+  EM_ASM_ARGS({
+      var msg = UTF8ToString($0);
+      console.log(msg);
+    },code);
+  if (strncmp(code,"show",4)==0)
+    return do_str(code, MP_PARSE_FILE_INPUT,false);
+  const char * s=code;
+  for (;*s;++s){
+    if (*s=='\n')
+      return do_str(code, MP_PARSE_FILE_INPUT,false);
+  }
+  return do_str(code, MP_PARSE_SINGLE_INPUT,true);
 }
 
 int mp_js_process_char(int c) {

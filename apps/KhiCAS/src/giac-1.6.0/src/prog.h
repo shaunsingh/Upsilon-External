@@ -26,6 +26,8 @@
 #ifndef NO_NAMESPACE_GIAC
 namespace giac {
 #endif // ndef NO_NAMESPACE_GIAC
+  typedef const char * cstcharptr;
+  extern int (*micropy_ptr) (cstcharptr);
   extern bool user_screen; 
   extern int user_screen_io_x,user_screen_io_y,user_screen_fontsize;
   extern const int rand_max2; // replace RAND_MAX if giac_rand(contextptr) is used
@@ -855,13 +857,13 @@ namespace giac {
   extern gen _chain_unit;
   extern gen _Curie_unit;
   extern gen _ct_unit;
-  // extern gen _°_unit;
+  // extern gen _Â°_unit;
   extern gen _d_unit;
   extern gen _dB_unit;
   extern gen _dyn_unit;
   extern gen _erg_unit;
   extern gen _eV_unit;
-  // extern gen _°F_unit;
+  // extern gen _Â°F_unit;
   extern gen _fath_unit;
   extern gen _fbm_unit;
   // extern gen _fc_unit;

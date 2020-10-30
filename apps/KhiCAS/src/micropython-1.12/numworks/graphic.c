@@ -22,8 +22,14 @@ extern const struct _mp_obj_module_t mp_module_graphic;
 // basic
 #ifdef NUMWORKS
 void c_sprint_double(char * s,double d);
+void strcat_double(char * s,double d){
+  for (;*s;)
+    ++s;
+  c_sprint_double(s,d);
+}
 int numworks_get_pixel(int x,int y);
 inline int os_get_pixel(int x,int y){ return numworks_get_pixel(x,y);}
+void sync_screen(){}
 #else
 int os_get_pixel(int x,int y);
 void sync_screen();
@@ -164,14 +170,19 @@ mp_obj_t mp_color_tuple(int c){
 }  
 
 static mp_obj_t graphic_set_pixel(size_t n_args, const mp_obj_t *args) {
+  if (n_args<2){
+    sync_screen();
+    return mp_const_none;
+  }
   uint16_t x = mp_obj_get_int(args[0]), y = mp_obj_get_int(args[1]),color=0;
   if (n_args==3)    
     color = mp_get_color(args[2]);
   c_set_pixel(x,y,color);
   return mp_const_none;
 }
-MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(graphic_set_pixel_obj, 2, 3, graphic_set_pixel);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(graphic_set_pixel_obj, 0, 3, graphic_set_pixel);
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(graphic_draw_pixel_obj, 2, 3, graphic_set_pixel);
+
 
 static mp_obj_t graphic_draw_line(size_t n_args, const mp_obj_t *args) {
   int x1 = mp_obj_get_int(args[0]), y1 = mp_obj_get_int(args[1]),
@@ -321,7 +332,7 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(graphic_draw_filled_arc_obj, 4, 8, graphic_d
 
 static mp_obj_t graphic_get_pixel(size_t n_args, const mp_obj_t *args) {
   uint16_t x = mp_obj_get_int(args[0]), y = mp_obj_get_int(args[1]);
-  if (x<0 || x>=LCD_WIDTH || y<0 || y>LCD_HEIGHT)
+  if (x<0 || x>=LCD_WIDTH || y<0 || y>=LCD_HEIGHT)
     return mp_const_none;
   int c=os_get_pixel(x,y);
   if (n_args==3) 
@@ -352,31 +363,31 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(graphic_draw_string_obj, 3, 5, graphic_draw_
 
 //
 static const mp_map_elem_t graphic_locals_dict_table[] = {
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_get_pixel), (mp_obj_t) &graphic_get_pixel_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_cyan), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,255)) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_magenta), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,255)) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_yellow), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_blue), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,255)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_red), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_green), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_black), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_white), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,255)) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_clear_screen), (mp_obj_t) &graphic_clear_screen_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_clear), (mp_obj_t) &graphic_clear_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_show_screen), (mp_obj_t) &graphic_show_screen_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_set_pixel), (mp_obj_t) &graphic_set_pixel_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_pixel), (mp_obj_t) &graphic_draw_pixel_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_line), (mp_obj_t) &graphic_draw_line_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_polygon), (mp_obj_t) &graphic_draw_polygon_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_polygon), (mp_obj_t) &graphic_draw_filled_polygon_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_rectangle), (mp_obj_t) &graphic_draw_rectangle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_fill_rect), (mp_obj_t) &graphic_fill_rect_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_rectangle), (mp_obj_t) &graphic_draw_filled_rectangle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_circle), (mp_obj_t) &graphic_draw_circle_obj },
- 	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_circle), (mp_obj_t) &graphic_draw_filled_circle_obj },
- 	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_arc), (mp_obj_t) &graphic_draw_arc_obj },
- 	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_arc), (mp_obj_t) &graphic_draw_filled_arc_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_string), (mp_obj_t) &graphic_draw_string_obj },
+	{ MP_ROM_QSTR(MP_QSTR_get_pixel), (mp_obj_t) &graphic_get_pixel_obj },
+	{ MP_ROM_QSTR(MP_QSTR_cyan), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,255)) },
+	{ MP_ROM_QSTR(MP_QSTR_magenta), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,255)) },
+	{ MP_ROM_QSTR(MP_QSTR_yellow), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,0)) },
+    { MP_ROM_QSTR(MP_QSTR_blue), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,255)) },
+    { MP_ROM_QSTR(MP_QSTR_red), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,0)) },
+    { MP_ROM_QSTR(MP_QSTR_green), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,0)) },
+    { MP_ROM_QSTR(MP_QSTR_black), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,0)) },
+    { MP_ROM_QSTR(MP_QSTR_white), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,255)) },
+	{ MP_ROM_QSTR(MP_QSTR_clear_screen), (mp_obj_t) &graphic_clear_screen_obj },
+	{ MP_ROM_QSTR(MP_QSTR_clear), (mp_obj_t) &graphic_clear_obj },
+	{ MP_ROM_QSTR(MP_QSTR_show_screen), (mp_obj_t) &graphic_show_screen_obj },
+	{ MP_ROM_QSTR(MP_QSTR_set_pixel), (mp_obj_t) &graphic_set_pixel_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_pixel), (mp_obj_t) &graphic_draw_pixel_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_line), (mp_obj_t) &graphic_draw_line_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_polygon), (mp_obj_t) &graphic_draw_polygon_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_filled_polygon), (mp_obj_t) &graphic_draw_filled_polygon_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_rectangle), (mp_obj_t) &graphic_draw_rectangle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_fill_rect), (mp_obj_t) &graphic_fill_rect_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_filled_rectangle), (mp_obj_t) &graphic_draw_filled_rectangle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_circle), (mp_obj_t) &graphic_draw_circle_obj },
+ 	{ MP_ROM_QSTR(MP_QSTR_draw_filled_circle), (mp_obj_t) &graphic_draw_filled_circle_obj },
+ 	{ MP_ROM_QSTR(MP_QSTR_draw_arc), (mp_obj_t) &graphic_draw_arc_obj },
+ 	{ MP_ROM_QSTR(MP_QSTR_draw_filled_arc), (mp_obj_t) &graphic_draw_filled_arc_obj },
+	{ MP_ROM_QSTR(MP_QSTR_draw_string), (mp_obj_t) &graphic_draw_string_obj },
 };
 
 
@@ -390,33 +401,33 @@ const mp_obj_type_t graphic_type = {
 
 
 STATIC const mp_map_elem_t mp_module_graphic_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR__graphic) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_cyan), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,255)) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_magenta), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,255)) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_yellow), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_blue), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,255)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_red), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_green), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_black), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,0)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_white), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,255)) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_set_pixel), (mp_obj_t) &graphic_set_pixel_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_pixel), (mp_obj_t) &graphic_draw_pixel_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_line), (mp_obj_t) &graphic_draw_line_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_polygon), (mp_obj_t) &graphic_draw_polygon_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_polygon), (mp_obj_t) &graphic_draw_filled_polygon_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_rectangle), (mp_obj_t) &graphic_draw_rectangle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_fill_rect), (mp_obj_t) &graphic_fill_rect_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_rectangle), (mp_obj_t) &graphic_draw_filled_rectangle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_circle), (mp_obj_t) &graphic_draw_circle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_circle), (mp_obj_t) &graphic_draw_filled_circle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_arc), (mp_obj_t) &graphic_draw_arc_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_filled_arc), (mp_obj_t) &graphic_draw_filled_arc_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_get_pixel), (mp_obj_t) &graphic_get_pixel_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_draw_string), (mp_obj_t) &graphic_draw_string_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_show_screen), (mp_obj_t) &graphic_show_screen_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_clear_screen), (mp_obj_t) &graphic_clear_screen_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_clear), (mp_obj_t) &graphic_clear_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_show), (mp_obj_t) &graphic_show_obj },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__graphic) },
+	{ MP_ROM_QSTR(MP_QSTR_cyan), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,255)) },
+	{ MP_ROM_QSTR(MP_QSTR_magenta), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,255)) },
+	{ MP_ROM_QSTR(MP_QSTR_yellow), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,0)) },
+    { MP_ROM_QSTR(MP_QSTR_blue), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,255)) },
+    { MP_ROM_QSTR(MP_QSTR_red), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,0,0)) },
+    { MP_ROM_QSTR(MP_QSTR_green), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,255,0)) },
+    { MP_ROM_QSTR(MP_QSTR_black), MP_OBJ_NEW_SMALL_INT(mp_rgb(0,0,0)) },
+    { MP_ROM_QSTR(MP_QSTR_white), MP_OBJ_NEW_SMALL_INT(mp_rgb(255,255,255)) },
+    { MP_ROM_QSTR(MP_QSTR_set_pixel), (mp_obj_t) &graphic_set_pixel_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_pixel), (mp_obj_t) &graphic_draw_pixel_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_line), (mp_obj_t) &graphic_draw_line_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_polygon), (mp_obj_t) &graphic_draw_polygon_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_filled_polygon), (mp_obj_t) &graphic_draw_filled_polygon_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_rectangle), (mp_obj_t) &graphic_draw_rectangle_obj },
+    { MP_ROM_QSTR(MP_QSTR_fill_rect), (mp_obj_t) &graphic_fill_rect_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_filled_rectangle), (mp_obj_t) &graphic_draw_filled_rectangle_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_circle), (mp_obj_t) &graphic_draw_circle_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_filled_circle), (mp_obj_t) &graphic_draw_filled_circle_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_arc), (mp_obj_t) &graphic_draw_arc_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_filled_arc), (mp_obj_t) &graphic_draw_filled_arc_obj },
+    { MP_ROM_QSTR(MP_QSTR_get_pixel), (mp_obj_t) &graphic_get_pixel_obj },
+    { MP_ROM_QSTR(MP_QSTR_draw_string), (mp_obj_t) &graphic_draw_string_obj },
+    { MP_ROM_QSTR(MP_QSTR_show_screen), (mp_obj_t) &graphic_show_screen_obj },
+    { MP_ROM_QSTR(MP_QSTR_clear_screen), (mp_obj_t) &graphic_clear_screen_obj },
+    { MP_ROM_QSTR(MP_QSTR_clear), (mp_obj_t) &graphic_clear_obj },
+    { MP_ROM_QSTR(MP_QSTR_show), (mp_obj_t) &graphic_show_obj },
 
 };
 
@@ -441,7 +452,7 @@ const mp_obj_module_t mp_module_graphic = {
  * ******************************** */
 int mp_token(const char * line){ // does not work, always mp_type_fun_bc
   mp_obj_dict_t *dict = NULL;
-  dict = mp_locals_get();
+  dict = mp_locals_get();//mp_globals_get();//
   mp_map_t * m=mp_obj_dict_get_map(dict);
   mp_obj_t index=mp_obj_new_str(line,strlen(line));
   mp_map_elem_t *ptr=mp_map_lookup(m, index, MP_MAP_LOOKUP) ;
@@ -525,6 +536,21 @@ bool mp_get_c_complex(mp_obj_t e,c_complex * d){
     return true;
   }
   return false;
+}
+
+void c_mul(const c_complex a,const c_complex b,c_complex * c){
+  c->r=a.r*b.r-a.i*b.i;
+  c->i=a.r*b.i+a.i*b.r;
+}
+
+void c_sub(const c_complex a,const c_complex b,c_complex * c){
+  c->r=a.r-b.r;
+  c->i=a.i-b.i;
+}
+
+void c_add(const c_complex a,const c_complex b,c_complex * c){
+  c->r=a.r+b.r;
+  c->i=a.i+b.i;
 }
 
 bool mp_array2doubletab(mp_obj_t l,double ** x,size_t * n,size_t * m){
@@ -668,7 +694,8 @@ char * printtab(double * x,size_t n,size_t m){
     strcpy(ptr,"[");
     for (size_t i=0;i<n;++i){
 #ifdef NUMWORKS
-      c_sprint_double(buf,x[i]);
+      buf[0]=0;
+      strcat_double(buf,x[i]);
       strcat(buf,",");
 #else
       sprintf(buf,"%.14g,",x[i]);
@@ -683,7 +710,13 @@ char * printtab(double * x,size_t n,size_t m){
   for (size_t i=0;i<n;++i){
     strcat(ptr,"[");
     for (size_t j=0;j<m;++j){
+#ifdef NUMWORKS
+      buf[0]=0;
+      strcat_double(buf,*x);
+      strcat(buf,",");
+#else
       sprintf(buf,"%.14g,",*x);
+#endif
       strcat(ptr,buf);
       ++x;
     }
@@ -695,12 +728,19 @@ char * printtab(double * x,size_t n,size_t m){
 }
 
 char * printc_complextab(c_complex * x,size_t n,size_t m){
-  char buf[256];
+  char buf[256]="";
   if (m==0){
     char * ptr=(char *)malloc(64*n);
     strcpy(ptr,"[");
     for (size_t i=0;i<n;++i){
+#ifdef NUMWORKS
+      c_sprint_double(buf,x[i].r);
+      strcat(buf,"+i*");
+      strcat_double(buf,x[i].i);
+      strcat(buf,",");
+#else
       sprintf(buf,"%.14g+i*%.14g,",x[i].r,x[i].i);
+#endif
       strcat(ptr,buf);
     }
     ptr[strlen(ptr)-1]=']';
@@ -711,7 +751,15 @@ char * printc_complextab(c_complex * x,size_t n,size_t m){
   for (size_t i=0;i<n;++i){
     strcat(ptr,"[");
     for (size_t j=0;j<m;++j){
+#ifdef NUMWORKS
+      buf[0]=0;
+      c_sprint_double(buf,x->r);
+      strcat(buf,"+i*");
+      strcat_double(buf,x->i);
+      strcat(buf,",");
+#else
       sprintf(buf,"%.14g+i*%.14g,",x->r,x->i);
+#endif
       strcat(ptr,buf);
       ++x;
     }
@@ -763,16 +811,41 @@ mp_obj_t c_complextab2mp_array(c_complex *x,size_t n,size_t m){
 
 const char * caseval(const char *);
 
+// mp_obj_t mp_obj_str_make_new(const mp_obj_type_t *type_in, size_t n_args, size_t n_kw, const mp_obj_t *args);
+// type= &mp_type_str, n_args==1, n_kw=0
+// mp_obj_is_str
+// const char *mp_obj_str_get_str(mp_obj_t self_in); 
+
 static mp_obj_t cas_caseval(size_t n_args, const mp_obj_t *args) {
   const char * text = mp_obj_str_get_str(args[0]);
+  if (n_args>1){
+    size_t len=strlen(text);
+    const char * argtext[8];
+    for (int i=1;i<n_args;++i){
+      argtext[i]=mp_obj_str_get_str(mp_obj_str_make_new(&mp_type_str,1,0,&args[i]));
+      len += strlen(argtext[i]);
+    }
+    char * buf=malloc(len+64);
+    strcpy(buf,text);
+    strcat(buf,"(");
+    for (int i=1;i<n_args;++i){
+      strcat(buf,argtext[i]);
+      strcat(buf,",");
+    }
+    buf[strlen(buf)-1]=')';
+    const char * val=caseval(buf);
+    return mp_obj_new_str(val,strlen(val));
+  }
   const char * val=caseval(text);
   return mp_obj_new_str(val,strlen(val));
 }
-MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(cas_caseval_obj, 1, 2, cas_caseval);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(cas_caseval_obj, 1, 8, cas_caseval);
 
 //
 static const mp_map_elem_t cas_locals_dict_table[] = {
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_caseval), (mp_obj_t) &cas_caseval_obj },
+	{ MP_ROM_QSTR(MP_QSTR_caseval), (mp_obj_t) &cas_caseval_obj },
+	{ MP_ROM_QSTR(MP_QSTR_xcas), (mp_obj_t) &cas_caseval_obj },
+	{ MP_ROM_QSTR(MP_QSTR_eval_expr), (mp_obj_t) &cas_caseval_obj },
 };
 
 
@@ -786,8 +859,10 @@ const mp_obj_type_t cas_type = {
 
 
 STATIC const mp_map_elem_t mp_module_cas_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR__cas) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_caseval), (mp_obj_t) &cas_caseval_obj },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__cas) },
+    { MP_ROM_QSTR(MP_QSTR_caseval), (mp_obj_t) &cas_caseval_obj },
+    { MP_ROM_QSTR(MP_QSTR_xcas), (mp_obj_t) &cas_caseval_obj },
+    { MP_ROM_QSTR(MP_QSTR_eval_expr), (mp_obj_t) &cas_caseval_obj },
 };
 
 STATIC const mp_obj_dict_t mp_module_cas_globals = {
@@ -889,6 +964,30 @@ static mp_obj_t arit(const mp_obj_t *args,int nargs,int cmd) {
   if (cmd==1 || cmd==2 || cmd==4 || cmd==5  || cmd==7 || cmd==8){
     return str2int(val);
   }
+  if (cmd==6){
+    char buf[strlen(val)+1];
+    strcpy(buf,val);
+    char * buf1=buf;
+    mp_obj_t res = mp_obj_new_list(0, NULL);
+    for (;*buf1;++buf1){
+      if (*buf1=='[')
+	break;
+    }
+    if (*buf1){
+      ++buf1;
+      for (int i=0;i<3;++i){
+	char * buf2=buf1;
+	for (;*buf2;++buf2){
+	  if (*buf2==',')
+	    break;
+	}
+	*buf2=0;
+	mp_obj_list_append(res,str2int(buf1));
+	buf1=buf2+1;
+      }
+    }
+    return res;
+  }
   return mp_obj_new_str(val,strlen(val));
 }
 static mp_obj_t arit_isprime(size_t n_args, const mp_obj_t *args) {
@@ -968,17 +1067,17 @@ static mp_obj_t arit_asc(size_t n_args, const mp_obj_t *args) {
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(arit_asc_obj, 1, 1, arit_asc);
 //
 static const mp_map_elem_t arit_locals_dict_table[] = {
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_isprime), (mp_obj_t) &arit_isprime_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_nextprime), (mp_obj_t) &arit_nextprime_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_prevprime), (mp_obj_t) &arit_prevprime_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_ifactor), (mp_obj_t) &arit_ifactor_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_gcd), (mp_obj_t) &arit_gcd_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_lcm), (mp_obj_t) &arit_lcm_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_iegcd), (mp_obj_t) &arit_iegcd_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_char), (mp_obj_t) &arit_char_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_asc), (mp_obj_t) &arit_asc_obj },
-        { MP_OBJ_NEW_QSTR(MP_QSTR_euler), (mp_obj_t) &arit_euler_obj },
-        { MP_OBJ_NEW_QSTR(MP_QSTR_nprimes), (mp_obj_t) &arit_nprimes_obj },
+	{ MP_ROM_QSTR(MP_QSTR_isprime), (mp_obj_t) &arit_isprime_obj },
+	{ MP_ROM_QSTR(MP_QSTR_nextprime), (mp_obj_t) &arit_nextprime_obj },
+	{ MP_ROM_QSTR(MP_QSTR_prevprime), (mp_obj_t) &arit_prevprime_obj },
+	{ MP_ROM_QSTR(MP_QSTR_ifactor), (mp_obj_t) &arit_ifactor_obj },
+	{ MP_ROM_QSTR(MP_QSTR_gcd), (mp_obj_t) &arit_gcd_obj },
+	{ MP_ROM_QSTR(MP_QSTR_lcm), (mp_obj_t) &arit_lcm_obj },
+	{ MP_ROM_QSTR(MP_QSTR_iegcd), (mp_obj_t) &arit_iegcd_obj },
+	{ MP_ROM_QSTR(MP_QSTR_char), (mp_obj_t) &arit_char_obj },
+	{ MP_ROM_QSTR(MP_QSTR_asc), (mp_obj_t) &arit_asc_obj },
+        { MP_ROM_QSTR(MP_QSTR_euler), (mp_obj_t) &arit_euler_obj },
+        { MP_ROM_QSTR(MP_QSTR_nprimes), (mp_obj_t) &arit_nprimes_obj },
 };
 
 
@@ -992,18 +1091,18 @@ const mp_obj_type_t arit_type = {
 
 
 STATIC const mp_map_elem_t mp_module_arit_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR__arit) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_isprime), (mp_obj_t) &arit_isprime_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_nextprime), (mp_obj_t) &arit_nextprime_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_prevprime), (mp_obj_t) &arit_prevprime_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ifactor), (mp_obj_t) &arit_ifactor_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_gcd), (mp_obj_t) &arit_gcd_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_lcm), (mp_obj_t) &arit_lcm_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_iegcd), (mp_obj_t) &arit_iegcd_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_char), (mp_obj_t) &arit_char_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_asc), (mp_obj_t) &arit_asc_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_euler), (mp_obj_t) &arit_euler_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_nprimes), (mp_obj_t) &arit_nprimes_obj },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__arit) },
+    { MP_ROM_QSTR(MP_QSTR_isprime), (mp_obj_t) &arit_isprime_obj },
+    { MP_ROM_QSTR(MP_QSTR_nextprime), (mp_obj_t) &arit_nextprime_obj },
+    { MP_ROM_QSTR(MP_QSTR_prevprime), (mp_obj_t) &arit_prevprime_obj },
+    { MP_ROM_QSTR(MP_QSTR_ifactor), (mp_obj_t) &arit_ifactor_obj },
+    { MP_ROM_QSTR(MP_QSTR_gcd), (mp_obj_t) &arit_gcd_obj },
+    { MP_ROM_QSTR(MP_QSTR_lcm), (mp_obj_t) &arit_lcm_obj },
+    { MP_ROM_QSTR(MP_QSTR_iegcd), (mp_obj_t) &arit_iegcd_obj },
+    { MP_ROM_QSTR(MP_QSTR_char), (mp_obj_t) &arit_char_obj },
+    { MP_ROM_QSTR(MP_QSTR_asc), (mp_obj_t) &arit_asc_obj },
+    { MP_ROM_QSTR(MP_QSTR_euler), (mp_obj_t) &arit_euler_obj },
+    { MP_ROM_QSTR(MP_QSTR_nprimes), (mp_obj_t) &arit_nprimes_obj },
 };
 
 STATIC const mp_obj_dict_t mp_module_arit_globals = {
@@ -1146,6 +1245,14 @@ static mp_obj_t linalg_addsub(size_t n_args, const mp_obj_t *args,bool add) {
     c_complex *x_=x,*y_=y;
     mp_obj_t res = mp_obj_new_list(0, NULL);
     for (int i=0;i<n1;++i){
+      if (m1==0){
+	if (add)
+	  mp_obj_list_append(res,mp_obj_new_complex_real(x->r+y->r,x->i+y->i));
+	else
+	  mp_obj_list_append(res,mp_obj_new_complex_real(x->r-y->r,x->i-y->i));
+	++x; ++y;
+	continue;
+      }
       mp_obj_t line = mp_obj_new_list(0, NULL);
       if (add){
 	for (int j=0;j<m1;++j,++x,++y){
@@ -1201,6 +1308,7 @@ void transpose(c_complex *x,int n,int m){
   }
 }
 
+
 static mp_obj_t linalg_dot(size_t n_args, const mp_obj_t *args) {
   c_complex *x,*y; c_complex a;
   size_t n1,m1,n2,m2;
@@ -1232,6 +1340,16 @@ static mp_obj_t linalg_dot(size_t n_args, const mp_obj_t *args) {
       nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "Wrong type of 2nd argument."));
     }
     if (m1==0){ // v*M
+      if (m2==0 && n1==n2){
+	c_complex c={0,0};
+	c_complex * x_=x,*y_=y;
+	for (int i=0;i<n1;++i,++x_,++y_){
+	  c.r += x_->r*y_->r-x_->i*y_->i;
+	  c.i += x_->r*y_->i+x_->i*y_->r;
+	}
+	free(x);free(y);
+	return mp_obj_new_complex_real(c.r,c.i);
+      }
       if (n1!=m2)
 	raisedimerr();
       mp_obj_t res = mp_obj_new_list(0, NULL);
@@ -1299,6 +1417,35 @@ static mp_obj_t linalg_dot(size_t n_args, const mp_obj_t *args) {
   nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "Wrong type of 1st argument."));
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linalg_dot_obj, 2, 2, linalg_dot);
+
+static mp_obj_t linalg_cross(size_t n_args, const mp_obj_t *args) {
+  c_complex *x,*y; 
+  size_t n1,m1,n2,m2;
+  if (mp_array2c_complextab(args[0],&x,&n1,&m1) && n1==3 && m1==0){
+    if (!mp_array2c_complextab(args[1],&y,&n2,&m2)){
+      free(x);
+      nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "Wrong type of 2nd argument."));
+    }
+    if (n2!=3 || m2!=0){
+      free(x);
+      free(y);
+      nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "Wrong type of 2nd argument."));
+    }
+    c_complex tmp1,tmp2,A,B,C;
+    c_mul(x[0],y[1],&tmp1);c_mul(x[1],y[0],&tmp2); c_sub(tmp1,tmp2,&C);
+    c_mul(x[2],y[0],&tmp1);c_mul(x[0],y[2],&tmp2); c_sub(tmp1,tmp2,&B);
+    c_mul(x[1],y[2],&tmp1);c_mul(x[2],y[1],&tmp2); c_sub(tmp1,tmp2,&A);
+    free(x);
+    free(y);
+    mp_obj_t r = mp_obj_new_list(0, NULL);
+    mp_obj_list_append(r,mp_obj_new_complex_real(A.r,A.i));
+    mp_obj_list_append(r,mp_obj_new_complex_real(B.r,B.i));
+    mp_obj_list_append(r,mp_obj_new_complex_real(C.r,C.i));
+    return r;
+  }
+  nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "Wrong type of 1st argument."));
+}
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linalg_cross_obj, 2, 2, linalg_cross);
 
 static mp_obj_t linalg_transpose(size_t n_args, const mp_obj_t *args) {
   c_complex *x;
@@ -1387,6 +1534,13 @@ static mp_obj_t linalg_inv(size_t n_args, const mp_obj_t *args) {
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linalg_inv_obj, 1, 1, linalg_inv);
 
 static mp_obj_t linalg_re(size_t n_args, const mp_obj_t *args) {
+  if (MP_OBJ_IS_INT(args[0]) || mp_obj_is_float(args[0]))
+    return args[0];
+  if (mp_obj_get_type(args[0])==&mp_type_complex){
+    double R,I;
+    mp_obj_get_complex(args[0],&R,&I);
+    return mp_obj_new_float(R);
+  }
   c_complex *x;
   size_t n1,m1;
   if (mp_array2c_complextab(args[0],&x,&n1,&m1)){
@@ -1402,6 +1556,13 @@ static mp_obj_t linalg_re(size_t n_args, const mp_obj_t *args) {
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linalg_re_obj, 1, 1, linalg_re);
 
 static mp_obj_t linalg_im(size_t n_args, const mp_obj_t *args) {
+  if (MP_OBJ_IS_INT(args[0]) || mp_obj_is_float(args[0]))
+    return mp_obj_new_int(0);
+  if (mp_obj_get_type(args[0])==&mp_type_complex){
+    double R,I;
+    mp_obj_get_complex(args[0],&R,&I);
+    return mp_obj_new_float(I);
+  }
   c_complex *x;
   size_t n1,m1;
   if (mp_array2c_complextab(args[0],&x,&n1,&m1)){
@@ -1421,6 +1582,13 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linalg_im_obj, 1, 1, linalg_im);
 static mp_obj_t linalg_conj(size_t n_args, const mp_obj_t *args) {
   c_complex *x;
   size_t n1,m1;
+  if (MP_OBJ_IS_INT(args[0]) || mp_obj_is_float(args[0]))
+    return args[0];
+  if (mp_obj_get_type(args[0])==&mp_type_complex){
+    double R,I;
+    mp_obj_get_complex(args[0],&R,&I);
+    return mp_obj_new_complex(R,-I);
+  }
   if (mp_array2c_complextab(args[0],&x,&n1,&m1)){
     int N=m1?n1*m1:n1;
     for (int i=0;i<N;++i){
@@ -1448,6 +1616,27 @@ double c_abs(c_complex c){
   return y*sqrt(1+t*t);
 }
 static mp_obj_t linalg_abs(size_t n_args, const mp_obj_t *args) {
+  if (MP_OBJ_IS_SMALL_INT(args[0])){
+    long long i=MP_OBJ_SMALL_INT_VALUE(args[0]);
+    if (i>=0)
+      return args[0];
+    return mp_obj_new_int(-i);
+  }
+  if (MP_OBJ_IS_INT(args[0]) || mp_obj_is_float(args[0])){
+    return mp_obj_new_float(fabs(mp_obj_get_float(args[0])));
+  }
+  if (mp_obj_get_type(args[0])==&mp_type_complex){
+    double R,I;
+    mp_obj_get_complex(args[0],&R,&I);
+    R=fabs(R); I=fabs(I);
+    if (R<I){
+      double t=R;
+      R=I;
+      I=t;
+    }
+    double t=I/R;
+    return mp_obj_new_float(R*sqrt(1+t*t));
+  }
   c_complex *x;
   size_t n1,m1;
   if (mp_array2c_complextab(args[0],&x,&n1,&m1)){
@@ -1704,40 +1893,46 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linalg_size_obj, 1, 1, linalg_size);
 //
 static const mp_rom_map_elem_t linalg_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_pi), mp_const_float_pi },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_matrix), (mp_obj_t) &linalg_matrix_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_arange), (mp_obj_t) &linalg_arange_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_linspace), (mp_obj_t) &linalg_linspace_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_dot), (mp_obj_t) &linalg_dot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_solve), (mp_obj_t) &linalg_solve_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_peval), (mp_obj_t) &linalg_peval_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_horner), (mp_obj_t) &linalg_peval_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_mul), (mp_obj_t) &linalg_dot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_transpose), (mp_obj_t) &linalg_transpose_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_rref), (mp_obj_t) &linalg_rref_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_egv), (mp_obj_t) &linalg_egv_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_eig), (mp_obj_t) &linalg_eig_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_det), (mp_obj_t) &linalg_det_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_zeros), (mp_obj_t) &linalg_zeros_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ones), (mp_obj_t) &linalg_ones_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_eye), (mp_obj_t) &linalg_eye_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_rand), (mp_obj_t) &linalg_rand_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_shape), (mp_obj_t) &linalg_shape_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_size), (mp_obj_t) &linalg_size_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_inv), (mp_obj_t) &linalg_inv_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_proot), (mp_obj_t) &linalg_proot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_pcoeff), (mp_obj_t) &linalg_pcoeff_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_fft), (mp_obj_t) &linalg_fft_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ifft), (mp_obj_t) &linalg_ifft_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_apply), (mp_obj_t) &linalg_apply_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_add), (mp_obj_t) &linalg_add_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_sub), (mp_obj_t) &linalg_sub_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_real), (mp_obj_t) &linalg_re_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_im), (mp_obj_t) &linalg_im_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_imag), (mp_obj_t) &linalg_im_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_conj), (mp_obj_t) &linalg_conj_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_abs), (mp_obj_t) &linalg_abs_obj },
+    { MP_ROM_QSTR(MP_QSTR_matrix), (mp_obj_t) &linalg_matrix_obj },
+    { MP_ROM_QSTR(MP_QSTR_arange), (mp_obj_t) &linalg_arange_obj },
+    { MP_ROM_QSTR(MP_QSTR_linspace), (mp_obj_t) &linalg_linspace_obj },
+    { MP_ROM_QSTR(MP_QSTR_dot), (mp_obj_t) &linalg_dot_obj },
+    { MP_ROM_QSTR(MP_QSTR_cross), (mp_obj_t) &linalg_cross_obj },
+    { MP_ROM_QSTR(MP_QSTR_solve), (mp_obj_t) &linalg_solve_obj },
+    { MP_ROM_QSTR(MP_QSTR_peval), (mp_obj_t) &linalg_peval_obj },
+    { MP_ROM_QSTR(MP_QSTR_horner), (mp_obj_t) &linalg_peval_obj },
+    { MP_ROM_QSTR(MP_QSTR_mul), (mp_obj_t) &linalg_dot_obj },
+    { MP_ROM_QSTR(MP_QSTR_transpose), (mp_obj_t) &linalg_transpose_obj },
+    { MP_ROM_QSTR(MP_QSTR_rref), (mp_obj_t) &linalg_rref_obj },
+    { MP_ROM_QSTR(MP_QSTR_egv), (mp_obj_t) &linalg_egv_obj },
+    { MP_ROM_QSTR(MP_QSTR_eigenvects), (mp_obj_t) &linalg_egv_obj },
+    { MP_ROM_QSTR(MP_QSTR_eig), (mp_obj_t) &linalg_eig_obj },
+    { MP_ROM_QSTR(MP_QSTR_det), (mp_obj_t) &linalg_det_obj },
+    { MP_ROM_QSTR(MP_QSTR_zeros), (mp_obj_t) &linalg_zeros_obj },
+    { MP_ROM_QSTR(MP_QSTR_ones), (mp_obj_t) &linalg_ones_obj },
+    { MP_ROM_QSTR(MP_QSTR_eye), (mp_obj_t) &linalg_eye_obj },
+    { MP_ROM_QSTR(MP_QSTR_identity), (mp_obj_t) &linalg_eye_obj },
+    { MP_ROM_QSTR(MP_QSTR_idn), (mp_obj_t) &linalg_eye_obj },
+    { MP_ROM_QSTR(MP_QSTR_rand), (mp_obj_t) &linalg_rand_obj },
+    { MP_ROM_QSTR(MP_QSTR_ranv), (mp_obj_t) &linalg_rand_obj },
+    { MP_ROM_QSTR(MP_QSTR_ranm), (mp_obj_t) &linalg_rand_obj },
+    { MP_ROM_QSTR(MP_QSTR_shape), (mp_obj_t) &linalg_shape_obj },
+    { MP_ROM_QSTR(MP_QSTR_size), (mp_obj_t) &linalg_size_obj },
+    { MP_ROM_QSTR(MP_QSTR_inv), (mp_obj_t) &linalg_inv_obj },
+    { MP_ROM_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
+    { MP_ROM_QSTR(MP_QSTR_proot), (mp_obj_t) &linalg_proot_obj },
+    { MP_ROM_QSTR(MP_QSTR_pcoeff), (mp_obj_t) &linalg_pcoeff_obj },
+    { MP_ROM_QSTR(MP_QSTR_fft), (mp_obj_t) &linalg_fft_obj },
+    { MP_ROM_QSTR(MP_QSTR_ifft), (mp_obj_t) &linalg_ifft_obj },
+    { MP_ROM_QSTR(MP_QSTR_apply), (mp_obj_t) &linalg_apply_obj },
+    { MP_ROM_QSTR(MP_QSTR_add), (mp_obj_t) &linalg_add_obj },
+    { MP_ROM_QSTR(MP_QSTR_sub), (mp_obj_t) &linalg_sub_obj },
+    { MP_ROM_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
+    { MP_ROM_QSTR(MP_QSTR_real), (mp_obj_t) &linalg_re_obj },
+    { MP_ROM_QSTR(MP_QSTR_im), (mp_obj_t) &linalg_im_obj },
+    { MP_ROM_QSTR(MP_QSTR_imag), (mp_obj_t) &linalg_im_obj },
+    { MP_ROM_QSTR(MP_QSTR_conj), (mp_obj_t) &linalg_conj_obj },
+    { MP_ROM_QSTR(MP_QSTR_abs), (mp_obj_t) &linalg_abs_obj },
 };
 
 
@@ -1751,42 +1946,48 @@ const mp_obj_type_t linalg_type = {
 
 
 STATIC const mp_rom_map_elem_t mp_module_linalg_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR__linalg) },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__linalg) },
     { MP_ROM_QSTR(MP_QSTR_pi), mp_const_float_pi },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_matrix), (mp_obj_t) &linalg_matrix_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_arange), (mp_obj_t) &linalg_arange_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_linspace), (mp_obj_t) &linalg_linspace_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_dot), (mp_obj_t) &linalg_dot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_solve), (mp_obj_t) &linalg_solve_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_peval), (mp_obj_t) &linalg_peval_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_horner), (mp_obj_t) &linalg_peval_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_mul), (mp_obj_t) &linalg_dot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_transpose), (mp_obj_t) &linalg_transpose_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_rref), (mp_obj_t) &linalg_rref_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_egv), (mp_obj_t) &linalg_egv_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_eig), (mp_obj_t) &linalg_eig_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_det), (mp_obj_t) &linalg_det_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_zeros), (mp_obj_t) &linalg_zeros_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ones), (mp_obj_t) &linalg_ones_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_eye), (mp_obj_t) &linalg_eye_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_rand), (mp_obj_t) &linalg_rand_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_shape), (mp_obj_t) &linalg_shape_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_size), (mp_obj_t) &linalg_size_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_inv), (mp_obj_t) &linalg_inv_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_proot), (mp_obj_t) &linalg_proot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_pcoeff), (mp_obj_t) &linalg_pcoeff_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_fft), (mp_obj_t) &linalg_fft_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ifft), (mp_obj_t) &linalg_ifft_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_apply), (mp_obj_t) &linalg_apply_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_add), (mp_obj_t) &linalg_add_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_sub), (mp_obj_t) &linalg_sub_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_real), (mp_obj_t) &linalg_re_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_im), (mp_obj_t) &linalg_im_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_imag), (mp_obj_t) &linalg_im_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_conj), (mp_obj_t) &linalg_conj_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_abs), (mp_obj_t) &linalg_abs_obj },
+    { MP_ROM_QSTR(MP_QSTR_matrix), (mp_obj_t) &linalg_matrix_obj },
+    { MP_ROM_QSTR(MP_QSTR_arange), (mp_obj_t) &linalg_arange_obj },
+    { MP_ROM_QSTR(MP_QSTR_linspace), (mp_obj_t) &linalg_linspace_obj },
+    { MP_ROM_QSTR(MP_QSTR_dot), (mp_obj_t) &linalg_dot_obj },
+    { MP_ROM_QSTR(MP_QSTR_cross), (mp_obj_t) &linalg_cross_obj },
+    { MP_ROM_QSTR(MP_QSTR_solve), (mp_obj_t) &linalg_solve_obj },
+    { MP_ROM_QSTR(MP_QSTR_peval), (mp_obj_t) &linalg_peval_obj },
+    { MP_ROM_QSTR(MP_QSTR_horner), (mp_obj_t) &linalg_peval_obj },
+    { MP_ROM_QSTR(MP_QSTR_mul), (mp_obj_t) &linalg_dot_obj },
+    { MP_ROM_QSTR(MP_QSTR_transpose), (mp_obj_t) &linalg_transpose_obj },
+    { MP_ROM_QSTR(MP_QSTR_rref), (mp_obj_t) &linalg_rref_obj },
+    { MP_ROM_QSTR(MP_QSTR_egv), (mp_obj_t) &linalg_egv_obj },
+    { MP_ROM_QSTR(MP_QSTR_eigenvects), (mp_obj_t) &linalg_egv_obj },
+    { MP_ROM_QSTR(MP_QSTR_eig), (mp_obj_t) &linalg_eig_obj },
+    { MP_ROM_QSTR(MP_QSTR_det), (mp_obj_t) &linalg_det_obj },
+    { MP_ROM_QSTR(MP_QSTR_zeros), (mp_obj_t) &linalg_zeros_obj },
+    { MP_ROM_QSTR(MP_QSTR_ones), (mp_obj_t) &linalg_ones_obj },
+    { MP_ROM_QSTR(MP_QSTR_eye), (mp_obj_t) &linalg_eye_obj },
+    { MP_ROM_QSTR(MP_QSTR_identity), (mp_obj_t) &linalg_eye_obj },
+    { MP_ROM_QSTR(MP_QSTR_idn), (mp_obj_t) &linalg_eye_obj },
+    { MP_ROM_QSTR(MP_QSTR_rand), (mp_obj_t) &linalg_rand_obj },
+    { MP_ROM_QSTR(MP_QSTR_ranv), (mp_obj_t) &linalg_rand_obj },
+    { MP_ROM_QSTR(MP_QSTR_ranm), (mp_obj_t) &linalg_rand_obj },
+    { MP_ROM_QSTR(MP_QSTR_shape), (mp_obj_t) &linalg_shape_obj },
+    { MP_ROM_QSTR(MP_QSTR_size), (mp_obj_t) &linalg_size_obj },
+    { MP_ROM_QSTR(MP_QSTR_inv), (mp_obj_t) &linalg_inv_obj },
+    { MP_ROM_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
+    { MP_ROM_QSTR(MP_QSTR_proot), (mp_obj_t) &linalg_proot_obj },
+    { MP_ROM_QSTR(MP_QSTR_pcoeff), (mp_obj_t) &linalg_pcoeff_obj },
+    { MP_ROM_QSTR(MP_QSTR_fft), (mp_obj_t) &linalg_fft_obj },
+    { MP_ROM_QSTR(MP_QSTR_ifft), (mp_obj_t) &linalg_ifft_obj },
+    { MP_ROM_QSTR(MP_QSTR_apply), (mp_obj_t) &linalg_apply_obj },
+    { MP_ROM_QSTR(MP_QSTR_add), (mp_obj_t) &linalg_add_obj },
+    { MP_ROM_QSTR(MP_QSTR_sub), (mp_obj_t) &linalg_sub_obj },
+    { MP_ROM_QSTR(MP_QSTR_re), (mp_obj_t) &linalg_re_obj },
+    { MP_ROM_QSTR(MP_QSTR_real), (mp_obj_t) &linalg_re_obj },
+    { MP_ROM_QSTR(MP_QSTR_im), (mp_obj_t) &linalg_im_obj },
+    { MP_ROM_QSTR(MP_QSTR_imag), (mp_obj_t) &linalg_im_obj },
+    { MP_ROM_QSTR(MP_QSTR_conj), (mp_obj_t) &linalg_conj_obj },
+    { MP_ROM_QSTR(MP_QSTR_abs), (mp_obj_t) &linalg_abs_obj },
 };
 
 STATIC const mp_obj_dict_t mp_module_linalg_globals = {
@@ -2103,7 +2304,17 @@ static mp_obj_t turtle_pencolor(size_t n_args, const mp_obj_t *args) {
       size_t n=0; mp_obj_t * tab=0;
       mp_obj_get_array(args[0],&n,&tab);
       if (n==3 &&  mp_obj_is_float(tab[0]) && mp_obj_is_float(tab[1]) && mp_obj_is_float(tab[2])){
+#ifdef NUMWORKS
+	strcpy(buf,"crayon(");
+	for (int i=0;i<3;++i){
+	  strcat_double(buf,mp_obj_get_float(tab[i]));
+	  if (i<2)
+	    strcat(buf,",");
+	}
+	strcat(buf,"):;");
+#else
 	sprintf(buf,"crayon(%.3g,%.3g,%.3g):;",mp_obj_get_float(tab[0]),mp_obj_get_float(tab[1]),mp_obj_get_float(tab[2]));
+#endif
       }
       if (n==3 &&  MP_OBJ_IS_SMALL_INT(tab[0]) && MP_OBJ_IS_SMALL_INT(tab[1]) && MP_OBJ_IS_SMALL_INT(tab[2])){
 	sprintf(buf,"crayon(%i,%i,%i):;",(int)MP_OBJ_SMALL_INT_VALUE(tab[0]),(int)MP_OBJ_SMALL_INT_VALUE(tab[1]),(int)MP_OBJ_SMALL_INT_VALUE(tab[2]));
@@ -2111,7 +2322,17 @@ static mp_obj_t turtle_pencolor(size_t n_args, const mp_obj_t *args) {
     }
   }
   if (n_args==3 && mp_obj_is_float(args[0]) && mp_obj_is_float(args[1]) && mp_obj_is_float(args[2]) ){
+#ifdef NUMWORKS
+	strcpy(buf,"crayon(");
+	for (int i=0;i<3;++i){
+	  strcat_double(buf,mp_obj_get_float(args[i]));
+	  if (i<2)
+	    strcat(buf,",");
+	}
+	strcat(buf,"):;");
+#else
     sprintf(buf,"crayon(%.3g,%.3g,%.3g):;",mp_obj_get_float(args[0]),mp_obj_get_float(args[1]),mp_obj_get_float(args[2]));
+#endif
   }
   const char * val=caseval(buf);
   return turtle_ret(val);
@@ -2133,74 +2354,74 @@ static mp_obj_t turtle_speed(size_t n_args, const mp_obj_t *args) {
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(turtle_speed_obj, 0, 1, turtle_speed);
 
 static const mp_map_elem_t turtle_locals_dict_table[] = {
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_forward), (mp_obj_t) &turtle_forward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_fd), (mp_obj_t) &turtle_forward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_backward), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_bk), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_left), (mp_obj_t) &turtle_left_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_lt), (mp_obj_t) &turtle_left_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_right), (mp_obj_t) &turtle_right_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_rt), (mp_obj_t) &turtle_right_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_circle), (mp_obj_t) &turtle_circle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_disque), (mp_obj_t) &turtle_disque_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_rectangle_plein), (mp_obj_t) &turtle_rectangle_plein_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_triangle_plein), (mp_obj_t) &turtle_triangle_plein_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_reset), (mp_obj_t) &turtle_reset_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_dessine_tortue), (mp_obj_t) &turtle_dessine_tortue_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_setheading), (mp_obj_t) &turtle_setheading_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_seth), (mp_obj_t) &turtle_setheading_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_setposition), (mp_obj_t) &turtle_setposition_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_goto), (mp_obj_t) &turtle_setposition_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_setpos), (mp_obj_t) &turtle_setposition_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_setx), (mp_obj_t) &turtle_setx_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_sety), (mp_obj_t) &turtle_sety_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_write), (mp_obj_t) &turtle_write_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_speed), (mp_obj_t) &turtle_speed_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_showturtle), (mp_obj_t) &turtle_showturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_st), (mp_obj_t) &turtle_showturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_hideturtle), (mp_obj_t) &turtle_hideturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_ht), (mp_obj_t) &turtle_hideturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_down), (mp_obj_t) &turtle_down_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_saute), (mp_obj_t) &turtle_saute_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pas_de_cote), (mp_obj_t) &turtle_pas_de_cote_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pendown), (mp_obj_t) &turtle_down_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pd), (mp_obj_t) &turtle_down_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_up), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_penup), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pu), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pencolor), (mp_obj_t) &turtle_pencolor_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_avance), (mp_obj_t) &turtle_forward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_av), (mp_obj_t) &turtle_forward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_recule), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_re), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_tourne_gauche), (mp_obj_t) &turtle_left_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_tg), (mp_obj_t) &turtle_left_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_tourne_droite), (mp_obj_t) &turtle_right_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_td), (mp_obj_t) &turtle_right_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_rond), (mp_obj_t) &turtle_circle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_efface), (mp_obj_t) &turtle_reset_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_cap), (mp_obj_t) &turtle_setheading_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_heading), (mp_obj_t) &turtle_setheading_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pos), (mp_obj_t) &turtle_setposition_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_position), (mp_obj_t) &turtle_setposition_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_ecris), (mp_obj_t) &turtle_write_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_vitesse_tortue), (mp_obj_t) &turtle_speed_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_montre_tortue), (mp_obj_t) &turtle_showturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_cache_tortue), (mp_obj_t) &turtle_hideturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_baisse_crayon), (mp_obj_t) &turtle_down_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_leve_crayon), (mp_obj_t) &turtle_up_obj },
-	/* { MP_OBJ_NEW_QSTR(MP_QSTR_time), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_sleep), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_monotonic), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_time), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_sleep), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_pensize), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_width), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_isdown), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_isvisible), (mp_obj_t) &turtle_up_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_color), (mp_obj_t) &turtle_up_obj },*/
+	{ MP_ROM_QSTR(MP_QSTR_forward), (mp_obj_t) &turtle_forward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_fd), (mp_obj_t) &turtle_forward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_backward), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_bk), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_left), (mp_obj_t) &turtle_left_obj },
+	{ MP_ROM_QSTR(MP_QSTR_lt), (mp_obj_t) &turtle_left_obj },
+	{ MP_ROM_QSTR(MP_QSTR_right), (mp_obj_t) &turtle_right_obj },
+	{ MP_ROM_QSTR(MP_QSTR_rt), (mp_obj_t) &turtle_right_obj },
+	{ MP_ROM_QSTR(MP_QSTR_circle), (mp_obj_t) &turtle_circle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_disque), (mp_obj_t) &turtle_disque_obj },
+	{ MP_ROM_QSTR(MP_QSTR_rectangle_plein), (mp_obj_t) &turtle_rectangle_plein_obj },
+	{ MP_ROM_QSTR(MP_QSTR_triangle_plein), (mp_obj_t) &turtle_triangle_plein_obj },
+	{ MP_ROM_QSTR(MP_QSTR_reset), (mp_obj_t) &turtle_reset_obj },
+	{ MP_ROM_QSTR(MP_QSTR_dessine_tortue), (mp_obj_t) &turtle_dessine_tortue_obj },
+	{ MP_ROM_QSTR(MP_QSTR_setheading), (mp_obj_t) &turtle_setheading_obj },
+	{ MP_ROM_QSTR(MP_QSTR_seth), (mp_obj_t) &turtle_setheading_obj },
+	{ MP_ROM_QSTR(MP_QSTR_setposition), (mp_obj_t) &turtle_setposition_obj },
+	{ MP_ROM_QSTR(MP_QSTR_goto), (mp_obj_t) &turtle_setposition_obj },
+	{ MP_ROM_QSTR(MP_QSTR_setpos), (mp_obj_t) &turtle_setposition_obj },
+	{ MP_ROM_QSTR(MP_QSTR_setx), (mp_obj_t) &turtle_setx_obj },
+	{ MP_ROM_QSTR(MP_QSTR_sety), (mp_obj_t) &turtle_sety_obj },
+	{ MP_ROM_QSTR(MP_QSTR_write), (mp_obj_t) &turtle_write_obj },
+	{ MP_ROM_QSTR(MP_QSTR_speed), (mp_obj_t) &turtle_speed_obj },
+	{ MP_ROM_QSTR(MP_QSTR_showturtle), (mp_obj_t) &turtle_showturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_st), (mp_obj_t) &turtle_showturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_hideturtle), (mp_obj_t) &turtle_hideturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_ht), (mp_obj_t) &turtle_hideturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_down), (mp_obj_t) &turtle_down_obj },
+	{ MP_ROM_QSTR(MP_QSTR_saute), (mp_obj_t) &turtle_saute_obj },
+	{ MP_ROM_QSTR(MP_QSTR_pas_de_cote), (mp_obj_t) &turtle_pas_de_cote_obj },
+	{ MP_ROM_QSTR(MP_QSTR_pendown), (mp_obj_t) &turtle_down_obj },
+	{ MP_ROM_QSTR(MP_QSTR_pd), (mp_obj_t) &turtle_down_obj },
+	{ MP_ROM_QSTR(MP_QSTR_up), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_penup), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_pu), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_pencolor), (mp_obj_t) &turtle_pencolor_obj },
+	{ MP_ROM_QSTR(MP_QSTR_avance), (mp_obj_t) &turtle_forward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_av), (mp_obj_t) &turtle_forward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_recule), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_re), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_tourne_gauche), (mp_obj_t) &turtle_left_obj },
+	{ MP_ROM_QSTR(MP_QSTR_tg), (mp_obj_t) &turtle_left_obj },
+	{ MP_ROM_QSTR(MP_QSTR_tourne_droite), (mp_obj_t) &turtle_right_obj },
+	{ MP_ROM_QSTR(MP_QSTR_td), (mp_obj_t) &turtle_right_obj },
+	{ MP_ROM_QSTR(MP_QSTR_rond), (mp_obj_t) &turtle_circle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_efface), (mp_obj_t) &turtle_reset_obj },
+	{ MP_ROM_QSTR(MP_QSTR_cap), (mp_obj_t) &turtle_setheading_obj },
+	{ MP_ROM_QSTR(MP_QSTR_heading), (mp_obj_t) &turtle_setheading_obj },
+	{ MP_ROM_QSTR(MP_QSTR_pos), (mp_obj_t) &turtle_setposition_obj },
+	{ MP_ROM_QSTR(MP_QSTR_position), (mp_obj_t) &turtle_setposition_obj },
+	{ MP_ROM_QSTR(MP_QSTR_ecris), (mp_obj_t) &turtle_write_obj },
+	{ MP_ROM_QSTR(MP_QSTR_vitesse_tortue), (mp_obj_t) &turtle_speed_obj },
+	{ MP_ROM_QSTR(MP_QSTR_montre_tortue), (mp_obj_t) &turtle_showturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_cache_tortue), (mp_obj_t) &turtle_hideturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_baisse_crayon), (mp_obj_t) &turtle_down_obj },
+	{ MP_ROM_QSTR(MP_QSTR_leve_crayon), (mp_obj_t) &turtle_up_obj },
+	/* { MP_ROM_QSTR(MP_QSTR_time), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_sleep), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_monotonic), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_time), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_sleep), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_pensize), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_width), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_isdown), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_isvisible), (mp_obj_t) &turtle_up_obj },
+	{ MP_ROM_QSTR(MP_QSTR_color), (mp_obj_t) &turtle_up_obj },*/
 
 };
 
@@ -2215,63 +2436,63 @@ const mp_obj_type_t turtle_type = {
 
 
 STATIC const mp_map_elem_t mp_module_turtle_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR__turtle) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_forward), (mp_obj_t) &turtle_forward_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_fd), (mp_obj_t) &turtle_forward_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_backward), (mp_obj_t) &turtle_backward_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_bk), (mp_obj_t) &turtle_backward_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_left), (mp_obj_t) &turtle_left_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_lt), (mp_obj_t) &turtle_left_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_right), (mp_obj_t) &turtle_right_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_rt), (mp_obj_t) &turtle_right_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_reset), (mp_obj_t) &turtle_reset_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_dessine_tortue), (mp_obj_t) &turtle_dessine_tortue_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_circle), (mp_obj_t) &turtle_circle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_disque), (mp_obj_t) &turtle_disque_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_rectangle_plein), (mp_obj_t) &turtle_rectangle_plein_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_triangle_plein), (mp_obj_t) &turtle_triangle_plein_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_setheading), (mp_obj_t) &turtle_setheading_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_goto), (mp_obj_t) &turtle_setposition_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_seth), (mp_obj_t) &turtle_setheading_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_setposition), (mp_obj_t) &turtle_setposition_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_setpos), (mp_obj_t) &turtle_setposition_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_setx), (mp_obj_t) &turtle_setx_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_sety), (mp_obj_t) &turtle_sety_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_write), (mp_obj_t) &turtle_write_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_speed), (mp_obj_t) &turtle_speed_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_showturtle), (mp_obj_t) &turtle_showturtle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_st), (mp_obj_t) &turtle_showturtle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_hideturtle), (mp_obj_t) &turtle_hideturtle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ht), (mp_obj_t) &turtle_hideturtle_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_down), (mp_obj_t) &turtle_down_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_saute), (mp_obj_t) &turtle_saute_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_pas_de_cote), (mp_obj_t) &turtle_pas_de_cote_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_pendown), (mp_obj_t) &turtle_down_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_pd), (mp_obj_t) &turtle_down_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_up), (mp_obj_t) &turtle_up_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_penup), (mp_obj_t) &turtle_up_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_pu), (mp_obj_t) &turtle_up_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_pencolor), (mp_obj_t) &turtle_pencolor_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_avance), (mp_obj_t) &turtle_forward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_av), (mp_obj_t) &turtle_forward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_recule), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_re), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_tourne_gauche), (mp_obj_t) &turtle_left_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_tg), (mp_obj_t) &turtle_left_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_tourne_droite), (mp_obj_t) &turtle_right_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_td), (mp_obj_t) &turtle_right_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_rond), (mp_obj_t) &turtle_circle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_efface), (mp_obj_t) &turtle_reset_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_cap), (mp_obj_t) &turtle_setheading_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_position), (mp_obj_t) &turtle_setposition_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_ecris), (mp_obj_t) &turtle_write_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_vitesse_tortue), (mp_obj_t) &turtle_speed_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_montre_tortue), (mp_obj_t) &turtle_showturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_cache_tortue), (mp_obj_t) &turtle_hideturtle_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_baisse_crayon), (mp_obj_t) &turtle_down_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_leve_crayon), (mp_obj_t) &turtle_up_obj },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__turtle) },
+    { MP_ROM_QSTR(MP_QSTR_forward), (mp_obj_t) &turtle_forward_obj },
+    { MP_ROM_QSTR(MP_QSTR_fd), (mp_obj_t) &turtle_forward_obj },
+    { MP_ROM_QSTR(MP_QSTR_backward), (mp_obj_t) &turtle_backward_obj },
+    { MP_ROM_QSTR(MP_QSTR_bk), (mp_obj_t) &turtle_backward_obj },
+    { MP_ROM_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
+    { MP_ROM_QSTR(MP_QSTR_left), (mp_obj_t) &turtle_left_obj },
+    { MP_ROM_QSTR(MP_QSTR_lt), (mp_obj_t) &turtle_left_obj },
+    { MP_ROM_QSTR(MP_QSTR_right), (mp_obj_t) &turtle_right_obj },
+    { MP_ROM_QSTR(MP_QSTR_rt), (mp_obj_t) &turtle_right_obj },
+    { MP_ROM_QSTR(MP_QSTR_reset), (mp_obj_t) &turtle_reset_obj },
+    { MP_ROM_QSTR(MP_QSTR_dessine_tortue), (mp_obj_t) &turtle_dessine_tortue_obj },
+    { MP_ROM_QSTR(MP_QSTR_circle), (mp_obj_t) &turtle_circle_obj },
+    { MP_ROM_QSTR(MP_QSTR_disque), (mp_obj_t) &turtle_disque_obj },
+    { MP_ROM_QSTR(MP_QSTR_rectangle_plein), (mp_obj_t) &turtle_rectangle_plein_obj },
+    { MP_ROM_QSTR(MP_QSTR_triangle_plein), (mp_obj_t) &turtle_triangle_plein_obj },
+    { MP_ROM_QSTR(MP_QSTR_setheading), (mp_obj_t) &turtle_setheading_obj },
+    { MP_ROM_QSTR(MP_QSTR_goto), (mp_obj_t) &turtle_setposition_obj },
+    { MP_ROM_QSTR(MP_QSTR_seth), (mp_obj_t) &turtle_setheading_obj },
+    { MP_ROM_QSTR(MP_QSTR_setposition), (mp_obj_t) &turtle_setposition_obj },
+    { MP_ROM_QSTR(MP_QSTR_setpos), (mp_obj_t) &turtle_setposition_obj },
+    { MP_ROM_QSTR(MP_QSTR_setx), (mp_obj_t) &turtle_setx_obj },
+    { MP_ROM_QSTR(MP_QSTR_sety), (mp_obj_t) &turtle_sety_obj },
+    { MP_ROM_QSTR(MP_QSTR_write), (mp_obj_t) &turtle_write_obj },
+    { MP_ROM_QSTR(MP_QSTR_speed), (mp_obj_t) &turtle_speed_obj },
+    { MP_ROM_QSTR(MP_QSTR_showturtle), (mp_obj_t) &turtle_showturtle_obj },
+    { MP_ROM_QSTR(MP_QSTR_st), (mp_obj_t) &turtle_showturtle_obj },
+    { MP_ROM_QSTR(MP_QSTR_hideturtle), (mp_obj_t) &turtle_hideturtle_obj },
+    { MP_ROM_QSTR(MP_QSTR_ht), (mp_obj_t) &turtle_hideturtle_obj },
+    { MP_ROM_QSTR(MP_QSTR_down), (mp_obj_t) &turtle_down_obj },
+    { MP_ROM_QSTR(MP_QSTR_saute), (mp_obj_t) &turtle_saute_obj },
+    { MP_ROM_QSTR(MP_QSTR_pas_de_cote), (mp_obj_t) &turtle_pas_de_cote_obj },
+    { MP_ROM_QSTR(MP_QSTR_pendown), (mp_obj_t) &turtle_down_obj },
+    { MP_ROM_QSTR(MP_QSTR_pd), (mp_obj_t) &turtle_down_obj },
+    { MP_ROM_QSTR(MP_QSTR_up), (mp_obj_t) &turtle_up_obj },
+    { MP_ROM_QSTR(MP_QSTR_penup), (mp_obj_t) &turtle_up_obj },
+    { MP_ROM_QSTR(MP_QSTR_pu), (mp_obj_t) &turtle_up_obj },
+    { MP_ROM_QSTR(MP_QSTR_pencolor), (mp_obj_t) &turtle_pencolor_obj },
+	{ MP_ROM_QSTR(MP_QSTR_avance), (mp_obj_t) &turtle_forward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_av), (mp_obj_t) &turtle_forward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_recule), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_re), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_back), (mp_obj_t) &turtle_backward_obj },
+	{ MP_ROM_QSTR(MP_QSTR_tourne_gauche), (mp_obj_t) &turtle_left_obj },
+	{ MP_ROM_QSTR(MP_QSTR_tg), (mp_obj_t) &turtle_left_obj },
+	{ MP_ROM_QSTR(MP_QSTR_tourne_droite), (mp_obj_t) &turtle_right_obj },
+	{ MP_ROM_QSTR(MP_QSTR_td), (mp_obj_t) &turtle_right_obj },
+	{ MP_ROM_QSTR(MP_QSTR_rond), (mp_obj_t) &turtle_circle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_efface), (mp_obj_t) &turtle_reset_obj },
+	{ MP_ROM_QSTR(MP_QSTR_cap), (mp_obj_t) &turtle_setheading_obj },
+	{ MP_ROM_QSTR(MP_QSTR_position), (mp_obj_t) &turtle_setposition_obj },
+	{ MP_ROM_QSTR(MP_QSTR_ecris), (mp_obj_t) &turtle_write_obj },
+	{ MP_ROM_QSTR(MP_QSTR_vitesse_tortue), (mp_obj_t) &turtle_speed_obj },
+	{ MP_ROM_QSTR(MP_QSTR_montre_tortue), (mp_obj_t) &turtle_showturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_cache_tortue), (mp_obj_t) &turtle_hideturtle_obj },
+	{ MP_ROM_QSTR(MP_QSTR_baisse_crayon), (mp_obj_t) &turtle_down_obj },
+	{ MP_ROM_QSTR(MP_QSTR_leve_crayon), (mp_obj_t) &turtle_up_obj },
 };
 
 STATIC const mp_obj_dict_t mp_module_turtle_globals = {
@@ -2298,7 +2519,7 @@ static mp_obj_t matplotl_show(size_t n_args, const mp_obj_t *args) {
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(matplotl_show_obj, 0, 0, matplotl_show);
 
 static mp_obj_t matplotl_clf(size_t n_args, const mp_obj_t *args) {
-  const char * val=caseval("erase():;");
+  const char * val=caseval("erase()");
   return mp_obj_new_str(val,strlen(val));
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(matplotl_clf_obj, 0, 0, matplotl_clf);
@@ -2335,8 +2556,20 @@ static mp_obj_t matplotl_axis(size_t n_args, const mp_obj_t *args) {
     if (MP_OBJ_IS_INT(args[3]))
       d=mp_obj_get_int(args[3]);
     if (a<b && c<d){
-      char buf[256];
+      char buf[256]="";
+#ifdef NUMWORKS
+      strcat(buf,"axis(");
+      strcat_double(buf,a);
+      strcat(buf,",");
+      strcat_double(buf,b);
+      strcat(buf,",");
+      strcat_double(buf,c);
+      strcat(buf,",");
+      strcat_double(buf,d);
+      strcat(buf,"):;");
+#else      
       sprintf(buf,"axis(%.14g,%.14g,%.14g,%.14g):;",a,b,c,d);
+#endif
       const char * val=caseval(buf);
       return turtle_ret(val);
     }
@@ -2356,8 +2589,18 @@ static mp_obj_t matplotl_text(size_t n_args, const mp_obj_t *args) {
   if (MP_OBJ_IS_INT(args[1]))
     b=mp_obj_get_int(args[1]);
   if (MP_OBJ_IS_STR(args[2])){
-    char buf[256];
+    char buf[256]="";
+#ifdef NUMWORKS
+    strcat(buf,"legend(point(");
+    strcat_double(buf,a);
+    strcat(buf,",");
+    strcat_double(buf,b);
+    char buf2[64];
+    sprintf(buf2,"),%s):;",mp_obj_str_get_str(args[2]));
+    strcat(buf,buf2);
+#else      
     sprintf(buf,"legend(point(%.14g,%.14g),%s):;",a,b,mp_obj_str_get_str(args[2]));
+#endif
     const char * val=caseval(buf);
     return turtle_ret(val);
   }
@@ -2392,11 +2635,19 @@ static mp_obj_t matplotl_plot(size_t n_args, const mp_obj_t *args) {
   }
   double xx=0,yy=0;
   if (n_args>=2 && mp_int_float(args[0],&xx) && mp_int_float(args[1],&yy)){
-    char buf[512];
+    char buf[512]="";
+#ifdef NUMWORKS
+    strcat(buf,"legend(point(");
+    strcat_double(buf,xx);
+    strcat(buf,",");
+    strcat_double(buf,yy);
+#else      
+    sprintf(buf,"point(%.14g,%.14g",xx,yy);
+#endif
     if (col==-1)
-      sprintf(buf,"point(%.14g,%.14g,display=\"%s\"):;",xx,yy,translate_point_type(mp_obj_str_get_str(args[2])));
+      sprintf(buf,",display=\"%s\"):;",translate_point_type(mp_obj_str_get_str(args[2])));
     else
-      sprintf(buf,"point(%.14g,%.14g,color=%i):;",xx,yy,col);
+      sprintf(buf,",color=%i):;",col);
     const char * val=caseval(buf);
     return turtle_ret(val);
   }
@@ -2425,13 +2676,25 @@ static mp_obj_t matplotl_bar_hist(size_t n_args, const mp_obj_t *args,bool bar) 
 	ptr=printtab(x,n,m);
 	free(x);
 	char buf2[strlen(buf)+strlen(ptr)+256];
+#ifdef NUMWORKS
+	sprintf(buf2,"%s,%s,",buf,ptr);
+	strcat_double(buf2,largeur);
+	strcat(buf2,"):;");
+#else
 	sprintf(buf2,"%s,%s,%.3g):;",buf,ptr,largeur);
+#endif
 	free(ptr);
 	const char * val=caseval(buf2);
 	return turtle_ret(val);
       }
       char buf2[strlen(buf)+256];
+#ifdef NUMWORKS
+      sprintf(buf2,"%s,",buf);
+      strcat_double(buf2,largeur);
+      strcat(buf2,"):;");
+#else
       sprintf(buf2,"%s,%.3g):;",buf,largeur);
+#endif
       const char * val=caseval(buf2);
       return turtle_ret(val);
     }
@@ -2475,14 +2738,39 @@ static mp_obj_t matplotl_arrow(size_t n_args, const mp_obj_t *args) {
     col=mp_get_color(args[4]);
   if (mp_int_float(args[0],&a) && mp_int_float(args[1],&b) &&
       mp_int_float(args[2],&c) && mp_int_float(args[3],&d)){
-    char buf[512];
+    char buf[512]="";
+#ifdef NUMWORKS
+    strcat(buf,"vector([");
+    strcat_double(buf,a);
+    strcat(buf,",");
+    strcat_double(buf,b);
+    strcat(buf,"],[");
+    strcat_double(buf,c);
+    strcat(buf,",");
+    strcat_double(buf,d);
+    char buf2[64];
+    sprintf(buf2,"],color=%i):;",col);
+    strcat(buf,buf2);
+#else          
     sprintf(buf,"vector([%.14g,%.14g],[%.14g,%.14g],color=%i):;",a,b,c,d,col);
+#endif
     const char * val=caseval(buf);
     return turtle_ret(val);
   }
   return turtle_ret("vector: Bad argument type");
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(matplotl_arrow_obj, 4, 5, matplotl_arrow);
+
+static mp_obj_t matplotl_grid(size_t n_args, const mp_obj_t *args) {
+  bool b=true;
+  if (n_args==1 && MP_OBJ_IS_SMALL_INT(args[0]) && MP_OBJ_SMALL_INT_VALUE(args[0])==0)
+    b=false;
+  char buf[64];
+  sprintf(buf,"axes=%i",b?1:0);
+  const char * val=caseval(buf);
+  return turtle_ret(val);  
+}
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(matplotl_grid_obj, 0, 1, matplotl_grid);
 
 static mp_obj_t matplotl_scatter_reg(size_t n_args, const mp_obj_t *args,bool scatter) {
   int col=0;
@@ -2525,22 +2813,23 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(matplotl_linear_regression_plot_obj, 2, 3, m
 
 //
 static const mp_map_elem_t matplotl_locals_dict_table[] = {
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_show), (mp_obj_t) &matplotl_show_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_clf), (mp_obj_t) &matplotl_clf_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_axis), (mp_obj_t) &matplotl_axis_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_text), (mp_obj_t) &matplotl_text_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_plot), (mp_obj_t) &matplotl_plot_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_bar), (mp_obj_t) &matplotl_bar_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_hist), (mp_obj_t) &matplotl_hist_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_histogram), (mp_obj_t) &matplotl_hist_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_boxplot), (mp_obj_t) &matplotl_boxplot_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_boxwhisker), (mp_obj_t) &matplotl_boxplot_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_arrow), (mp_obj_t) &matplotl_arrow_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_vector), (mp_obj_t) &matplotl_arrow_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_barplot), (mp_obj_t) &matplotl_bar_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_scatter), (mp_obj_t) &matplotl_scatter_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_linear_regression_plot), (mp_obj_t) &matplotl_linear_regression_plot_obj },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_scatterplot), (mp_obj_t) &matplotl_scatter_obj },
+	{ MP_ROM_QSTR(MP_QSTR_show), (mp_obj_t) &matplotl_show_obj },
+	{ MP_ROM_QSTR(MP_QSTR_clf), (mp_obj_t) &matplotl_clf_obj },
+	{ MP_ROM_QSTR(MP_QSTR_axis), (mp_obj_t) &matplotl_axis_obj },
+	{ MP_ROM_QSTR(MP_QSTR_text), (mp_obj_t) &matplotl_text_obj },
+	{ MP_ROM_QSTR(MP_QSTR_plot), (mp_obj_t) &matplotl_plot_obj },
+	{ MP_ROM_QSTR(MP_QSTR_bar), (mp_obj_t) &matplotl_bar_obj },
+	{ MP_ROM_QSTR(MP_QSTR_hist), (mp_obj_t) &matplotl_hist_obj },
+	{ MP_ROM_QSTR(MP_QSTR_histogram), (mp_obj_t) &matplotl_hist_obj },
+	{ MP_ROM_QSTR(MP_QSTR_boxplot), (mp_obj_t) &matplotl_boxplot_obj },
+	{ MP_ROM_QSTR(MP_QSTR_boxwhisker), (mp_obj_t) &matplotl_boxplot_obj },
+	{ MP_ROM_QSTR(MP_QSTR_arrow), (mp_obj_t) &matplotl_arrow_obj },
+	{ MP_ROM_QSTR(MP_QSTR_grid), (mp_obj_t) &matplotl_grid_obj },
+	{ MP_ROM_QSTR(MP_QSTR_vector), (mp_obj_t) &matplotl_arrow_obj },
+	{ MP_ROM_QSTR(MP_QSTR_barplot), (mp_obj_t) &matplotl_bar_obj },
+	{ MP_ROM_QSTR(MP_QSTR_scatter), (mp_obj_t) &matplotl_scatter_obj },
+	{ MP_ROM_QSTR(MP_QSTR_linear_regression_plot), (mp_obj_t) &matplotl_linear_regression_plot_obj },
+	{ MP_ROM_QSTR(MP_QSTR_scatterplot), (mp_obj_t) &matplotl_scatter_obj },
 };
 
 
@@ -2554,23 +2843,24 @@ const mp_obj_type_t matplotl_type = {
 
 
 STATIC const mp_map_elem_t mp_module_matplotl_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR__matplotl) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_show), (mp_obj_t) &matplotl_show_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_clf), (mp_obj_t) &matplotl_clf_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_axis), (mp_obj_t) &matplotl_axis_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_text), (mp_obj_t) &matplotl_text_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_plot), (mp_obj_t) &matplotl_plot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_boxplot), (mp_obj_t) &matplotl_boxplot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_boxwhisker), (mp_obj_t) &matplotl_boxplot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_arrow), (mp_obj_t) &matplotl_arrow_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_vector), (mp_obj_t) &matplotl_arrow_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_bar), (mp_obj_t) &matplotl_bar_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_hist), (mp_obj_t) &matplotl_hist_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_histogram), (mp_obj_t) &matplotl_hist_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_barplot), (mp_obj_t) &matplotl_bar_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_scatter), (mp_obj_t) &matplotl_scatter_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_linear_regression_plot), (mp_obj_t) &matplotl_linear_regression_plot_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_scatterplot), (mp_obj_t) &matplotl_scatter_obj },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__matplotl) },
+    { MP_ROM_QSTR(MP_QSTR_show), (mp_obj_t) &matplotl_show_obj },
+    { MP_ROM_QSTR(MP_QSTR_clf), (mp_obj_t) &matplotl_clf_obj },
+    { MP_ROM_QSTR(MP_QSTR_axis), (mp_obj_t) &matplotl_axis_obj },
+    { MP_ROM_QSTR(MP_QSTR_text), (mp_obj_t) &matplotl_text_obj },
+    { MP_ROM_QSTR(MP_QSTR_plot), (mp_obj_t) &matplotl_plot_obj },
+    { MP_ROM_QSTR(MP_QSTR_boxplot), (mp_obj_t) &matplotl_boxplot_obj },
+    { MP_ROM_QSTR(MP_QSTR_boxwhisker), (mp_obj_t) &matplotl_boxplot_obj },
+    { MP_ROM_QSTR(MP_QSTR_arrow), (mp_obj_t) &matplotl_arrow_obj },
+    { MP_ROM_QSTR(MP_QSTR_grid), (mp_obj_t) &matplotl_grid_obj },
+    { MP_ROM_QSTR(MP_QSTR_vector), (mp_obj_t) &matplotl_arrow_obj },
+    { MP_ROM_QSTR(MP_QSTR_bar), (mp_obj_t) &matplotl_bar_obj },
+    { MP_ROM_QSTR(MP_QSTR_hist), (mp_obj_t) &matplotl_hist_obj },
+    { MP_ROM_QSTR(MP_QSTR_histogram), (mp_obj_t) &matplotl_hist_obj },
+    { MP_ROM_QSTR(MP_QSTR_barplot), (mp_obj_t) &matplotl_bar_obj },
+    { MP_ROM_QSTR(MP_QSTR_scatter), (mp_obj_t) &matplotl_scatter_obj },
+    { MP_ROM_QSTR(MP_QSTR_linear_regression_plot), (mp_obj_t) &matplotl_linear_regression_plot_obj },
+    { MP_ROM_QSTR(MP_QSTR_scatterplot), (mp_obj_t) &matplotl_scatter_obj },
 };
 
 STATIC const mp_obj_dict_t mp_module_matplotl_globals = {

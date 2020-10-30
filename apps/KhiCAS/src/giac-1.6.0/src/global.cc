@@ -25,7 +25,7 @@ using namespace std;
 #else
 #include <strstream>
 #endif
-#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG && !defined POCKETCAS
+#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG 
 #include <fstream>
 #endif
 #include "global.h"
@@ -92,6 +92,11 @@ using namespace std;
 #include <stdio.h>
 #include <stdarg.h>
 
+#ifdef HAVE_LIBMICROPYTHON
+std::string python_console;
+#endif
+bool freezeturtle=false;
+
 #if defined(FIR)
 extern "C" int firvsprintf(char*,const char*, va_list);
 #endif
@@ -121,9 +126,21 @@ int my_sprintf(char * s, const char * format, ...){
     return z;
 }
 
+  int ctrl_c_interrupted(int exception){
+    if (!giac::ctrl_c && !giac::interrupted)
+      return 0;
+    giac::ctrl_c=giac::interrupted=0;
+#ifndef NO_STD_EXCEPT
+    if (exception)
+      giac::setsizeerr("Interrupted");
+#endif
+    return 1;
+  }
+
 #ifndef NO_NAMESPACE_GIAC
 namespace giac {
 #endif // ndef NO_NAMESPACE_GIAC
+  const context * python_contextptr=0;
   void opaque_double_copy(void * source,void * target){
     *((double *) target) = * ((double *) source);
   }
@@ -6072,7 +6089,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
 	alertcmath=false;
 	alert(gettext("Assigning phase, j, J and rect."),contextptr);
       }
-      cur += "phase:=arg:;j:=i:;J:=i:;rect(r,theta):=r*exp(i*theta):;";
+      cur += "phase:=arg:;j:=i:;J:=i:;";
       posmath=poscmath;
     }
     if (posmath>=0 && posmath<cs){
@@ -6289,7 +6306,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
 	  break;
 	for (int pos2=pos-1;pos2>=0;--pos2){
 	  ch=res[pos2];
-	  if (ch!=' ' && ch!=9){
+	  if (ch!=' ' && ch!=9 && ch!='\r'){
 	    if (ch=='{' || ch=='[' || ch==',' || ch=='-' || ch=='+' ||  ch=='/')
 	      cherche=true;
 	    break;
@@ -6297,7 +6314,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
 	}
 	for (size_t pos2=pos+1;pos2<res.size();++pos2){
 	  ch=res[pos2];
-	  if (ch!=' ' && ch!=9){
+	  if (ch!=' ' && ch!=9 && ch!='\r'){
 	    if (ch==']' || ch=='}' || ch==')')
 	      cherche=true;
 	    break;
@@ -6315,7 +6332,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
       bool instring=false,chkfrom=true;
       for (pos=0;pos<int(cur.size());++pos){
 	char ch=cur[pos];
-	if (ch==' ' || ch==char(9))
+	if (ch==' ' || ch==char(9) || ch=='\r')
 	  continue;
 	if (!instring && pythoncompat && ch=='{' && (pos==0 || cur[pos-1]!='\\')){
 	  // find matching }, counting : and , and ;
@@ -6494,7 +6511,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
       }
       // detect : at end of line
       for (pos=int(cur.size())-1;pos>=0;--pos){
-	if (cur[pos]!=' ' && cur[pos]!=char(9))
+	if (cur[pos]!=' ' && cur[pos]!=char(9) && cur[pos]!='\r')
 	  break;
       }
       if (pos<0){ 
@@ -6558,7 +6575,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
 	    convert_python(cur,contextptr);
 	    // no fi if there is an else or elif
 	    for (p=0;p<int(res.size());++p){
-	      if (res[p]!=' ' && res[p]!=char(9))
+	      if (res[p]!=' ' && res[p]!=char(9) && res[p]!='\r')
 		break;
 	    }
 	    if (p<res.size()+5 && (res.substr(p,4)=="else" || res.substr(p,4)=="elif")){
@@ -6603,7 +6620,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
       int ws=0;
       int cs=cur.size();
       for (ws=0;ws<cs;++ws){
-	if (cur[ws]!=' ' && cur[ws]!=char(9))
+	if (cur[ws]!=' ' && cur[ws]!=char(9) && cur[ws]!='\r')
 	  break;
       }
       if (cur[pos]==':'){
@@ -6774,7 +6791,9 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
     }
     if (pythonmode){
       char ch;
-      while ((ch=s[s.size()-1])==';' || (ch=='\n'))
+      while (s.size()>1 && 
+	     ( ((ch=s[s.size()-1])==';' && s[s.size()-2]!=':') || (ch=='\n'))
+	     )
 	s=s.substr(0,s.size()-1);
       // replace ;) by )
       for (int i=s.size()-1;i>=2;--i){
@@ -6787,7 +6806,7 @@ void update_lexer_localization(const std::vector<int> & v,std::map<std::string,s
 	s += ":;";
       else {
 	int pos=s.find('\n');
-	if (pos>=0 && pos<s.size())
+	if (pos>=0 && pos<s.size() && s[s.size()-1]!=';')
 	  s += ";";
       }
       if (debug_infolevel)

@@ -1190,6 +1190,8 @@ namespace xcas {
 	spread_ptr->update_input();
         return;
       }
+      if (g.type>=_IDNT && spread_ptr->is_spreadsheet && v[C].type!=_VECT)
+	v[C]=makevecteur(v[C],0,0);
       if ( (v[C].type==_VECT) && (v[C]._VECTptr->size()==3)){
 	v[C]._VECTptr->front()=spread_convert(g,R,C,contextptr);
 	if (!spread_ptr->is_spreadsheet)
@@ -3622,6 +3624,13 @@ namespace xcas {
 
   gen Xcas_fltk_current_sheet(const gen & g,GIAC_CONTEXT){
     Flv_Table_Gen * tptr=(Flv_Table_Gen * )evaled_table(contextptr);
+    if (!tptr && last_history_pack){
+      Fl::lock();
+      Tableur_Group * tg=dynamic_cast<Tableur_Group *>(new_tableur(last_history_pack,2));
+      Fl::unlock();
+      if (tg)
+	tptr=tg->table;
+    }
     if (tptr){
       const giac::context * contextptr = get_context((tptr));
       int r,c;
@@ -3631,6 +3640,11 @@ namespace xcas {
 	gen tmp=tptr->m[r];
 	tmp=tmp[c];
 	return tmp[1];
+      }
+      if (ckmatrix(g,true)){
+	tptr->is_spreadsheet=true;
+	tptr->set_matrix(g);
+	return 1;
       }
       if (g.type==_VECT && g._VECTptr->size()==2 && g._VECTptr->front().type==_INT_ && g._VECTptr->back().type==_INT_)
 	return gen(extractmatricefromsheet(tptr->m),_MATRIX__VECT)[g];

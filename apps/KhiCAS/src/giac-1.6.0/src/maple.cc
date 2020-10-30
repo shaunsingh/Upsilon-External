@@ -24,7 +24,7 @@ using namespace std;
 #include <cmath>
 #include <cstdlib>
 #include <stdio.h>
-#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG && !defined POCKETCAS
+#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG 
 #include <fstream>
 #endif
 #if !defined HAVE_NO_SYS_TIMES_H && defined HAVE_SYS_TIME_H
@@ -79,6 +79,9 @@ using namespace std;
 #ifdef KHICAS
 int time_shift;
 #ifdef NUMWORKS
+#ifdef DEVICE
+extern "C" unsigned long long millis();
+#else
 namespace Ion {
   namespace Timing {
     
@@ -94,6 +97,7 @@ namespace Ion {
 double millis(){
   return double(Ion::Timing::millis()); // RTC_GetTicks();
 }
+#endif
 #else
 extern "C" double millis();
 #endif
@@ -400,7 +404,7 @@ namespace giac {
 #endif
 	return 1;
       }
-      return millis();
+      return (double) millis();
     }
     double delta;
     int ntimes=1,i=0;

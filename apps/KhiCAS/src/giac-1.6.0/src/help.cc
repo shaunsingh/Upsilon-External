@@ -24,17 +24,23 @@ using namespace std;
 #include "gen.h"
 #include "help.h"
 #include <iostream>
-#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG && !defined POCKETCAS
+#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG 
 #include <fstream>
 #endif
 #include "global.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#if defined MICROPY_LIB || defined HAVE_LIBMICROPYTHON
+extern "C" int mp_token(const char * line);
+#endif
+
 #ifdef KHICAS
 #include "kdisplay.h" // for select_item,
+#if defined MICROPY_LIB || defined HAVE_LIBMICROPYTHON
 extern "C" int xcas_python_eval;
-extern "C" int mp_token(const char * line);
+#endif
 #endif
 
 #if defined VISUALC || defined BESTA_OS
@@ -102,34 +108,33 @@ namespace giac {
     return a.second>b.second;
   }
 
+  const char * python_keywords[] = {   // List of known giac keywords...
+    "False",
+    "None",
+    "True",
+    "and",
+    "break",
+    "continue",
+    "def",
+    "default",
+    "elif",
+    "else",
+    "except",
+    "for",
+    "from",
+    "global",
+    "if",
+    "import",
+    "not",
+    "or",
+    "return",
+    "try",
+    "while",
+    "xor",
+    "yield",
+  };
   const char * const python_builtins[]={
-    "ArithmeticError",
-    "AssertionError",
-    "AttributeError",
-    "BaseException",
-    "EOFError",
-    "Ellipsis",
-    "Exception",
-    "GeneratorExit",
-    "ImportError",
-    "IndentationError",
-    "IndexError",
-    "KeyError",
-    "KeyboardInterrupt",
-    "LookupError",
-    "MemoryError",
-    "NameError",
     "NoneType",
-    "NotImplementedError",
-    "OSError",
-    "OverflowError",
-    "RuntimeError",
-    "StopIteration",
-    "SyntaxError",
-    "SystemExit",
-    "TypeError",
-    "ValueError",
-    "ZeroDivisionError",
     "__call__",
     "__class__",
     "__delitem__",
@@ -264,6 +269,10 @@ namespace giac {
     "zip",
   };
 
+  bool is_python_keyword(const char * s){
+    return dichotomic_search(python_keywords,sizeof(python_keywords)/sizeof(char*),s)!=-1;
+  }
+  
   bool is_python_builtin(const char * s){
     return dichotomic_search(python_builtins,sizeof(python_builtins)/sizeof(char*),s)!=-1;
   }
@@ -1333,7 +1342,7 @@ namespace giac {
     ifstream if_mtt(filename);
     int n=0;
     while (if_mtt && !if_mtt.eof()){
-      if_mtt.getline(buf,BUFFER_SIZE,char(0xa4)); // was '\A4', utf8 not compatible, octal \244
+      if_mtt.getline(buf,BUFFER_SIZE,char(0xa4)); // was '¤', utf8 not compatible, octal \244
       if (!if_mtt || if_mtt.eof()){
 	if (verbose)
 	  cerr << "// Read " << n << " entries from cache " << filename << endl;
@@ -1642,7 +1651,7 @@ namespace giac {
   }
 #endif // RTOS_THREADX
 
-  // static char otherchars[]="_.~\A0\A1\A2\A3\A4\A5\A6\A7\A8\A9\AA\AB\AC\AD\AE\AF\B0\B1\B2\B3\B4\B5\B6\B7\B8\B9\BA\BB\BC\BD\BE\BF\C0\C1\C2\C3\C4\C5\C6\C7\C8\C9\CA\CB\CC\CD\CE\CF\D0\D1\D2\D3\D4\D5\D6\D7\D8\D9\DA\DB\DC\DD\DE\DF\E0\E1\E2\E3\E4\E5\E6\E7\E8\E9\EA\EB\EC\ED\EE\EF\F0\F1\F2\F3\F4\F5\F6\F7\F8\F9\FA\FB\FC\FD\FE\FF";
+  // static char otherchars[]="_.~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
 
   bool isalphan(char ch){
     if (ch>='0' && ch<='9')

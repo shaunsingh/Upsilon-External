@@ -71,7 +71,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/codeset.m4 \
 	$(top_srcdir)/m4/uintmax_t.m4 $(top_srcdir)/m4/ulonglong.m4 \
 	$(top_srcdir)/m4/wchar_t.m4 $(top_srcdir)/m4/wint_t.m4 \
 	$(top_srcdir)/m4/xsize.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.in
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -95,6 +95,7 @@ AUTOCONF = ${SHELL} /home/parisse/giac-1.6.0/config/missing --run autoconf
 AUTOHEADER = ${SHELL} /home/parisse/giac-1.6.0/config/missing --run autoheader
 AUTOMAKE = ${SHELL} /home/parisse/giac-1.6.0/config/missing --run automake-1.11
 AWK = gawk
+BERNMM_LIBS = 
 BUILD_INCLUDED_LIBINTL = no
 CATOBJEXT = .gmo
 CC = /usr/bin/gcc
@@ -102,6 +103,7 @@ CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2
 COCOA_LIBS = 
 CONFIG_AO = yes
+CONFIG_BERNMM = yes
 CONFIG_COCOA = no
 CONFIG_CURL = yes
 CONFIG_DOC_PROGS = yes
@@ -118,7 +120,7 @@ CURL_LIBS =
 CXX = /usr/bin/g++
 CXXCPP = /usr/bin/g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -fno-strict-aliasing -DGIAC_GENERIC_CONSTANTS
+CXXFLAGS = -g -O2 -fno-strict-aliasing -DGIAC_GENERIC_CONSTANTS -DHAVE_LIBMICROPYTHON -fpermissive
 CYGPATH_W = echo
 DATADIRNAME = share
 DEFS = -DHAVE_CONFIG_H
@@ -134,7 +136,7 @@ EGREP = /bin/grep -E
 EXEEXT = 
 FGREP = /bin/grep -F
 GENCAT = gencat
-GINSH_LIBS = -lreadline -lncurses -lcurl -lsamplerate -lglpk -lao -llapack -lblas -lgfortran -ldl -lpng12 -lm -lecm -lmpfi -lmpfr -lgmp 
+GINSH_LIBS = -lreadline -lncurses -lcurl -lsamplerate -lglpk -lao -llapack -lblas -lgfortran -ldl -lpng12 -lm -lbernmm -lecm -lmpfi -lmpfr -lgmp 
 GLIBC2 = yes
 GLIBC21 = yes
 GLPK_LIBS = 
@@ -142,7 +144,7 @@ GMPXX_LIBS = -lgmpxx
 GMSGFMT = /usr/bin/msgfmt
 GREP = /bin/grep
 GSL_LIBS = -lgsl -lgslcblas
-GUI_LIBS = -lfltk_images -ljpeg -lpng -lz -lfltk -lfltk_gl -lXext -lXft -lfontconfig -lX11 -lGL -lcurl -lsamplerate -lglpk -lao -llapack -lblas -lgfortran -ldl -lpng12 -lm -lecm -lmpfi -lmpfr -lgmp  
+GUI_LIBS = -lfltk_images -ljpeg -lpng -lz -lfltk -lfltk_gl -lXext -lXft -lfontconfig -lX11 -lGL -lcurl -lsamplerate -lglpk -lao -llapack -lblas -lgfortran -ldl -lpng12 -lm -lbernmm -lecm -lmpfi -lmpfr -lgmp  
 HAVE_ASPRINTF = 1
 HAVE_POSIX_PRINTF = 1
 HAVE_SNPRINTF = 1
@@ -160,14 +162,14 @@ INTL_LIBTOOL_SUFFIX_PREFIX =
 INTL_MACOSX_LIBS = 
 LATEX = /usr/bin/latex
 LD = /usr/bin/ld -m elf_x86_64
-LDFLAGS = 
+LDFLAGS =  -L. -L.. -lmicropython
 LEX = flex
 LEXLIB = 
 LEX_OUTPUT_ROOT = lex.yy
 LIBICONV = 
 LIBINTL = 
 LIBOBJS = 
-LIBS = -lrt -lpthread -lcurl -lsamplerate -lglpk -lao -llapack -lblas -lgfortran -ldl -lpng12 -lm -lecm -lmpfi -lmpfr -lgmp 
+LIBS = -lrt -lpthread -lnauty -lcurl -lsamplerate -lglpk -lao -llapack -lblas -lgfortran -ldl -lpng12 -lm -lbernmm -lecm -lmpfi -lmpfr -lgmp 
 LIBTERMCAP = -lncurses
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 

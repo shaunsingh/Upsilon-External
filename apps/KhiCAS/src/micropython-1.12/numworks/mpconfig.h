@@ -392,13 +392,13 @@
 // Whether to enable optimisation of: a, b, c = d, e, f
 // Requires MICROPY_COMP_DOUBLE_TUPLE_ASSIGN and costs 68 bytes (Thumb2)
 #ifndef MICROPY_COMP_TRIPLE_TUPLE_ASSIGN
-#define MICROPY_COMP_TRIPLE_TUPLE_ASSIGN (0)
+#define MICROPY_COMP_TRIPLE_TUPLE_ASSIGN (1)
 #endif
 
 // Whether to enable optimisation of: return a if b else c
 // Costs about 80 bytes (Thumb2) and saves 2 bytes of bytecode for each use
 #ifndef MICROPY_COMP_RETURN_IF_EXPR
-#define MICROPY_COMP_RETURN_IF_EXPR (0)
+#define MICROPY_COMP_RETURN_IF_EXPR (1)
 #endif
 
 /*****************************************************************************/
@@ -406,7 +406,7 @@
 
 // Whether to collect memory allocation stats
 #ifndef MICROPY_MEM_STATS
-#define MICROPY_MEM_STATS (0)
+#define MICROPY_MEM_STATS (1)
 #endif
 
 // The mp_print_t printer used for debugging output
@@ -418,7 +418,7 @@
 //   mp_bytecode_print
 //   mp_parse_node_print
 #ifndef MICROPY_DEBUG_PRINTERS
-#define MICROPY_DEBUG_PRINTERS (0)
+#define MICROPY_DEBUG_PRINTERS (1)
 #endif
 
 // Whether to enable all debugging outputs (it will be extremely verbose)
@@ -463,7 +463,7 @@
 
 // Whether math.factorial is large, fast and recursive (1) or small and slow (0).
 #ifndef MICROPY_OPT_MATH_FACTORIAL
-#define MICROPY_OPT_MATH_FACTORIAL (0)
+#define MICROPY_OPT_MATH_FACTORIAL (1)
 #endif
 
 /*****************************************************************************/
@@ -596,12 +596,12 @@ typedef long long mp_longint_impl_t;
 // Whether to include information in the byte code to determine source
 // line number (increases RAM usage, but doesn't slow byte code execution)
 #ifndef MICROPY_ENABLE_SOURCE_LINE
-#define MICROPY_ENABLE_SOURCE_LINE (0)
+#define MICROPY_ENABLE_SOURCE_LINE (1)
 #endif
 
 // Whether to include doc strings (increases RAM usage)
 #ifndef MICROPY_ENABLE_DOC_STRING
-#define MICROPY_ENABLE_DOC_STRING (0)
+#define MICROPY_ENABLE_DOC_STRING (1)
 #endif
 
 // Exception messages are short static strings
@@ -830,7 +830,7 @@ typedef double mp_float_t;
 
 // Whether str.center() method provided
 #ifndef MICROPY_PY_BUILTINS_STR_CENTER
-#define MICROPY_PY_BUILTINS_STR_CENTER (0)
+#define MICROPY_PY_BUILTINS_STR_CENTER (1)
 #endif
 
 // Whether str.count() method provided
@@ -845,12 +845,12 @@ typedef double mp_float_t;
 
 // Whether str.partition()/str.rpartition() method provided
 #ifndef MICROPY_PY_BUILTINS_STR_PARTITION
-#define MICROPY_PY_BUILTINS_STR_PARTITION (0)
+#define MICROPY_PY_BUILTINS_STR_PARTITION (1)
 #endif
 
 // Whether str.splitlines() method provided
 #ifndef MICROPY_PY_BUILTINS_STR_SPLITLINES
-#define MICROPY_PY_BUILTINS_STR_SPLITLINES (0)
+#define MICROPY_PY_BUILTINS_STR_SPLITLINES (1)
 #endif
 
 // Whether to support bytearray object
@@ -865,12 +865,12 @@ typedef double mp_float_t;
 
 // Whether to support memoryview object
 #ifndef MICROPY_PY_BUILTINS_MEMORYVIEW
-#define MICROPY_PY_BUILTINS_MEMORYVIEW (0)
+#define MICROPY_PY_BUILTINS_MEMORYVIEW (1)
 #endif
 
 // Whether to support memoryview.itemsize attribute
 #ifndef MICROPY_PY_BUILTINS_MEMORYVIEW_ITEMSIZE
-#define MICROPY_PY_BUILTINS_MEMORYVIEW_ITEMSIZE (0)
+#define MICROPY_PY_BUILTINS_MEMORYVIEW_ITEMSIZE (1)
 #endif
 
 // Whether to support set object
@@ -886,12 +886,12 @@ typedef double mp_float_t;
 // Whether to support slice attribute read access,
 // i.e. slice.start, slice.stop, slice.step
 #ifndef MICROPY_PY_BUILTINS_SLICE_ATTRS
-#define MICROPY_PY_BUILTINS_SLICE_ATTRS (0)
+#define MICROPY_PY_BUILTINS_SLICE_ATTRS (1)
 #endif
 
 // Whether to support frozenset object
 #ifndef MICROPY_PY_BUILTINS_FROZENSET
-#define MICROPY_PY_BUILTINS_FROZENSET (0)
+#define MICROPY_PY_BUILTINS_FROZENSET (1)
 #endif
 
 // Whether to support property object
@@ -910,12 +910,12 @@ typedef double mp_float_t;
 // the same object will compare as not-equal.  With it enabled the semantics
 // match CPython and ranges are equal if they yield the same sequence of items.
 #ifndef MICROPY_PY_BUILTINS_RANGE_BINOP
-#define MICROPY_PY_BUILTINS_RANGE_BINOP (0)
+#define MICROPY_PY_BUILTINS_RANGE_BINOP (1)
 #endif
 
 // Support for callling next() with second argument
 #ifndef MICROPY_PY_BUILTINS_NEXT2
-#define MICROPY_PY_BUILTINS_NEXT2 (0)
+#define MICROPY_PY_BUILTINS_NEXT2 (1)
 #endif
 
 // Whether to support rounding of integers (incl bignum); eg round(123,-1)=120
@@ -934,20 +934,20 @@ typedef double mp_float_t;
 // "Reverse" methods are controlled by
 // MICROPY_PY_REVERSE_SPECIAL_METHODS below.
 #ifndef MICROPY_PY_ALL_SPECIAL_METHODS
-#define MICROPY_PY_ALL_SPECIAL_METHODS (0)
+#define MICROPY_PY_ALL_SPECIAL_METHODS (1)
 #endif
 
 // Whether to support all inplace arithmetic operarion methods
 // (__imul__, etc.)
 #ifndef MICROPY_PY_ALL_INPLACE_SPECIAL_METHODS
-#define MICROPY_PY_ALL_INPLACE_SPECIAL_METHODS (0)
+#define MICROPY_PY_ALL_INPLACE_SPECIAL_METHODS (1)
 #endif
 
 // Whether to support reverse arithmetic operarion methods
 // (__radd__, etc.). Additionally gated by
 // MICROPY_PY_ALL_SPECIAL_METHODS.
 #ifndef MICROPY_PY_REVERSE_SPECIAL_METHODS
-#define MICROPY_PY_REVERSE_SPECIAL_METHODS (0)
+#define MICROPY_PY_REVERSE_SPECIAL_METHODS (1)
 #endif
 
 // Whether to support compile function
@@ -999,12 +999,12 @@ typedef double mp_float_t;
 
 // Support for calls to pow() with 3 integer arguments
 #ifndef MICROPY_PY_BUILTINS_POW3
-#define MICROPY_PY_BUILTINS_POW3 (0)
+#define MICROPY_PY_BUILTINS_POW3 (1)
 #endif
 
 // Whether to provide the help function
 #ifndef MICROPY_PY_BUILTINS_HELP
-#define MICROPY_PY_BUILTINS_HELP (0)
+#define MICROPY_PY_BUILTINS_HELP (1)
 #endif
 
 // Use this to configure the help text shown for help().  It should be a
@@ -1015,7 +1015,7 @@ typedef double mp_float_t;
 
 // Add the ability to list the available modules when executing help('modules')
 #ifndef MICROPY_PY_BUILTINS_HELP_MODULES
-#define MICROPY_PY_BUILTINS_HELP_MODULES (0)
+#define MICROPY_PY_BUILTINS_HELP_MODULES (1)
 #endif
 
 // Whether to set __file__ for imported modules
@@ -1025,7 +1025,7 @@ typedef double mp_float_t;
 
 // Whether to provide mem-info related functions in micropython module
 #ifndef MICROPY_PY_MICROPYTHON_MEM_INFO
-#define MICROPY_PY_MICROPYTHON_MEM_INFO (0)
+#define MICROPY_PY_MICROPYTHON_MEM_INFO (1)
 #endif
 
 // Whether to provide "micropython.stack_use" function
@@ -1043,7 +1043,7 @@ typedef double mp_float_t;
 // Whether to support slice assignments for array (and bytearray).
 // This is rarely used, but adds ~0.5K of code.
 #ifndef MICROPY_PY_ARRAY_SLICE_ASSIGN
-#define MICROPY_PY_ARRAY_SLICE_ASSIGN (0)
+#define MICROPY_PY_ARRAY_SLICE_ASSIGN (1)
 #endif
 
 // Whether to support attrtuple type (MicroPython extension)
@@ -1059,17 +1059,17 @@ typedef double mp_float_t;
 
 // Whether to provide "ucollections.deque" type
 #ifndef MICROPY_PY_COLLECTIONS_DEQUE
-#define MICROPY_PY_COLLECTIONS_DEQUE (0)
+#define MICROPY_PY_COLLECTIONS_DEQUE (1)
 #endif
 
 // Whether to provide "collections.OrderedDict" type
 #ifndef MICROPY_PY_COLLECTIONS_ORDEREDDICT
-#define MICROPY_PY_COLLECTIONS_ORDEREDDICT (0)
+#define MICROPY_PY_COLLECTIONS_ORDEREDDICT (1)
 #endif
 
 // Whether to provide the _asdict function for namedtuple
 #ifndef MICROPY_PY_COLLECTIONS_NAMEDTUPLE__ASDICT
-#define MICROPY_PY_COLLECTIONS_NAMEDTUPLE__ASDICT (0)
+#define MICROPY_PY_COLLECTIONS_NAMEDTUPLE__ASDICT (1)
 #endif
 
 // Whether to provide "math" module
@@ -1079,22 +1079,22 @@ typedef double mp_float_t;
 
 // Whether to provide special math functions: math.{erf,erfc,gamma,lgamma}
 #ifndef MICROPY_PY_MATH_SPECIAL_FUNCTIONS
-#define MICROPY_PY_MATH_SPECIAL_FUNCTIONS (0)
+#define MICROPY_PY_MATH_SPECIAL_FUNCTIONS (1)
 #endif
 
 // Whether to provide math.factorial function
 #ifndef MICROPY_PY_MATH_FACTORIAL
-#define MICROPY_PY_MATH_FACTORIAL (0)
+#define MICROPY_PY_MATH_FACTORIAL (1)
 #endif
 
 // Whether to provide math.isclose function
 #ifndef MICROPY_PY_MATH_ISCLOSE
-#define MICROPY_PY_MATH_ISCLOSE (0)
+#define MICROPY_PY_MATH_ISCLOSE (1)
 #endif
 
 // Whether to provide "cmath" module
 #ifndef MICROPY_PY_CMATH
-#define MICROPY_PY_CMATH (0)
+#define MICROPY_PY_CMATH (1)
 #endif
 
 // Whether to provide "gc" module
@@ -1155,7 +1155,7 @@ typedef double mp_float_t;
 
 // Whether to provide "sys.maxsize" constant
 #ifndef MICROPY_PY_SYS_MAXSIZE
-#define MICROPY_PY_SYS_MAXSIZE (0)
+#define MICROPY_PY_SYS_MAXSIZE (1)
 #endif
 
 // Whether to provide "sys.modules" dictionary
@@ -1176,7 +1176,7 @@ typedef double mp_float_t;
 
 // Whether to provide "sys.atexit" function (MicroPython extension)
 #ifndef MICROPY_PY_SYS_ATEXIT
-#define MICROPY_PY_SYS_ATEXIT (0)
+#define MICROPY_PY_SYS_ATEXIT (1)
 #endif
 
 // Whether to provide "sys.settrace" function
@@ -1186,7 +1186,7 @@ typedef double mp_float_t;
 
 // Whether to provide "sys.getsizeof" function
 #ifndef MICROPY_PY_SYS_GETSIZEOF
-#define MICROPY_PY_SYS_GETSIZEOF (0)
+#define MICROPY_PY_SYS_GETSIZEOF (1)
 #endif
 
 // Whether to provide sys.{stdin,stdout,stderr} objects
@@ -1251,7 +1251,7 @@ typedef double mp_float_t;
 // Extended modules
 
 #ifndef MICROPY_PY_UCTYPES
-#define MICROPY_PY_UCTYPES (0)
+#define MICROPY_PY_UCTYPES (1)
 #endif
 
 // Whether to provide SHORT, INT, LONG, etc. types in addition to
@@ -1261,40 +1261,40 @@ typedef double mp_float_t;
 #endif
 
 #ifndef MICROPY_PY_UZLIB
-#define MICROPY_PY_UZLIB (0)
+#define MICROPY_PY_UZLIB (1)
 #endif
 
 #ifndef MICROPY_PY_UJSON
-#define MICROPY_PY_UJSON (0)
+#define MICROPY_PY_UJSON (1)
 #endif
 
 #ifndef MICROPY_PY_URE
-#define MICROPY_PY_URE (0)
+#define MICROPY_PY_URE (1)
 #endif
 
 #ifndef MICROPY_PY_URE_DEBUG
-#define MICROPY_PY_URE_DEBUG (0)
+#define MICROPY_PY_URE_DEBUG (1)
 #endif
 
 #ifndef MICROPY_PY_URE_MATCH_GROUPS
-#define MICROPY_PY_URE_MATCH_GROUPS (0)
+#define MICROPY_PY_URE_MATCH_GROUPS (1)
 #endif
 
 #ifndef MICROPY_PY_URE_MATCH_SPAN_START_END
-#define MICROPY_PY_URE_MATCH_SPAN_START_END (0)
+#define MICROPY_PY_URE_MATCH_SPAN_START_END (1)
 #endif
 
 #ifndef MICROPY_PY_URE_SUB
-#define MICROPY_PY_URE_SUB (0)
+#define MICROPY_PY_URE_SUB (1)
 #endif
 
 #ifndef MICROPY_PY_UHEAPQ
-#define MICROPY_PY_UHEAPQ (0)
+#define MICROPY_PY_UHEAPQ (1)
 #endif
 
 // Optimized heap queue for relative timestamps
 #ifndef MICROPY_PY_UTIMEQ
-#define MICROPY_PY_UTIMEQ (0)
+#define MICROPY_PY_UTIMEQ (1)
 #endif
 
 #ifndef MICROPY_PY_UHASHLIB
@@ -1310,7 +1310,7 @@ typedef double mp_float_t;
 #endif
 
 #ifndef MICROPY_PY_UHASHLIB_SHA256
-#define MICROPY_PY_UHASHLIB_SHA256 (1)
+#define MICROPY_PY_UHASHLIB_SHA256 (0)
 #endif
 
 #ifndef MICROPY_PY_UCRYPTOLIB
@@ -1336,12 +1336,12 @@ typedef double mp_float_t;
 #endif
 
 #ifndef MICROPY_PY_URANDOM
-#define MICROPY_PY_URANDOM (0)
+#define MICROPY_PY_URANDOM (1)
 #endif
 
 // Whether to include: randrange, randint, choice, random, uniform
 #ifndef MICROPY_PY_URANDOM_EXTRA_FUNCS
-#define MICROPY_PY_URANDOM_EXTRA_FUNCS (0)
+#define MICROPY_PY_URANDOM_EXTRA_FUNCS (1)
 #endif
 
 #ifndef MICROPY_PY_MACHINE

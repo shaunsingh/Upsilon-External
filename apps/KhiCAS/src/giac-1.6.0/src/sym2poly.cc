@@ -23,7 +23,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 using namespace std;
-#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG && !defined POCKETCAS
+#if !defined GIAC_HAS_STO_38 && !defined NSPIRE && !defined FXCG 
 #include <fstream>
 #endif
 #include <string>
@@ -3150,6 +3150,22 @@ namespace giac {
     if (is_inequation(e) && e._SYMBptr->feuille.type==_VECT){
       vecteur & v=*e._SYMBptr->feuille._VECTptr;
       unary_function_ptr u=e._SYMBptr->sommet;
+      if (calc_mode(contextptr)==1){
+	if (lidnt(v[0]).empty() && !lidnt(v[1]).empty()){
+	  gen e2=makesequence(v[1],v[0]);
+	  if (u==at_superieur_strict)
+	    return symbolic(at_inferieur_strict,e2);
+	  if (u==at_superieur_egal)
+	    return symbolic(at_inferieur_egal,e2);
+	  if (u==at_inferieur_strict)
+	    return symbolic(at_superieur_strict,e2);
+	  if (u==at_inferieur_egal)
+	    return symbolic(at_superieur_egal,e2);
+	}
+	return e;
+      }
+      if (v[0].type==_IDNT && equalposcomp(lidnt(v[1]),v[0])==0)
+	return symbolic(u,makesequence(v[0],normal(v[1],true,contextptr)));
       gen e2= v[0]-v[1];
       e2=normal(e2,true,contextptr);
       gen c=_content(e2,contextptr);
@@ -4027,7 +4043,7 @@ namespace giac {
 	  vecteur2vector_int(B,m.val,b);
 	  return makemod(resultant_int(a,b,tmp1,tmp2,m.val),m);
 	}
-#ifdef INT128
+#if defined INT128 && !defined USE_GMP_REPLACEMENTS
 	if (m.type==_ZINT && sizeinbase2(m)<61){
 	  longlong p=mpz_get_si(*m._ZINTptr);
 	  int n=giacmax(A.size(),B.size());

@@ -2582,6 +2582,7 @@ namespace giac {
 	// if (b) purgenoassume(x,contextptr);
 	// first_try = quotesubst(ratnormal(e,contextptr),x,lim_point,contextptr);
       }
+      gen numtry=evalf(first_try,1,contextptr);
       bool absb=eval_abs(contextptr);
       first_try=eval(first_try,eval_level(contextptr),contextptr); // moved before eval_abs(false,contextptr), must be before simplifier below
       first_try=simplifier(first_try,contextptr); // for assume(a>0); limit((sqrt(2*a^3*x-x^4)-a*root(3,a^2*x))/(a-root(4,a*x^3)),x=a);
@@ -2591,7 +2592,7 @@ namespace giac {
       eval_abs(absb,contextptr);
       if (is_undef(first_try) && first_try.type==_STRNG)
 	return first_try;
-      if (!is_undef(first_try)){
+      if (!is_undef(first_try) && !is_undef(numtry)){
 	// if (!direction) return first_try;
 	if (first_try!=unsigned_inf)
 	  return first_try;
@@ -2952,6 +2953,12 @@ namespace giac {
       c=coeff_ln[p-1];
       f=subst(it->_SYMBptr->feuille,faster_var,faster_var_subst,false,contextptr);
       faster_var_subst.push_back(pow(w,c,contextptr)*exp(normal(f-c*g,contextptr),contextptr));
+    }
+    // add original variable in faster_var/faster_var_subst
+    // otherwise we might miss replacements
+    if (faster_var.front().is_symb_of_sommet(at_exp) && faster_var.front()._SYMBptr->feuille==x){
+      faster_var.push_back(x);
+      faster_var_subst.push_back(ln(faster_var_subst.front(),contextptr));
     }
     // subst in original expression and make the asymptotic expansion
     double ordre=begin_ordre;

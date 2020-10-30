@@ -9,6 +9,10 @@ size_t stackptr=0xffffffffffffffff;
 #endif
 #endif
 
+#ifdef NSPIRE_NEWLIB
+#include <os.h>
+#endif
+
 /*
  *  Copyright (C) 2001,14 B. Parisse, Institut Fourier, 38402 St Martin d'Heres
  *
@@ -2184,7 +2188,7 @@ namespace giac {
 	    return true;
 	  }
 #else // rtos
-#if !defined(WIN32) && defined(HAVE_PTHREAD_H)
+#if !defined(WIN32) && defined(HAVE_PTHREAD_H) && defined HAVE_LIBPTHREAD
 	  void * stackaddr;
 	  if (contextptr && (stackaddr=thread_param_ptr(contextptr)->stackaddr)){
 	    // CERR << &slevel << " " << thread_param_ptr(contextptr)->stackaddr << '\n';
@@ -3160,7 +3164,7 @@ namespace giac {
 	  }
 	}
       }
-      if (equalposcomp(plot_sommets,_SYMBptr->sommet) || equalposcomp(analytic_sommets,_SYMBptr->sommet) || _SYMBptr->sommet==at_surd || _SYMBptr->sommet==at_erf)
+      if (equalposcomp(plot_sommets,_SYMBptr->sommet) || equalposcomp(analytic_sommets,_SYMBptr->sommet) || _SYMBptr->sommet==at_surd || _SYMBptr->sommet==at_erf || _SYMBptr->sommet==at_division)
 	return new_ref_symbolic(symbolic(_SYMBptr->sommet,_SYMBptr->feuille.conj(contextptr)));
       else
 	return new_ref_symbolic(symbolic(at_conj,*this));
@@ -7562,7 +7566,10 @@ namespace giac {
   gen pow(unsigned long int base, unsigned long int exponent){
     ref_mpz_t *e=new ref_mpz_t;
 #ifdef EMCC
-    if (base==int(base)){
+    mpz_set_si(e->z,base);
+    mpz_pow_ui(e->z,e->z,exponent);
+    return e;
+    if (base==int(base)){ // too slow!
       mpz_set_si(e->z,1);
       for (unsigned long int i=0;i<exponent;++i){
 	mpz_mul_ui(e->z,e->z,int(base));
@@ -11439,17 +11446,17 @@ namespace giac {
 #ifndef NO_STDEXCEPT
       settypeerr(gettext("is_probab_prime_p"));
 #endif
-      return false;
+      return 0;
     }
     if (a.type==_INT_ && a.val<2)
-      return false;
+      return 0;
     if (a.type==_INT_ && a.val<(1<<20)){
       for (int i=0;;++i){
 	int p=giac_primes[i];
 	if (p*p>a.val)
-	  return true;
+	  return 2;
 	if (a.val%p==0)
-	  return false;
+	  return 0;
       }
     }
     ref_mpz_t *aptr;
@@ -11892,7 +11899,7 @@ namespace giac {
 	return 1;
       }
     }
-#if !defined(WIN32) && defined(HAVE_PTHREAD_H)
+#if !defined(WIN32) && defined(HAVE_PTHREAD_H) && defined HAVE_LIBPTHREAD
     if (contextptr && thread_param_ptr(contextptr)->stackaddr && thread_param_ptr(contextptr)->stacksize/2){
       gen er;
       short int err=s.size();
@@ -16148,6 +16155,8 @@ void sprint_double(char * s,double d){
     static context * contextptr=0;
     if (!contextptr) contextptr=new context;
     context & C=*contextptr;
+    if (!strcmp(s,"caseval contextptr"))
+      return (const char *) contextptr;
     if (!strcmp(s,"shell off")){
       os_shell=false;
       return "shell off";
@@ -16169,25 +16178,51 @@ void sprint_double(char * s,double d){
       turtle();
       _efface_logo(vecteur(0),contextptr);
     }
-#ifndef NSPIRE_NEWLIB
     if (!strcmp(s,"*")){
+#ifdef NSPIRE_NEWLIB
+      if (nspirelua==1){
+	nspirelua=2;
+	*logptr(contextptr) << (lang?"menu menu: quitte le shell\n":"menu menu : leave the shell\n");
+	while (1){
+	  xcas::Console_Disp(1,contextptr);
+	  const char * expr =xcas::Console_GetLine(contextptr);
+	  if (!expr || expr[0]==4 || strcmp(expr,"exit")==0)
+	    break;
+	  xcas::run(expr,7,contextptr);
+	  xcas::Console_NewLine(xcas::LINE_TYPE_OUTPUT,1);
+	}
+	nspirelua=1;
+      }
+      return "Done";
+#else
       int res=xcas::console_main(contextptr);
       S=printint(res);
       return S.c_str();
-    }
 #endif
-    if (!strcmp(s,"+")){
+    }
+    if (!strcmp(s,"+"))
+      s="+\"temp\"";
+    if (!strncmp(s,"+\"",2)){
+      char filename[256];
+      strcpy(filename,s+2);
+      filename[strlen(filename)-1]=0;
+#ifdef NSPIRE_NEWLIB
+      strcat(filename,".py.tns");
+#else
+      strcat(filename,".py");
+#endif
       char buf[4096]="def f(x):\n  return x*x\n";
-      if (file_exists("temp.py")){
-	const char * ch=read_file("temp.py");
+      if (file_exists(filename)){
+	const char * ch=read_file(filename);
 	S=ch;
 	if (S.size()>sizeof(buf))
 	  S=S.substr(0,sizeof(buf)-1);
 	strcpy(buf,S.c_str());
       }
-      xcas::textedit(buf,sizeof(buf),contextptr);
-      S=buf;
-      return S.c_str();
+      xcas::textedit(buf,sizeof(buf),true,contextptr,filename);
+      s=buf;
+      //S=buf;
+      //return S.c_str();      
     }
     if (!strcmp(s,"toolbox menu")){
       char buf[1024]="";
@@ -16388,7 +16423,7 @@ void sprint_double(char * s,double d){
 	  last=tmp;
       }
       if (last.is_symb_of_sommet(at_pnt)){
-	if (os_shell)
+	if (os_shell || nspirelua)
 	  xcas::displaygraph(g,&C);
 	S="Graphic_object";
       }
