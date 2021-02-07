@@ -382,7 +382,7 @@ namespace giac {
 	examples=nullstring;
       return true;
     }
-#if defined EMCC
+#if defined EMCC || defined EMCC2
     // Find closest string
     syntax=nullstring;
     related=nullstring;
@@ -516,7 +516,8 @@ namespace giac {
       of << "," << endl;
     }
     cmds << "]" << endl;
-    of << endl;
+    of << endl; 
+    of.close();
     ofstream ofw("static_help_w.h");
     ofstream ofwindex("index_w.h");
     ofwindex << "const TChooseItem index_w[]={" << endl;
@@ -944,7 +945,7 @@ namespace giac {
     return result;
   }
 
-#if !defined(NSPIRE_NEWLIB) && !defined(RTOS_THREADX) && !defined(EMCC) &&!defined(NSPIRE) && !defined FXCG && !defined(KHICAS) && !defined GIAC_HAS_STO_38
+#if !defined(NSPIRE_NEWLIB) && !defined(RTOS_THREADX) && !defined(EMCC) && !defined(EMCC2) &&!defined(NSPIRE) && !defined FXCG && !defined(KHICAS) && !defined GIAC_HAS_STO_38
   multimap<string,string> html_mtt,html_mall;
   std::vector<std::string> html_vtt,html_vall;
 
@@ -1084,7 +1085,7 @@ namespace giac {
 	  break;
 	}
 	if (s>8 && tmp.substr(s-8,8)=="</B></A>"){
-	  // Find backward the first occurence of <A
+	  // Find backward the first occurrence of <A
 	  int l=s-8;
 	  for (;l>0;--l){
 	    if (tmp[l]=='<' && tmp[l+1]=='A')
@@ -1223,8 +1224,112 @@ namespace giac {
 #endif
 #endif // visualc
 
+#ifdef __MINGW_H
+  int giac_errno=0;
+  int get_errno(){
+    return giac_errno;
+  }
+  void set_errno(int i){
+    giac_errno=i;
+  }
+
+/* scandir.cc
+
+   Copyright 1998, 1999, 2000, 2001 Red Hat, Inc.
+
+   Written by Corinna Vinschen <corinna.vinschen@cityweb.de>
+
+   This file is part of Cygwin.
+
+   scandir is a copyrighted work licensed under the terms of the
+   Cygwin license.  Please consult the file "CYGWIN_LICENSE" for
+   details. */
+extern "C"
+int
+scandir (const char *dir,
+	 struct dirent ***namelist,
+	 int (*select) (const struct dirent *),
+	 int (*compar) (const struct dirent **, const struct dirent **))
+{
+  DIR *dirp;
+  struct dirent *ent, *etmp, **nl = NULL, **ntmp;
+  int count = 0;
+  int allocated = 0;
+
+  if (!(dirp = opendir (dir)))
+    return -1;
+
+  int prior_errno = get_errno ();
+  set_errno (0);
+
+  while ((ent = readdir (dirp)))
+    {
+      if (!select || select (ent))
+	{
+
+	  /* Ignore error from readdir/select. See POSIX specs. */
+	  set_errno (0);
+
+	  if (count == allocated)
+	    {
+
+	      if (allocated == 0)
+		allocated = 10;
+	      else
+		allocated *= 2;
+
+	      ntmp = (struct dirent **) realloc (nl, allocated * sizeof *nl);
+	      if (!ntmp)
+		{
+		  set_errno (ENOMEM);
+		  break;
+		}
+	      nl = ntmp;
+	  }
+
+	  if (!(etmp = (struct dirent *) malloc (sizeof *ent)))
+	    {
+	      set_errno (ENOMEM);
+	      break;
+	    }
+	  *etmp = *ent;
+	  nl[count++] = etmp;
+	}
+    }
+
+  if ((prior_errno = get_errno ()) != 0)
+    {
+      closedir (dirp);
+      if (nl)
+	{
+	  while (count > 0)
+	    free (nl[--count]);
+	  free (nl);
+	}
+      /* Ignore errors from closedir() and what not else. */
+      set_errno (prior_errno);
+      return -1;
+    }
+
+  closedir (dirp);
+  set_errno (prior_errno);
+
+  qsort (nl, count, sizeof *nl, (int (*)(const void *, const void *)) compar);
+  if (namelist)
+    *namelist = nl;
+  return count;
+}
+
+extern "C"
+int
+alphasort (const struct dirent **a, const struct dirent **b)
+{
+  return strcoll ((*a)->d_name, (*b)->d_name);
+}  
+#endif
+
   void find_all_index(const std::string & subdir,multimap<std::string,std::string> & mtt,multimap<std::string,std::string> & mall){
-#if defined GNUWINCE || defined __MINGW_H || defined __ANDROID__ || defined EMCC || defined NSPIRE_NEWLIB || defined FXCG || defined KHICAS
+#if defined GNUWINCE || defined __ANDROID__ || defined EMCC|| defined EMCC2 || defined NSPIRE_NEWLIB || defined FXCG || defined KHICAS
     return;
 #else
     // cerr << "HTML help Scanning " << subdir << endl;
@@ -1246,7 +1351,7 @@ namespace giac {
 
     struct dirent **eps;
     int n;
-#if defined APPLE_SMART || defined NO_SCANDIR
+#if defined APPLE_SMART || defined NO_SCANDIR 
     n =-1;
 #else
     n = scandir (subdir.c_str(), &eps, dir_select, alphasort);

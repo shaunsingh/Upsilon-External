@@ -4,44 +4,39 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Bartlett-Hann window function : bartlett_hann_window</title>
+<title>Primitive part of a polynomial: primpart
+</title>
 </head>
 <body >
 <a href="cascmd_en296.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en298.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec367" class="subsection">5.27.12  Bartlett-Hann window function : <span style="font-family:monospace">bartlett_hann_window</span><a id="hevea_default515"></a></h3>
-<p>
-<span style="font-family:monospace">bartlett_hann_window</span> takes as arguments a real vector  <span style="font-weight:bold"><span style="font-style:italic">v</span></span>  of length  <span style="font-style:italic">n</span>  and optionally an interval  <span style="font-style:italic">n</span><sub>1</sub> <span style="font-family:monospace">..</span> <span style="font-style:italic">n</span><sub>2</sub>  (with default values  <span style="font-style:italic">n</span><sub>1</sub>=0  and  <span style="font-style:italic">n</span><sub>2</sub>=<span style="font-style:italic">n</span>−1 ), and returns the elementwise product of the vector  [<span style="font-style:italic">v</span><sub><span style="font-style:italic">n</span><sub>1</sub></sub>,…,<span style="font-style:italic">v</span><sub><span style="font-style:italic">n</span><sub>2</sub></sub>]  and the vector  <span style="font-weight:bold"><span style="font-style:italic">w</span></span>  of length  <span style="font-style:italic">N</span>=<span style="font-style:italic">n</span><sub>2</sub>−<span style="font-style:italic">n</span><sub>1</sub>+1  defined by
-</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">w</span><sub><span style="font-style:italic">k</span></sub>=<span style="font-style:italic">a</span><sub>0</sub>+<span style="font-style:italic">a</span><sub>1</sub> </td><td class="dcell">⎪<br>
-⎪<br>
-⎪<br>
-⎪</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">k</span></td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">N</span>−1</td></tr>
-</table></td><td class="dcell">−</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2</td></tr>
-</table></td><td class="dcell">⎪<br>
-⎪<br>
-⎪<br>
-⎪</td><td class="dcell">−<span style="font-style:italic">a</span><sub>2</sub> cos</td><td class="dcell">⎛<br>
-⎜<br>
-⎜<br>
-⎝</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">2 <span style="font-style:italic">k</span> π</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">N</span>−1</td></tr>
-</table></td><td class="dcell">⎞<br>
-⎟<br>
-⎟<br>
-⎠</td></tr>
-</table><p>
-for  <span style="font-style:italic">k</span>=0,1,…,<span style="font-style:italic">N</span>−1 , where  <span style="font-style:italic">a</span><sub>0</sub>=0.62 ,  <span style="font-style:italic">a</span><sub>1</sub>=0.48  and  <span style="font-style:italic">a</span><sub>2</sub>=0.38 . For example, input :
+<h3 id="sec366" class="subsection">6.27.15  Primitive part of a polynomial: <span style="font-family:monospace">primpart</span>
+<a id="hevea_default536"></a></h3>
+<p>The primitive part of a polynomial is the polynomial divided by its
+content (the greatest common divisor of its coefficients). The
+<span style="font-family:monospace">primpart</span> command computes the primitive part of a polynomial.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">primpart</span> takes one argument:<br>
+ <span style="font-style:italic">P</span>, a polynomial given by a symbolic expression or by the
+list of its coefficients.
+</li><li class="li-itemize"><span style="font-family:monospace">primpart(</span><span style="font-style:italic">P</span><span style="font-family:monospace">)</span> returns the
+primitive part of <span style="font-style:italic">P</span>.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-	<span style="font-family:monospace">L:=bartlett_hann_window(randvector(1000,0..1)):;</span>
+<span style="font-family:monospace">primpart(6x^2-3x+9)</span>
 </div><p>
-followed by <span style="font-family:monospace">scatterplot(L)</span>.</p>
+<span style="font-style:italic">or:</span>
+</p><div class="center">
+<span style="font-family:monospace">primpart([6,-3,9],x))</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
+</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">2 <span style="font-style:italic">x</span><sup>2</sup>−<span style="font-style:italic">x</span>+3
+</td></tr>
+</table>
 <hr>
 <a href="cascmd_en296.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

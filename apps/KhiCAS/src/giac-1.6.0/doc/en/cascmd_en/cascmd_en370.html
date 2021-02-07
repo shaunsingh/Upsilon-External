@@ -4,74 +4,99 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Sturm sequences : sturmseq</title>
+<title>Rebuilding a fraction from its value modulo p: fracmod  iratrecon
+
+</title>
 </head>
 <body >
 <a href="cascmd_en369.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en371.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec447" class="subsection">5.30.17  Sturm sequences : <span style="font-family:monospace">sturmseq</span></h3>
-<p><a id="hevea_default603"></a>
-<span style="font-family:monospace">sturmseq</span> takes as argument, a polynomial expression <span style="font-style:italic">P</span> or a 
-rational fraction <span style="font-style:italic">P</span>/<span style="font-style:italic">Q</span> and returns the list of the Sturm sequences 
-of the square-free factors of odd multiplicity of <span style="font-style:italic">P</span> (or of <span style="font-style:italic">P</span>/<span style="font-style:italic">Q</span>).
-For <span style="font-style:italic">F</span> a square-free factor of odd multiplicity, the Sturm 
-sequence <span style="font-style:italic">R</span><sub>1</sub>,<span style="font-style:italic">R</span><sub>2</sub>,... is made from <span style="font-style:italic">F</span>, <span style="font-style:italic">F</span>′ by a recurrence
-relation :
+<h3 id="sec449" class="subsection">6.34.12  Rebuilding a fraction from its value modulo <span style="font-style:italic">p</span>: <span style="font-family:monospace">fracmod</span> <span style="font-family:monospace"> iratrecon</span>
+<a id="hevea_default632"></a>
+<a id="hevea_default633"></a></h3>
+<p>Given an integer <span style="font-style:italic">n</span> and a modulus <span style="font-style:italic">p</span>, the <span style="font-family:monospace">fracmod</span> (or
+<span style="font-family:monospace">iratrecon</span>, for Maple compatibility) command finds the rational number 
+equal to <span style="font-style:italic">n</span> mod<span style="font-style:italic">p</span>, where both the numerator and denominator are not
+greater than √<span style="text-decoration:overline"><span style="font-style:italic">p</span></span>/2 in absolute value.
 </p><ul class="itemize"><li class="li-itemize">
-<span style="font-style:italic">R</span><sub>1</sub> is the opposite of the euclidean division remainder of <span style="font-style:italic">F</span> by
-<span style="font-style:italic">F</span>′ then,
-</li><li class="li-itemize"><span style="font-style:italic">R</span><sub>2</sub> is the opposite of the euclidean division remainder of <span style="font-style:italic">F</span>′ by
-<span style="font-style:italic">R</span><sub>1</sub>, 
-</li><li class="li-itemize">... 
-</li><li class="li-itemize">and so on until <span style="font-style:italic">R</span><sub><span style="font-style:italic">k</span></sub>=0.
-</li></ul><p>
-Input :
-</p><div class="center"><span style="font-family:monospace">sturmseq(2*x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">3+2)</span></div><p>
-or 
-</p><div class="center"><span style="font-family:monospace">sturmseq(2*y</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">3+2,y)</span></div><p>
-Output :
-</p><div class="center"><span style="font-family:monospace">[2,[[1,0,0,1],[3,0,0],-9],1]</span></div><p>
-The first term gives the content of the numerator (here 2), 
-then the Sturm sequence (in list representation) [<span style="font-style:italic">x</span><sup>3</sup>+1,3<span style="font-style:italic">x</span><sup>2</sup>,−9].<br>
-Input :
-</p><div class="center"><span style="font-family:monospace">sturmseq((2*x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">3+2)/(3*x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2+2),x)</span></div><p>
-Output :
-</p><div class="center"><span style="font-family:monospace">[2,[[1,0,0,1],[3,0,0],-9],1,[1,[[3,0,2],[6,0],-72]]</span></div><p>
-The first term gives the content of the numerator (here 2), 
-then the Sturm sequence of the numerator ([[1,0,0,1],[3,0,0],-9]), 
-then the content of the denominator (here 1) and the Sturm 
-sequence of the denominator ([[3,0,2],[6,0],-72]). As expressions,
-[<span style="font-style:italic">x</span><sup>3</sup>+1,3<span style="font-style:italic">x</span><sup>2</sup>, −9] is the Sturm sequence of the numerator and
-[3<span style="font-style:italic">x</span><sup>2</sup>+2,6<span style="font-style:italic">x</span>,−72] is the Sturm sequence of the denominator.<br>
-Input :
-</p><div class="center"><span style="font-family:monospace">sturmseq((x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">3+1)</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2,x)</span></div><p>
-Output :
-</p><div class="center"><span style="font-family:monospace">[1,1]</span></div><p>
-Indeed <span style="font-style:italic">F</span>=1.<br>
-Input :
-</p><div class="center"><span style="font-family:monospace">sturmseq(3*(3*x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">3+1)/(2*x+2),x)</span></div><p>
-Output :
-</p><div class="center"><span style="font-family:monospace">[3,[[3,0,0,1],[9,0,0],-81],2,[[1,1],1]]</span></div><p>
-The first term gives the content of the numerator 
-(here <span style="font-family:monospace">3</span>),<br>
-the second term gives the Sturm sequence of the numerator
-(here <span style="font-family:monospace">3x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">3+1, 9x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2, -81</span>),<br>
-the third term gives the content of the denominator (here 
-<span style="font-family:monospace">2</span>),<br>
-the fourth term gives the Sturm sequence of the denominator 
-(<span style="font-family:monospace">x+1,1</span>).<br>
-<span style="font-weight:bold">Warning !!!!</span><br>
-<span style="font-style:italic">P</span> is defined by its symbolic expression.<br>
-Input :
-</p><div class="center">
-<span style="font-family:monospace">sturmseq([1,0,0,1],x)</span>
-</div><p>
-Output :
-</p><div class="center">
-<span style="font-family:monospace">Bad argument type</span>.
+<span style="font-family:monospace">fracmod</span> (or <span style="font-family:monospace">iratrecon</span>) takes
+two arguments:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">n</span>, an integer (representing a fraction).
+</li><li class="li-itemize"><span style="font-style:italic">p</span>, an integer (the modulus).
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">fracmod(</span><span style="font-style:italic">n</span><span style="font-family:monospace">,</span><span style="font-style:italic">p</span><span style="font-family:monospace">)</span> (or <span style="font-family:monospace">iratrecon(</span><span style="font-style:italic">n</span><span style="font-family:monospace">,</span><span style="font-style:italic">p</span><span style="font-family:monospace">)</span>)
+returns, if possible, a fraction <span style="font-style:italic">a</span>/<span style="font-style:italic">b</span> such that 
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+     
+
+</td><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:right;white-space:nowrap" >   <span style="font-style:italic">a</span></td><td style="text-align:left;white-space:nowrap" >= <span style="font-style:italic">n</span> × <span style="font-style:italic">b</span> (mod <span style="font-style:italic">p</span> )</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td></tr>
+<tr><td style="text-align:right;white-space:nowrap" ><table class="display"><tr style="vertical-align:middle"><td class="dcell">
+−</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-size:x-large">√</span></td><td class="dcell"><table style="border:0;border-spacing:1;border-collapse:separate;" class="cellpadding0"><tr><td class="hbar"></td></tr>
+<tr><td style="text-align:center;white-space:nowrap" ><span style="font-style:italic">p</span></td></tr>
+</table></td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td></tr>
+</table></td><td style="text-align:left;white-space:nowrap" ><table class="display"><tr style="vertical-align:middle"><td class="dcell">&lt; <span style="font-style:italic">a</span> ≤ </td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-size:x-large">√</span></td><td class="dcell"><table style="border:0;border-spacing:1;border-collapse:separate;" class="cellpadding0"><tr><td class="hbar"></td></tr>
+<tr><td style="text-align:center;white-space:nowrap" ><span style="font-style:italic">p</span></td></tr>
+</table></td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td></tr>
+</table></td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td></tr>
+<tr><td style="text-align:right;white-space:nowrap" >
+0 ≤ <span style="font-style:italic">b</span></td><td style="text-align:left;white-space:nowrap" ><table class="display"><tr style="vertical-align:middle"><td class="dcell">&lt; </td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-size:x-large">√</span></td><td class="dcell"><table style="border:0;border-spacing:1;border-collapse:separate;" class="cellpadding0"><tr><td class="hbar"></td></tr>
+<tr><td style="text-align:center;white-space:nowrap" ><span style="font-style:italic">p</span></td></tr>
+</table></td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td></tr>
+</table></td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td></tr>
+<tr><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td><td style="text-align:left;white-space:nowrap" >&nbsp;</td><td style="text-align:right;white-space:nowrap" >&nbsp;</td></tr>
+</table></td></tr>
+</table>
+In other words, <span style="font-style:italic">n</span>=<span style="font-style:italic">a</span>/<span style="font-style:italic">b</span>(mod <span style="font-style:italic">p</span> ).
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Examples.</span>
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">fracmod(3,13)</span>
 </div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">−</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">4</td></tr>
+</table></td></tr>
+</table>
+Indeed: 3*−4=−12=1 (mod 13), hence 3=−1/4%13.<br>
+Note that this means:<br>
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">-1/4 % 13</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">3%13
+</td></tr>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">fracmod(13,121)</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">−</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">4</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">9</td></tr>
+</table></td></tr>
+</table>
+Indeed: 13×−9=−117=4 (mod 121) hence 13=−4/9%13.
+</li></ul>
 <hr>
 <a href="cascmd_en369.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

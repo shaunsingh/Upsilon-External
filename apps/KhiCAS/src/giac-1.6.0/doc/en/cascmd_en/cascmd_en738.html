@@ -4,29 +4,44 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Markov chains: markov</title>
+<title>Drawing lined paper: line_paper</title>
 </head>
 <body >
 <a href="cascmd_en737.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en739.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec949" class="subsection">8.4.24  Markov chains: <span style="font-family:monospace">markov</span><a id="hevea_default1298"></a></h3>
-<p>Given the transition matrix of a Markov chain, the <span style="font-family:monospace">markov</span>
-command will compute characteristic features of the chain. If <span style="font-style:italic">M</span> is
-a transition matrix, then <span style="font-family:monospace">markov(</span><span style="font-style:italic">M</span><span style="font-family:monospace">)</span> will return the list of
-the positive recurrent states, the list of corresponding
-invariant probabilities, the list of other strong connected
-components, the list of probabilities of ending up in the sequence of
-recurrent states. 
-For example, if you enter
+<h3 id="sec1002" class="subsection">13.2.5  Drawing lined paper: <span style="font-family:monospace">line_paper</span></h3>
+<p>
+<a id="hevea_default1438"></a></p><p>The <span style="font-family:monospace">line_paper</span> command draws lined paper.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">line_paper</span> takes two mandatory arguments and two optional arguments.
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">xspacing</span>, the spacing in the <span style="font-style:italic">x</span> direction.
+</li><li class="li-itemize">θ, the angle from the horizontal to draw the lines.
+</li><li class="li-itemize">Optionally, <span style="font-family:monospace">x=</span><span style="font-style:italic">x</span><sub><span style="font-style:italic">min</span></sub>..<span style="font-style:italic">x</span><sub><span style="font-style:italic">max</span></sub>, to determine how
+far the lines extend in the <span style="font-style:italic">x</span> direction (by default, the
+distances given in the graphic configuration page accessible from
+the main menu).
+</li><li class="li-itemize">Optionally, <span style="font-family:monospace">y=</span><span style="font-style:italic">y</span><sub><span style="font-style:italic">min</span></sub>..<span style="font-style:italic">y</span><sub><span style="font-style:italic">max</span></sub>, to determine how
+far the lines extend in the <span style="font-style:italic">y</span> direction (by default, the
+distances given in the graphic configuration page accessible from
+the main menu).
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">line_paper(</span><span style="font-style:italic">xspacing,</span>θ ⟨<span style="font-family:monospace">x=</span><span style="font-style:italic">x</span><sub><span style="font-style:italic">min</span></sub>..<span style="font-style:italic">x</span><sub><span style="font-style:italic">max</span></sub>,<span style="font-family:monospace">y=</span><span style="font-style:italic">y</span><sub><span style="font-style:italic">min</span></sub>..<span style="font-style:italic">y</span><sub><span style="font-style:italic">max</span></sub>⟩<span style="font-family:monospace">)</span>
+draws the lined paper.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">markov([[0,0,1/2,0,1/2],[0,0,1,0,0],[1/4,1/4,0,1/4,1/4],[0,0,1/2,0,1/2],[0,0,0,0,1]])
-</span></div><p>
-you will get
+<span style="font-family:monospace">line_paper(0.6,pi/3)</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
 </p><div class="center">
-<span style="font-family:monospace">[[4]],[[0,0,0,0,1]],[[3,1,2,0]],[[1],[1],[1],[1],[1]]
-</span></div>
+<img src="cascmd_en139.png">
+</div><p>
+Unchecking <span style="font-family:monospace">Show Axes</span> on the <span style="font-family:monospace">cfg</span> screen removes
+the axes.</p>
 <hr>
 <a href="cascmd_en737.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

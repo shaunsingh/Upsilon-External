@@ -1,5 +1,5 @@
 # 1 "<stdin>"
-# 1 "/home/maxoufox/Projects/nw-external-apps/apps/KhiCAS/src/micropython-1.12/numworks//"
+# 1 "/home/maxoufox/Projects/Omega-External/apps/KhiCAS/src/micropython-1.12/numworks//"
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "<stdin>"

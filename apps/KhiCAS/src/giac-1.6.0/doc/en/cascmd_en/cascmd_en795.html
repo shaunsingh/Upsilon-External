@@ -4,75 +4,77 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>The difference between := and =&lt;</title>
+<title>The parabola in the plane: parabola
+</title>
 </head>
 <body >
 <a href="cascmd_en794.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en796.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec1022" class="subsection">11.2.10  The difference between <span style="font-family:monospace">:=</span> and <span style="font-family:monospace">=&lt;</span></h3>
-<p>
-<a id="ssec:assignmentdiffs"></a></p><p>The <span style="font-family:monospace">:=</span> and <span style="font-family:monospace">=&lt;</span> assignment operators have different
-effects when they are used to modify an element of a list contained in
-a variable, since <span style="font-family:monospace">=&lt;</span> modifies the element by reference.
-Otherwise, they will have the same effect.</p><p>For example, if<br>
-Input:
+<h3 id="ssec:2dparabola" class="subsection">13.12.3  The parabola in the plane: <span style="font-family:monospace">parabola</span>
+<a id="hevea_default1512"></a></h3>
+<p>See Section <a href="cascmd_en884.html#ssec%3A3dparabola">14.11.3</a> for parabolas in space.</p><p>The <span style="font-family:monospace">parabola</span> command draws parabolas and other conic
+sections.
+<span style="font-family:monospace">parabola</span> can take parameters in different forms.
+</p><ul class="itemize"><li class="li-itemize">
+<ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">parabola</span> can take one argument:<br>
+ <span style="font-style:italic">eqn</span>, a second degree equation in the variables <span style="font-family:monospace">x</span>
+and <span style="font-family:monospace">y</span> (or an expression which will be set to zero).
+</li><li class="li-itemize"><span style="font-family:monospace">parabola(</span><span style="font-style:italic">eqn</span><span style="font-family:monospace">)</span> returns and draws
+the conic section given by the equation <span style="font-style:italic">eqn</span>.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+ <span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">A := [1,2,3]
-</span></div><p>
-then <br>
-Input:
+<span style="font-family:monospace">parabola(x^2 - y - 1)</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
 </p><div class="center">
-<span style="font-family:monospace">A[1] := 5
-</span></div><p>
-and<br>
-Input:
+<img src="cascmd_en233.png">
+</div></li><li class="li-itemize"><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">parabola</span> can take two arguments:<br>
+ <span style="font-style:italic">F</span>,<span style="font-style:italic">V</span>, two points.
+</li><li class="li-itemize"><span style="font-family:monospace">parabola(</span><span style="font-style:italic">F</span>,<span style="font-style:italic">V</span><span style="font-family:monospace">)</span> returns and draws the parabola with
+focus <span style="font-style:italic">F</span> and vertex <span style="font-style:italic">V</span>.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+ <span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">A[1] =&lt; 5
-</span></div><p>
-both change <span style="font-family:monospace">A[1]</span> to 5, so <span style="font-family:monospace">A</span> will be
-<span style="font-family:monospace">[1,5,3]</span>, but they do it in different ways. The command
-<span style="font-family:monospace">A[1] =&lt; 5</span> changes the middle value in the list that
-<span style="font-family:monospace">A</span> originally pointed to, and so any other variable pointing
-to the list will be changed, but <span style="font-family:monospace">A[1] := 5</span> will create a
-duplicate list with the middle element of 5, and so any other variable
-pointing to the original list won’t be affected.<br>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">A:=[0,1,2,3,4]<br>
- B:=A<br>
- B[3]=&lt;33<br>
- A,B
-</span></div><p>
+<span style="font-family:monospace">parabola(0,i)</span>
+</div><p>
 Output:
 </p><div class="center">
-<span style="font-family:monospace">[0,1,2,33,4],[0,1,2,33,4] 
-</span></div><p>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">A:=[0,1,2,3,4]<br>
- B:=A<br>
- B[3]:=33<br>
- A,B
-</span></div><p>
-Output:
-</p><div class="center">
-<span style="font-family:monospace">[0,1,2,3,4],[0,1,2,33,4] 
-</span></div><p>
-If <span style="font-family:monospace">B</span> is set equal to a copy of <span style="font-family:monospace">A</span> instead of
-<span style="font-family:monospace">A</span>, then changing <span style="font-family:monospace">B</span> won’t affect <span style="font-family:monospace">A</span>.<br>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">A:=[0,1,2,3,4]<br>
- B:=copy(A)<br>
- B[3]=&lt;33<br>
- A,B
-</span></div><p>
-Output:
-</p><div class="center">
-<span style="font-family:monospace">[0,1,2,3,4],[0,1,2,33,4] 
-</span></div>
+<img src="cascmd_en234.png">
+</div></li><li class="li-itemize"><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">parabola</span> can take two parameters:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">A</span>=(<span style="font-style:italic">a</span>,<span style="font-style:italic">b</span>), a point.
+</li><li class="li-itemize"><span style="font-style:italic">c</span>, a real number.
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">parabola(</span><span style="font-style:italic">A</span>,<span style="font-style:italic">c</span>) returns and draws the parabola 
+<span style="font-style:italic">y</span> = <span style="font-style:italic">b</span> + <span style="font-style:italic">c</span>(<span style="font-style:italic">x</span> − <span style="font-style:italic">a</span>)<sup>2</sup>.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Examples.</span>
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">parabola(-i,1)</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<div class="center">
+<img src="cascmd_en235.png">
+</div>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">parabola(-i,i,1/2)</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<div class="center">
+<img src="cascmd_en236.png">
+</div>
+</li></ul></li></ul>
 <hr>
 <a href="cascmd_en794.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

@@ -2759,6 +2759,7 @@ namespace giac {
       gen num,den;
       a=e2r(arg[0],lv,contextptr);
       fxnd(a,num,den);
+      simplify3(num,den);
       gen nd=num*den,out(1);
       gen nover2=rdiv(expnum,plus_two,contextptr);      
       if (nd.type==_EXT && nd._EXTptr->type==_VECT){ // extract content
@@ -2792,6 +2793,9 @@ namespace giac {
       }
       // Extract integer content of s
       gen cont=Tppz<gen>(s);
+      if (s.dim==0 && !s.coord.empty() && is_positive(-s.coord[0].value,contextptr)){
+	cont=-cont; s=-s;
+      }	
       gen simpl,doubl; bool pos;
       zint2simpldoublpos(cont,simpl,doubl,pos,2,contextptr);
       if (!pos) simpl=-simpl;
@@ -2990,6 +2994,8 @@ namespace giac {
     if (tmp.type==_FRAC){
       f.num=tmp._FRACptr->num;
       f.den=tmp._FRACptr->den;
+      if (f.num.type==_POLY && f.den.type==_POLY && lvar(ee)!=lidnt(l))
+	simplify3(f.num,f.den);
     }
     else
       f=tmp;
@@ -3114,7 +3120,7 @@ namespace giac {
     if (f1.type==_VECT && f1.subtype==_SEQ__VECT && f1._VECTptr->size()==1)
       f1=f1._VECTptr->front();
     f3=g._SYMBptr->feuille._VECTptr->back();
-    bool res= ((f3.type==_SYMB || f3.type<=_IDNT || f3.type==_FRAC) && !f3.is_symb_of_sommet(at_bloc));
+    bool res= f3.type<=_IDNT || f3.type==_FRAC || f3.type==_VECT || (f3.type==_SYMB && !f3.is_symb_of_sommet(at_bloc));
     if (res)
       f3=eval(f3,1,context0); // eval operators like /
     return res;
@@ -4036,7 +4042,7 @@ namespace giac {
 	modpoly B=unmod(*v[1]._VECTptr,m);
 	gen res;
 	if (ntlresultant(A,B,m,res))
-	  return res;
+	  return makemod(res,m);
 	if (m.type==_INT_){
 	  vector<int> a,b,tmp1,tmp2;
 	  vecteur2vector_int(A,m.val,a);

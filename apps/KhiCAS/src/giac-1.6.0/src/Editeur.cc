@@ -276,11 +276,13 @@ namespace xcas {
 	      continue;
 	    } else {
 	      bool test;
+#ifdef HAVE_LIBMICROPYTHON
 	      if (mode==4){
 		int tok=mp_token(bufptr);
 		test=is_python_builtin(bufptr) || tok;
 	      }
 	      else
+#endif
 		test=giac::vector_completions_ptr() && binary_search(giac::vector_completions_ptr()->begin(),giac::vector_completions_ptr()->end(),bufptr,alpha_order);
 	      if (test) {
 		current='A';
@@ -2539,6 +2541,8 @@ namespace xcas {
 
   Xcas_Text_Editor::Xcas_Text_Editor(int X, int Y, int W, int H, Fl_Text_Buffer *b,const char* l ):Fl_Text_Editor(X,Y,W,H,l){
     styletable=vector<Fl_Text_Display::Style_Table_Entry>(styletable_init,styletable_init+styletable_n);
+    styletable[0].color=Xcas_editor_color;
+    cursor_color(Xcas_editor_color);
     tableur=0;
     gchanged=true;
     labeltype(FL_NO_LABEL);
@@ -3020,6 +3024,7 @@ namespace xcas {
     show_insert_position();
   }
 
+#ifdef HAVE_LIBMICROPYTHON
   vector<aide> micropython_filter_help(const vector<aide> & v_orig){
     vector<aide> v;
     for (int i=0;i<v_orig.size();++i){
@@ -3029,6 +3034,7 @@ namespace xcas {
     }
     return v;
   }
+#endif
 
   void Xcas_Text_Editor::set_tooltip(){
     static string toolt;
@@ -3044,7 +3050,11 @@ namespace xcas {
 	break;
     }
     if (s.size()>1 && k<s.size()){
+#ifdef HAVE_LIBMICROPYTHON
       vector<aide> vs=(contextptr && (python_compat(contextptr) & 4))?micropython_filter_help(*giac::vector_aide_ptr()):*giac::vector_aide_ptr();
+#else
+      vector<aide> vs=(*giac::vector_aide_ptr());
+#endif
       const aide & help=helpon(s,vs,giac::language(hp?hp->contextptr:0),vs.size());
       toolt=writehelp(help,giac::language(hp?hp->contextptr:0));
       toolt += '\n';

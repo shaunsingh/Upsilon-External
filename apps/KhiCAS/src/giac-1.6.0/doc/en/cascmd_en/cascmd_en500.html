@@ -4,89 +4,91 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Make a list of integers: range</title>
+<title>Eigenvalues: eigenvals
+</title>
 </head>
 <body >
 <a href="cascmd_en499.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en501.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec594" class="subsection">5.43.40  Make a list of integers: <span style="font-family:monospace">range</span></h3>
-<p><a id="hevea_default770"></a></p><p>The <span style="font-family:monospace">range</span> command takes one, two or three arguments.
+<h3 id="sec626" class="subsection">6.48.1  Eigenvalues: <span style="font-family:monospace">eigenvals</span>
+<a id="hevea_default878"></a></h3>
+<p>The <span style="font-family:monospace">eigenvals</span> command finds eigenvalues of a matrix.
 </p><ul class="itemize"><li class="li-itemize">
-For one argument, the argument must be a non-negative integer <span style="font-style:italic">n</span>.
-<span style="font-family:monospace">range</span> will then return the list <span style="font-family:monospace">[0,1,…,</span><span style="font-style:italic">n</span>−1<span style="font-family:monospace">]</span><br>
- Input:
-<div class="center">
-<span style="font-family:monospace">range(5)
-</span></div>
-Output:
-<div class="center">
-<span style="font-family:monospace">[0,1,2,3,4] 
-</span></div>
-</li><li class="li-itemize">For two arguments, the arguments must be two numbers <span style="font-style:italic">a</span> and <span style="font-style:italic">b</span>,
-with <span style="font-style:italic">a</span> ≤ <span style="font-style:italic">b</span>. <span style="font-family:monospace">range</span> will then return the list
-<span style="font-family:monospace">[</span><span style="font-style:italic">a</span><span style="font-family:monospace">, </span><span style="font-style:italic">a</span>+1<span style="font-family:monospace">,…]</span> up to, but not including, <span style="font-style:italic">b</span>.<br>
- Input:
-<div class="center">
-<span style="font-family:monospace">range(4,10)
-</span></div>
-Output:
-<div class="center">
-<span style="font-family:monospace">[4,5,6,7,8,9] 
-</span></div>
-</li><li class="li-itemize">For three arguments, the arguments must be three numbers <span style="font-style:italic">a</span>, <span style="font-style:italic">b</span>
-and a non-zero <span style="font-style:italic">p</span>. <span style="font-family:monospace">range</span> will then return the list 
-<span style="font-family:monospace">[</span><span style="font-style:italic">a</span><span style="font-family:monospace">, </span><span style="font-style:italic">a</span>+<span style="font-style:italic">p</span><span style="font-family:monospace">,</span><span style="font-style:italic">a</span>+2<span style="font-style:italic">p</span><span style="font-family:monospace">,…]</span> up to, but not including, <span style="font-style:italic">b</span>.
-If <span style="font-style:italic">p</span> &gt; 0, then <span style="font-style:italic">a</span> ≤ <span style="font-style:italic">b</span>; if <span style="font-style:italic">p</span> &lt; 0, then <span style="font-style:italic">a</span> ≥ <span style="font-style:italic">b</span>.<br>
- Input:
-<div class="center">
-<span style="font-family:monospace">range(4,13,2)
-</span></div>
-Output:
-<div class="center">
-<span style="font-family:monospace">[4,6,8,10,12] 
-</span></div>
-Input:
-<div class="center">
-<span style="font-family:monospace">range(10,4,-1)
-</span></div>
-Output:
-<div class="center">
-<span style="font-family:monospace">[10,9,8,7,6,5] 
-</span></div>
-</li></ul><p>The <span style="font-family:monospace">range</span> command can be used to create a list of values
-<span style="font-style:italic">f</span>(<span style="font-style:italic">k</span>), where <span style="font-style:italic">k</span> is an integer satisfying a certain condition.
+<span style="font-family:monospace">eigenvals</span> takes one argument:<br>
+ <span style="font-style:italic">A</span>, a square matrix.
+</li><li class="li-itemize"><span style="font-family:monospace">eigenvals(</span><span style="font-style:italic">A</span><span style="font-family:monospace">)</span> returns the sequence of the
+eigenvalues of <span style="font-style:italic">A</span>, including multiplicities. (If <span style="font-style:italic">A</span> is an
+<span style="font-style:italic">n</span>× <span style="font-style:italic">n</span> matrix, then the sequence will have <span style="font-style:italic">n</span> values.)
+</li></ul><p>
+<span style="font-weight:bold">Remark:</span>
+<span style="font-family:monospace">Xcas</span> may not be able to find the exact roots of the
+characteristic polynomial in some cases. In that case,
+<span style="font-family:monospace">eigenvals(</span><span style="font-style:italic">A</span><span style="font-family:monospace">)</span> will return approximate eigenvalues of
+<span style="font-style:italic">A</span> if the coefficients are numeric or a subset of the eigenvalues if
+the coefficients are symbolic.</p><p><br>
+</p><p><span style="font-weight:bold">Examples.</span>
 </p><ul class="itemize"><li class="li-itemize">
-You can list the values of an expression in a variable which
-goes over a range defined by <span style="font-family:monospace">range</span>.<br>
- Input:
+<span style="font-style:italic">Input:</span>
 <div class="center">
-<span style="font-family:monospace">[k^2 + k for k in range(10)]
-</span></div>
-Output:
+<span style="font-family:monospace">eigenvals([[4,1,-2],[1,2,-1],[2,1,0]])</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">2,2,2
+</td></tr>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
 <div class="center">
-<span style="font-family:monospace">[0,2,6,12,20,30,42,56,72,90] 
-</span></div>
-</li><li class="li-itemize">YOu can list the values of an expression in a variable which
-goes over a range defined by <span style="font-family:monospace">range</span> and which satisfies a
-given condition.<br>
- Input:
+<span style="font-family:monospace">eigenvals([[4,1,0],[1,2,-1],[2,1,0]])</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">rootof</span></td><td class="dcell">⎛<br>
+⎝</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">1,0,−20,0,100</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">,</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">1,0,−24,0,144,0,−148</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">⎞<br>
+⎠</td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">18</td></tr>
+</table></td><td class="dcell">,</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">rootof</span></td><td class="dcell">⎛<br>
+⎝</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">−1,0,20,18,8</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">,</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">1,0,−24,0,144,0,−148</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">⎞<br>
+⎠</td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">36</td></tr>
+</table></td><td class="dcell">,</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">rootof</span></td><td class="dcell">⎛<br>
+⎝</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">−1,0,20,−18,8</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">,</td><td class="dcell">⎡<br>
+⎣</td><td class="dcell">1,0,−24,0,144,0,−148</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">⎤<br>
+⎦</td><td class="dcell">⎞<br>
+⎠</td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">36</td></tr>
+</table></td></tr>
+</table>
+<span style="font-style:italic">Input:</span>
 <div class="center">
-<span style="font-family:monospace">[k for k in range (4,10) if isprime(k)] 
-</span></div> 
-Output:
-<div class="center">
-<span style="font-family:monospace">[5,7] 
-</span></div>
-Input:
-<div class="center">
-<span style="font-family:monospace">[k^2 + k for k in range (1,10,2) if isprime(k)] 
-</span></div> 
-Output:
-<div class="center">
-<span style="font-family:monospace">[12,30,56] 
-</span></div>
+<span style="font-family:monospace">evalf(eigenvals([[4,1,0],[1,2,-1],[2,1,0]]))</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">1.46081112719,4.21431974338,0.324869129433
+</td></tr>
+</table>
 </li></ul>
 <hr>
 <a href="cascmd_en499.html"><img src="previous_motif.gif" alt="Previous"></a>

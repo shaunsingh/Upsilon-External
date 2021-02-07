@@ -32,6 +32,10 @@
 
 #if defined(__x86_64__) || defined(__arm64__)
 #define x86_64 1
+#else
+#ifdef __MINGW_H
+#define MINGW32
+#endif
 #endif
 
 // Thanks to Jason Papadopoulos, author of msieve
@@ -93,7 +97,7 @@ double lgamma(double);
 #else // NSPIRE
 #define CIN std::cin
 #define COUT std::cout
-#ifdef EMCC
+#if defined(EMCC) || defined(EMCC2)
 #define CERR std::cout
 extern "C" double emcctime(); 
 extern "C" int glinit(int,int,int,int,int);
@@ -533,7 +537,7 @@ inline float ffloor(float f1){
 #endif
 }
 inline float finv(float f1){ return 1/f1; }
-#if defined __APPLE__ || defined EMCC || defined NO_BSD 
+#if defined __APPLE__ || defined EMCC || defined EMCC2 || defined NO_BSD 
 inline float fgamma(float f1){ return tgammaf(f1); }
 #else
 #if defined(__MINGW_H) || defined(VISUALC) || defined(FXCG)// FIXME gamma, not used

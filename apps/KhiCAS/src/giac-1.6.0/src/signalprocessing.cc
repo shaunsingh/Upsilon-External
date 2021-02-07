@@ -39,7 +39,7 @@ int nextpow2(int n) {
 bool is_sound_data(const gen &g,int &nc,int &bd,int &sr,int &len) {
     if (g.type!=_VECT)
         return false;
-    vecteur &gv=*g._VECTptr;
+    const vecteur &gv=*g._VECTptr;
     if (gv.size()<2 || gv.front().type!=_VECT || gv.front()._VECTptr->size()!=4)
         return false;
     vecteur &header=*gv.front()._VECTptr;
@@ -127,8 +127,8 @@ gen _createwav(const gen &g,GIAC_CONTEXT) {
             double secs=-1,plen=-1;
             for (const_iterateur it=args.begin();it!=args.end();++it) {
                 if (it->is_symb_of_sommet(at_equal)) {
-                    gen &lh=it->_SYMBptr->feuille._VECTptr->front();
-                    gen &rh=it->_SYMBptr->feuille._VECTptr->back();
+                    const gen &lh=it->_SYMBptr->feuille._VECTptr->front();
+                    const gen &rh=it->_SYMBptr->feuille._VECTptr->back();
                     if (lh==at_channels) {
                         if (!rh.is_integer() || (nc=rh.val)<1)
                             return gensizeerr(contextptr);
@@ -215,8 +215,8 @@ gen _plotwav(const gen &g,GIAC_CONTEXT) {
         return gentypeerr(contextptr);
     for (const_iterateur it=opts.begin();it!=opts.end();++it) {
         if (it->is_symb_of_sommet(at_equal)) {
-            gen &lh=it->_SYMBptr->feuille._VECTptr->front();
-            gen &rh=it->_SYMBptr->feuille._VECTptr->back();
+            const gen &lh=it->_SYMBptr->feuille._VECTptr->front();
+            const gen &rh=it->_SYMBptr->feuille._VECTptr->back();
             if (lh==at_range) {
                 if (rh.is_symb_of_sommet(at_interval)) {
                     gen a=rh._SYMBptr->feuille._VECTptr->front();
@@ -310,7 +310,7 @@ gen _plotspectrum(const gen &g,GIAC_CONTEXT) {
         gen intrv=symbolic(at_interval,makesequence(0,sr/2));
         return _plotspectrum(makesequence(g,symbolic(at_equal,makesequence(at_range,intrv))),contextptr);
     } else if (g.subtype==_SEQ__VECT) {
-        vecteur &gv=*g._VECTptr;
+        const vecteur &gv=*g._VECTptr;
         if (gv.size()!=2 || !is_sound_data(gv.front(),nc,bd,sr,len))
             return gensizeerr(contextptr);
         vecteur data;
@@ -320,8 +320,8 @@ gen _plotspectrum(const gen &g,GIAC_CONTEXT) {
         len=data.size();
         if (!gv.back().is_symb_of_sommet(at_equal))
             return gensizeerr(contextptr);
-        gen &lh=gv.back()._SYMBptr->feuille._VECTptr->front();
-        gen &rh=gv.back()._SYMBptr->feuille._VECTptr->back();
+        const gen &lh=gv.back()._SYMBptr->feuille._VECTptr->front();
+        const gen &rh=gv.back()._SYMBptr->feuille._VECTptr->back();
         if (lh==at_range) {
             gen a,b;
             if (rh.type==_VECT) {
@@ -435,8 +435,8 @@ gen _channel_data(const gen &g,GIAC_CONTEXT) {
         } else if (*it==at_matrix)
             asmatrix=true;
         else if (it->is_symb_of_sommet(at_equal)) {
-            gen &lh=it->_SYMBptr->feuille._VECTptr->front();
-            gen &rh=it->_SYMBptr->feuille._VECTptr->back();
+            const gen &lh=it->_SYMBptr->feuille._VECTptr->front();
+            const gen &rh=it->_SYMBptr->feuille._VECTptr->back();
             if (lh==at_range) {
                 if (rh.type==_VECT) {
                     if (rh._VECTptr->size()!=2)
@@ -446,8 +446,8 @@ gen _channel_data(const gen &g,GIAC_CONTEXT) {
                     int start=rh._VECTptr->front().val,stop=rh._VECTptr->back().val;
                     slice_start=start-1; slice_len=stop-start+1;
                 } else if (rh.is_symb_of_sommet(at_interval)) {
-                    gen &a=rh._SYMBptr->feuille._VECTptr->front();
-                    gen &b=rh._SYMBptr->feuille._VECTptr->back();
+                    const gen &a=rh._SYMBptr->feuille._VECTptr->front();
+                    const gen &b=rh._SYMBptr->feuille._VECTptr->back();
                     if (!a.is_integer() || !b.is_integer()) {
                         if (!is_real(a,contextptr) || !is_real(b,contextptr))
                             return gensizeerr(contextptr);
@@ -601,7 +601,7 @@ gen _moving_average(const gen &g,GIAC_CONTEXT) {
     if (g.type==_STRNG && g.subtype==-1) return g;
     if (g.type!=_VECT || g.subtype!=_SEQ__VECT)
         return gentypeerr(contextptr);
-    vecteur &gv=*g._VECTptr;
+    const vecteur &gv=*g._VECTptr;
     if (gv.size()!=2)
         return gensizeerr("Wrong number of input arguments");
     if (gv.front().type!=_VECT)
@@ -627,6 +627,27 @@ static const char _moving_average_s []="moving_average";
 static define_unary_function_eval (__moving_average,&_moving_average,_moving_average_s);
 define_unary_function_ptr5(at_moving_average,alias_at_moving_average,&__moving_average,0,true)
 
+gen _rms(const gen &g,GIAC_CONTEXT) {
+	if (g.type==_STRNG && g.subtype==-1) return g;
+	if (g.type!=_VECT)
+		return gentypeerr(contextptr);
+	const vecteur &gv=*g._VECTptr;
+	int n=gv.size();
+	if (n==0)
+		return gensizeerr("The list is empty");
+	gen res(0);
+	for (const_iterateur it=gv.begin();it!=gv.end();++it) {
+		gen rp=re(*it,contextptr);
+		gen ip=im(*it,contextptr);
+		res+=rp*rp+ip*ip;
+	}
+	res=res/n;
+	return sqrt(res,contextptr);
+}
+static const char _rms_s []="rms";
+static define_unary_function_eval (__rms,&_rms,_rms_s);
+define_unary_function_ptr5(at_rms,alias_at_rms,&__rms,0,true)
+
 gen _resample(const gen &g,GIAC_CONTEXT) {
     if (g.type==_STRNG && g.subtype==-1) return g;
 #ifndef HAVE_LIBSAMPLERATE
@@ -642,7 +663,7 @@ gen _resample(const gen &g,GIAC_CONTEXT) {
     int nsr=44100;
     int quality=2;
     if (g.subtype==_SEQ__VECT) {
-        vecteur &gv=*g._VECTptr;
+        const vecteur &gv=*g._VECTptr;
         if (gv.size()<2 || !gv[1].is_integer() || (nsr=gv[1].val)<1)
             return gensizeerr(contextptr);
         if (gv.size()>2) {
@@ -655,13 +676,13 @@ gen _resample(const gen &g,GIAC_CONTEXT) {
         vecteur ch=decode_chdata(*snd._VECTptr->at(i)._VECTptr,bd);
         chdata.push_back(ch);
     }
-    int nlen=((long)len*(long)nsr)/(long)sr;
     SRC_DATA data;
+    data.src_ratio=double(nsr)/double(sr);
+    int nlen=(int)std::floor(len*data.src_ratio);
     data.input_frames=len;
     data.output_frames=nlen;
     float *indata=new float[len*nc];
     data.data_out=new float[nlen*nc];
-    data.src_ratio=double(nsr)/double(sr);
     for (int i=0;i<len;++i) {
         for (int j=0;j<nc;++j) {
             indata[i*nc+j]=_evalf(chdata[j][i],contextptr).DOUBLE_val();
@@ -1413,7 +1434,9 @@ gen expand_Dirac_prod(const gen &f_orig,const identificateur &x,const gen &a,int
     return ret;
 }
 
-gen simplify_Dirac(const gen &g_orig,const identificateur &x,GIAC_CONTEXT) {
+gen simplify_Dirac(const gen &g_orig,const identificateur &x,int depth,GIAC_CONTEXT) {
+	if (depth>100)
+		return g_orig;
     gen g=expand(g_orig,contextptr),r,ret(0),rest(0);
     vecteur terms;
     if (g.is_symb_of_sommet(at_plus) && g._SYMBptr->feuille.type==_VECT)
@@ -1432,7 +1455,7 @@ gen simplify_Dirac(const gen &g_orig,const identificateur &x,GIAC_CONTEXT) {
         }
     }
     if (!is_zero(rest))
-        rest=simplify_Dirac(ratnormal(rest,contextptr),x,contextptr);
+        rest=simplify_Dirac(ratnormal(rest,contextptr),x,depth+1,contextptr);
     return ret+rest;
 }
 
@@ -2140,7 +2163,7 @@ gen fourier(const gen &f_orig,const identificateur &x,const identificateur &s,
     if (is_zero(recursive_normal(im(ret,contextptr),contextptr)))
         ret=re(ret,contextptr);
     ret=simplify_signs(ret,s,contextptr);
-    ret=simplify_Dirac(ret,s,contextptr);
+    ret=simplify_Dirac(ret,s,0,contextptr);
     ret=Heaviside2abs(ret,s,contextptr);
     gen rcn=recursive_normal(ret,contextptr);
     if (is_rational_wrt(rcn,s))
@@ -2253,13 +2276,13 @@ gen _threshold(const gen &g,GIAC_CONTEXT) {
     if (g.type==_STRNG && g.subtype==-1) return g;
     if (g.type!=_VECT || g.subtype!=_SEQ__VECT)
         return gentypeerr(contextptr);
-    vecteur &args=*g._VECTptr;
+    const vecteur &args=*g._VECTptr;
     if (int(args.size())<2)
         return gensizeerr(contextptr);
     if (args.front().type!=_VECT)
         return gentypeerr(contextptr);
-    vecteur &data=*args.front()._VECTptr;
-    gen &bnd=args.at(1);
+    const vecteur &data=*args.front()._VECTptr;
+    gen bnd=args.at(1);
     int n=data.size();
     vecteur output=data;
     if (bnd.type==_VECT) {
