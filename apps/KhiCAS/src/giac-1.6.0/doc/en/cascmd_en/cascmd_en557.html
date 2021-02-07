@@ -4,69 +4,88 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Statistics functions acting on column matrices : mean, stddev, variance, median, quantile, quartiles, boxwhisker</title>
+<title>Solving AX=b: simult
+</title>
 </head>
 <body >
 <a href="cascmd_en556.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en558.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec657" class="subsection">5.49.32  Statistics functions acting on column matrices : <span style="font-family:monospace">mean</span>, <span style="font-family:monospace">stddev</span>, <span style="font-family:monospace">variance</span>, <span style="font-family:monospace">median</span>, <span style="font-family:monospace">quantile</span>, <span style="font-family:monospace">quartiles</span>, <span style="font-family:monospace">boxwhisker</span></h3>
-<p><a id="sec:statmat"></a>
-<a id="hevea_default871"></a> <a id="hevea_default872"></a><a id="hevea_default873"></a><a id="hevea_default874"></a><a id="hevea_default875"></a><a id="hevea_default876"></a><a id="hevea_default877"></a>
-The following functions work on matrices, acting column by column:
+<h3 id="sec712" class="subsection">6.56.4  Solving <span style="font-style:italic">AX</span>=<span style="font-style:italic">b</span>: <span style="font-family:monospace">simult</span>
+<a id="hevea_default959"></a></h3>
+<p>The <span style="font-family:monospace">simult</span> command can solve a linear system of equations or 
+several linear systems of equations with the same matrix of
+coefficients (see also <a href="cascmd_en556.html#ssec%3Arref">6.56.3</a>).
 </p><ul class="itemize"><li class="li-itemize">
-<span style="font-family:monospace">mean</span> computes the arithmetic means of the statistical series
-stored in the columns of a matrix.<br>
-Input :
-<div class="center"><span style="font-family:monospace">mean([[3,4,2],[1,2,6]])</span></div>
-Output is the vector of the means of each column :
-<div class="center"><span style="font-family:monospace">[2,3,4]</span></div>
-Input :
-<div class="center"><span style="font-family:monospace">mean([[1,0,0],[0,1,0],[0,0,1]])</span></div>
-Output 
-<div class="center"><span style="font-family:monospace">[1/3,1/3,1/3]</span></div></li><li class="li-itemize"><span style="font-family:monospace">stddev</span> computes the standard deviations of the population
-statistical series stored in the columns of a matrix.<br>
-Input :
-<div class="center"><span style="font-family:monospace">stddev([[3,4,2],[1,2,6]])</span></div>
-Output is the vector of the standard deviations of each column :
-<div class="center"><span style="font-family:monospace">[1,1,2]</span></div>
-</li><li class="li-itemize"><span style="font-family:monospace">variance</span> computes the variances of the statistical series
-stored in the columns of a matrix.<br>
-Input :
-<div class="center"><span style="font-family:monospace">variance([[3,4,2],[1,2,6]])</span></div>
-Output is the vector of the variance of each column :
-<div class="center"><span style="font-family:monospace">[1,1,4]</span></div></li><li class="li-itemize"><span style="font-family:monospace">median</span> computes the medians of the statistical series
-stored in the columns of a matrix.<br>
-Input :
-<div class="center"><span style="font-family:monospace">median([[6,0,1,3,4,2,5],[0,1,3,4,2,5,6],[1,3,4,2,5,6,0], [3,4,2,5,6,0,1],[4,2,5,6,0,1,3],[2,5,6,0,1,3,4]])</span></div>
-Output is the vector of the median of each column :
-<div class="center"><span style="font-family:monospace">[3,3,4,4,4,3,4]</span></div></li><li class="li-itemize"><span style="font-family:monospace">quantile</span> computes the deciles as specified by the second
-argument of the statistical series stored in the columns of a matrix.<br>
-Input :<div class="center"><span style="font-family:monospace">quantile([[6,0,1,3,4,2,5],[0,1,3,4,2,5,6],[1,3,4,2,5,6,0], [3,4,2,5,6,0,1],[4,2,5,6,0,1,3],[2,5,6,0,1,3,4]],0.25)</span></div>
-Output is the vector of the first quartile of each column :
-<div class="center"><span style="font-family:monospace">[1,1,2,2,1,1,1]</span></div>
-Input :
-<div class="center"><span style="font-family:monospace">quantile([[6,0,1,3,4,2,5],[0,1,3,4,2,5,6],[1,3,4,2,5,6,0], [3,4,2,5,6,0,1],[4,2,5,6,0,1,3],[2,5,6,0,1,3,4]],0.75)</span></div>
-Output is the vector of the third quartile of each column :
-<div class="center"><span style="font-family:monospace">[3,3,4,4,4,3,4]</span></div></li><li class="li-itemize"><span style="font-family:monospace">quartiles</span> computes the minima, the first quartiles, the 
-medians, the third quartiles and the maxima of the statistical series
-stored in the columns of a matrix.<br>
-Input :
-<div class="center"><span style="font-family:monospace">quartiles([[6,0,1,3,4,2,5],[0,1,3,4,2,5,6],[1,3,4,2,5,6,0], [3,4,2,5,6,0,1], [4,2,5,6,0,1,3], [2,5,6,0,1,3,4]])</span></div>
-Output is a matrix, its first row is the minima of each column,
-its second row is the fist quartiles of each column, 
-its third row the medians 
-of each column, its fourth row the third
-quartiles of each column and its last row the maxima of each column:
-<div class="center"><span style="font-family:monospace">[[0,0,1,0,0,0,0],[1,1,2,2,1,1,1], [2,2,3,3,2,2,3],</span></div>
-<div class="center"><span style="font-family:monospace">[3,3,4,4,4,3,4],[6,5,6,6,6,6,6]]</span></div></li><li class="li-itemize"><span style="font-family:monospace">boxwhisker</span> draws the whisker boxes of the statistical series
-stored in the columns of a matrix .<br>
-Input :
-<div class="center"><span style="font-family:monospace">boxwhisker([[6,0,1,3,4,2,5],[0,1,3,4,2,5,6], [1,3,4,2,5,6,0],[3,4,2,5,6,0,1], [4,2,5,6,0,1,3],[2,5,6,0,1,3,4]])</span></div>
-Output :
-<div class="center"><span style="font-family:monospace">the drawing of the whisker boxes of the statistical 
-series of each column of the matrix argument</span></div> 
+<span style="font-family:monospace">simult</span> takes two arguments:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">A</span>, a matrix (the matrix of coefficients of a system).
+</li><li class="li-itemize"><span style="font-style:italic">b</span>, a column vector (representing the right hand side of
+the system) or a matrix (where each column represents the right
+hand side of an equation).
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">simult(</span><span style="font-style:italic">A</span>,<span style="font-style:italic">b</span><span style="font-family:monospace">)</span> returns a column vector of the
+solutions (or a matrix where each column is the column vector of a
+solution).
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Examples.</span>
+</p><ul class="itemize"><li class="li-itemize">
+Solve
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">⎧<br>
+⎨<br>
+⎩</td><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" >  3<span style="font-style:italic">x</span> + <span style="font-style:italic">y</span></td><td style="text-align:center;white-space:nowrap" >=</td><td style="text-align:right;white-space:nowrap" >−2 </td></tr>
+<tr><td style="text-align:left;white-space:nowrap" >  3<span style="font-style:italic">x</span> +2<span style="font-style:italic">y</span></td><td style="text-align:center;white-space:nowrap" >=</td><td style="text-align:right;white-space:nowrap" >2 
+</td></tr>
+</table></td></tr>
+</table>
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">simult([[3,1],[3,2]],[[-2],[2]])</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">⎡<br>
+⎢<br>
+⎣</td><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:center;white-space:nowrap" >−2</td></tr>
+<tr><td style="text-align:center;white-space:nowrap" >4</td></tr>
+</table></td><td class="dcell">⎤<br>
+⎥<br>
+⎦</td></tr>
+</table>
+<div class="center"><span style="font-family:monospace">[[-2],[4]]</span></div>
+Hence <span style="font-style:italic">x</span>=−2 and <span style="font-style:italic">y</span>=4 is the solution.
+</li><li class="li-itemize">Solve
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">⎧<br>
+⎨<br>
+⎩</td><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" >3<span style="font-style:italic">x</span> + <span style="font-style:italic">y</span></td><td style="text-align:center;white-space:nowrap" >=</td><td style="text-align:right;white-space:nowrap" >−2 </td></tr>
+<tr><td style="text-align:left;white-space:nowrap" >3
+<span style="font-style:italic">x</span> +2<span style="font-style:italic">y</span></td><td style="text-align:center;white-space:nowrap" >=</td><td style="text-align:right;white-space:nowrap" >2 
+</td></tr>
+</table></td></tr>
+</table>
+and
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">⎧<br>
+⎨<br>
+⎩</td><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" >3<span style="font-style:italic">x</span> + <span style="font-style:italic">y</span></td><td style="text-align:center;white-space:nowrap" >=</td><td style="text-align:right;white-space:nowrap" >1 </td></tr>
+<tr><td style="text-align:left;white-space:nowrap" >3<span style="font-style:italic">x</span> +2<span style="font-style:italic">y</span></td><td style="text-align:center;white-space:nowrap" >=</td><td style="text-align:right;white-space:nowrap" >2 
+</td></tr>
+</table></td></tr>
+</table>
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">simult([[3,1],[3,2]],[[-2,1],[2,2]])</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">⎡<br>
+⎢<br>
+⎣</td><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:center;white-space:nowrap" >−2</td><td style="text-align:center;white-space:nowrap" >0</td></tr>
+<tr><td style="text-align:center;white-space:nowrap" >4</td><td style="text-align:center;white-space:nowrap" >1</td></tr>
+</table></td><td class="dcell">⎤<br>
+⎥<br>
+⎦</td></tr>
+</table>
+So <span style="font-style:italic">x</span>=−2 and <span style="font-style:italic">y</span>=4 is the solution of the first system of equations
+and <span style="font-style:italic">x</span>=0 and <span style="font-style:italic">y</span>=1 is the solution of the second system.
 </li></ul>
 <hr>
 <a href="cascmd_en556.html"><img src="previous_motif.gif" alt="Previous"></a>

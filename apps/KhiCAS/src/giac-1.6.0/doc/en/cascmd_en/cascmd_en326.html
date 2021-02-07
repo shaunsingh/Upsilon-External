@@ -4,62 +4,107 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Transform a polynomial in internal format into a list, and
-conversely: convert</title>
+<title>Solving au+bv=c over polynomials: abcuv
+</title>
 </head>
 <body >
 <a href="cascmd_en325.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en327.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec398" class="subsection">5.29.5  Transform a polynomial in internal format into a list, and
-conversely: <span style="font-family:monospace">convert</span></h3>
-<p><a id="hevea_default546"></a></p><p>The <span style="font-family:monospace">convert</span> command can take a polynomial in the internal
-format as a first argument and the <span style="font-family:monospace">list</span> option as the second
-argument. Here, the <span style="font-family:monospace">list</span> option can be omitted.<br>
-In this case, <span style="font-family:monospace">convert</span> returns a list representing the
-polynomial. <br>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">p := symb2poly(x^2 - x*y + 2y, [x,y])
-</span></div><p>
-Output:
-</p><div class="center">
-<span style="font-family:monospace">%%%{1,[2,0]%%%}+%%%{-1,[1,1]%%%}+%%%{2,[0,1]%%%} 
-</span></div><p>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">l := convert(p,list)
-</span></div><p>
-or:
-</p><div class="center">
-<span style="font-family:monospace">l := convert(p)
-</span></div><p>
-Output:
-</p><div class="center">
-<span style="font-family:monospace">[[1,[2,0]],[-1,[1,1]],[2,[0,1]]] 
-</span></div><p>
-which is a list of the coefficients followed by a list of the variable
-powers.</p><p>The <span style="font-family:monospace">convert</span> command can also take a list as the first argument and
-the <span style="font-family:monospace">polynom</span> option as the second argument.<br>
-In this case, <span style="font-family:monospace">convert</span> returns the corresponding polynomial in
-internal format.<br>
-Input (<span style="font-family:monospace">l</span> from above):
-</p><div class="center">
-<span style="font-family:monospace">l
-</span></div><p>
-Output:
-</p><div class="center">
-<span style="font-family:monospace">[[1,[2,0]],[-1,[1,1]],[2,[0,1]]] 
-</span></div><p>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">convert(l,polynom)
-</span></div><p>
-Output:
-</p><div class="center">
-<span style="font-family:monospace">%%%{1,[2,0]%%%}+%%%{-1,[1,1]%%%}+%%%{2,[0,1]%%%} 
-</span></div>
+<h3 id="sec399" class="subsection">6.28.10  Solving au+bv=c over polynomials: <span style="font-family:monospace">abcuv</span>
+<a id="hevea_default576"></a></h3>
+<p>A consequence of Bézout’s identity is that given polynomials
+<span style="font-style:italic">A</span>(<span style="font-style:italic">x</span>), <span style="font-style:italic">B</span>(<span style="font-style:italic">x</span>) and <span style="font-style:italic">C</span>(<span style="font-style:italic">x</span>), there exist polynomials <span style="font-style:italic">U</span>(<span style="font-style:italic">x</span>) and <span style="font-style:italic">V</span>(<span style="font-style:italic">x</span>)
+such that
+</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">C</span>(<span style="font-style:italic">x</span>)=<span style="font-style:italic">U</span>(<span style="font-style:italic">x</span>)· <span style="font-style:italic">A</span>(<span style="font-style:italic">x</span>)+<span style="font-style:italic">V</span>(<span style="font-style:italic">x</span>)· <span style="font-style:italic">B</span>(<span style="font-style:italic">x</span>) 
+</td></tr>
+</table><p>
+exactly when <span style="font-style:italic">C</span>(<span style="font-style:italic">x</span>) is a multiple of the greatest common divisor of
+<span style="font-style:italic">A</span>(<span style="font-style:italic">x</span>) and <span style="font-style:italic">B</span>(<span style="font-style:italic">x</span>). The <span style="font-family:monospace">abcuv</span> command solves this polynomial
+equation.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">abcuv</span> takes three mandatory and one optional
+argument:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">A</span>, <span style="font-style:italic">B</span> and <span style="font-style:italic">C</span>, three polynomials given as expressions or
+lists of coefficients in decreasing order, where <span style="font-style:italic">C</span> is a multiple
+of the greatest common divisor of <span style="font-style:italic">A</span> and <span style="font-style:italic">B</span>.
+</li><li class="li-itemize">Optionally if the polynomials are expressions, <span style="font-style:italic">x</span>, the
+variable (which defaults to <span style="font-family:monospace">x</span>).
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">abcuv(</span><span style="font-style:italic">A</span>,<span style="font-style:italic">B</span>,<span style="font-style:italic">C</span>  ⟨ ,<span style="font-style:italic">x</span>⟩<span style="font-family:monospace">)</span> returns a list of two expressions 
+<span style="font-family:monospace">[</span><span style="font-style:italic">U</span>,<span style="font-style:italic">V</span><span style="font-family:monospace">]</span> such that <span style="font-style:italic">C</span> = <span style="font-style:italic">U</span>· <span style="font-style:italic">A</span> + <span style="font-style:italic">V</span>· <span style="font-style:italic">B</span>.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Examples.</span>
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">abcuv(x^2+2*x+1 ,x^2-1,x+1)</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">⎡<br>
+⎢<br>
+⎢<br>
+⎣</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">,−</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">⎤<br>
+⎥<br>
+⎥<br>
+⎦</td></tr>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">abcuv(x^2+2*x+1 ,x^2-1,x^3+1)</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">⎡<br>
+⎢<br>
+⎢<br>
+⎣</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">−<span style="font-style:italic">x</span>+2</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">,</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">3</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell"> <span style="font-style:italic">x</span></td><td class="dcell">⎤<br>
+⎥<br>
+⎥<br>
+⎦</td></tr>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">abcuv([1,2,1],[1,0,-1],[1,0,0,1])</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">[▯ </td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">,−</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">,</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell"> ▯,
+▯ −</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">,</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">,−</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">
+▯]
+</td></tr>
+</table>
+</li></ul>
 <hr>
 <a href="cascmd_en325.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

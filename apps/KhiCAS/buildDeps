@@ -4,7 +4,7 @@ set -e
 
 function build {
   (
-    cd src/gmp-6.2.0
+    cd src/gmp-6.2.1
     ./configure --host=arm-none-eabi --disable-assembly CFLAGS="$2"
     make -j $(nproc)
     cp .libs/libgmp.a ../lib/
@@ -13,7 +13,7 @@ function build {
   )
 
   (
-    cd src/mpfr-4.0.2
+    cd src/mpfr-4.1.0
     ./configure --with-gmp=../ --host=arm-none-eabi --disable-shared CFLAGS="$2"
     make -j $(nproc)
     cp src/.libs/libmpfr.a ../lib/

@@ -6,6 +6,7 @@ var UI = {
   from: '',
   ready: false,
   focusaftereval: true,
+  frac_add:1.0, // set to 0 to avoid adding an approx value of a fraction
   docprefix: "https://www-fourier.univ-grenoble-alpes.fr/%7eparisse/giac/doc/fr/cascmd_fr/",
   base_url: "https://www-fourier.univ-grenoble-alpes.fr/%7eparisse/",
   //forum_url: "http://xcas.e.univ-grenoble-alpes.fr/XCAS/viewforum.php?f=25",
@@ -1356,6 +1357,12 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
     //console.log(s);//console.log(UI.python_output);
   },
   mpeval:function(text){
+    while (text.length>0){
+      var ch=text.substr(text.length-1,1);
+      if (ch!=' ')
+	break;
+      text=text.substr(0,text.length-1);
+    }
     if (text=='xcas' || text=='xcas '){
       UI.micropy=0; UI.python_mode=0; 
       var form = $id('config');
@@ -1405,6 +1412,14 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
     return '"'+UI.python_output+'"';
   },
   handle_shortcuts:function(text){
+    while (text.length>0){
+      var ch=text.substr(text.length-1,1);
+      if (ch!=' '){
+	if (ch==':') return text.substr(0,text.length-1)+';show_pixels()';
+	break;
+      }
+      text=text.substr(0,text.length-1);
+    }
     if (text=='.') return 'avance(0)';
     if (text==',') return 'show()';
     if (text==';') return 'show_pixels()';
@@ -1809,6 +1824,8 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
     console.log('makelink',start);
     var s = 'python=';
     if (UI.python_mode) s += (UI.python_mode+'&'); else s += '0&';
+    let radian_mode=($id('config').angle_mode.checked?1:0);
+    s += 'radian='+(radian_mode?1:0)+'&';
     var cur = $id('mathoutput').firstChild;
     var i = 0;
     var savepy=UI.python_mode;
@@ -1817,7 +1834,7 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
     var casiovars=UI.caseval_noautosimp('VARS(-1)');
     if (savepy)
       UI.caseval_noautosimp('python_compat('+savepy+')');
-    casiovars += ';python_compat('+UI.python_mode+');angle_radian('+ ($id('config').angle_mode.checked?1:0)+');';
+    casiovars += ';python_compat('+UI.python_mode+');angle_radian('+ radian_mode+');';
     // console.log('UI.savesheet=',UI.savesheet);
     if (UI.savesheet){
       var tabl=UI.current_sheet(1);
@@ -2449,6 +2466,9 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
       var s;
       reader.onloadend = function (e) {
         s = e.target.result;
+	if (s.length>11 && (s.substr(3,7)=='<tbody>' || s.substr(3,8)=='#xwaspy\n') )
+	  s=s.substr(3,s.length-3);
+	//console.log(s.substr(0,7));
 	if (s.length>8 && s.substr(0,8)=='#xwaspy\n'){
 	  // decode sessions saved as fake py files (Numworks)
 	  pos=8;
@@ -3128,6 +3148,10 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
       out=UI.mpeval(text);
     else
       out = UI.caseval(text);
+    if (out==null){
+      console.log(text,out);
+      return;
+    }
     //console.log(text,out);
     var s = ' ';
     var isstr = out[0] == '"';
@@ -3166,12 +3190,18 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
       UI.turtle_draw(n, field.nextSibling.value);
     }
     if (n && n.length > 5 && n.substr(0, 5) == 'gl3d_') {
-      Module.print(n);
+      console.log('render',n);
+      field.removeEventListener("touchstart", UI.touch_handler, false);
+      field.removeEventListener("touchend", UI.touch_handler, false);
+      field.removeEventListener("touchmove", UI.touch_handler, false); 
+      field.addEventListener("touchstart", UI.touch_handler, false);
+      field.addEventListener("touchend", UI.touch_handler, false);
+      field.addEventListener("touchmove", UI.touch_handler, false);
+      $id('table_3d').style.display='none';
       var n3d = n.substr(5, n.length - 5);
       //Module.print(n3d);
       //Module.canvas=$id(n);
       UI.giac_renderer(n3d);
-      //Module.canvas=$id('canvas');
       return;
     }
     var f = field.firstChild;
@@ -3582,8 +3612,28 @@ id="matr_case' + i + '_' + j + '">' + oldval + '</textarea><div class="matrixcel
       }
     }
     if (delbut) s += '</tr>'; else s += UI.erase_button(!UI.qa);
-    // console.log(s);
+    //console.log(s);
     return s;
+  },
+  touch_handler:function(event){
+    var touches = event.changedTouches,
+        first = touches[0];
+    var s2=first.target.id;
+    var is_3d= s2.length>5 && s2.substr(0,4)=='gl3d';
+    var n3d='';
+    if (is_3d)
+      n3d = s2.substr(5, s2.length - 5);
+    event.preventDefault();
+    if (event.type=="touchstart"){
+      UI.canvas_pushed=true;
+      UI.canvas_lastx=first.clientX; UI.canvas_lasty=first.clientY;
+    }
+    if (event.type=="touchmove"){
+      UI.canvas_mousemove(first, n3d);
+    }
+    if (event.type=="touchend"){
+      UI.canvas_pushed=false;
+    }
   },
   giac_renderer: function (text) {
     var gr = Module.cwrap('_ZN4giac13giac_rendererEPKc', 'number', ['string']);

@@ -42,6 +42,7 @@ int micropy_ck_eval(const char *line){
 
 const char * read_file(const char * filename){
   FILE * f =fopen(filename,"r");
+  if (!f) return 0;
   static char buf[256*1024];
   fscanf(f,"%s",buf);
   return buf;

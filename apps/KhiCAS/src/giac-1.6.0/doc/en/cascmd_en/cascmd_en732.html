@@ -4,92 +4,109 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>The Wilconon test polynomial: wilcoxonp</title>
+<title>Starting the debugger: debug sst in sst_in cont kill break breakpoint halt rmbrk rmbreakpoint watch rmwtch
+
+
+
+
+
+
+
+
+
+
+
+
+</title>
 </head>
 <body >
 <a href="cascmd_en731.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en733.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec940" class="subsection">8.4.18  The Wilconon test polynomial: <span style="font-family:monospace">wilcoxonp</span><a id="hevea_default1289"></a></h3>
-<p>The <span style="font-family:monospace">wilcoxonp</span> command will compute the polynomial for the
-Wilcoxon or Mann-Whitney test; it can take one or two parameters. If
-you enter
+<h3 id="sec993" class="subsection">12.5.1  Starting the debugger: <span style="font-family:monospace">debug</span> <span style="font-family:monospace">sst</span> <span style="font-family:monospace">in</span> <span style="font-family:monospace">sst_in</span> <span style="font-family:monospace">cont</span> <span style="font-family:monospace">kill</span> <span style="font-family:monospace">break</span> <span style="font-family:monospace">breakpoint</span> <span style="font-family:monospace">halt</span> <span style="font-family:monospace">rmbrk</span> <span style="font-family:monospace">rmbreakpoint</span> <span style="font-family:monospace">watch</span> <span style="font-family:monospace">rmwtch</span>
+<a id="hevea_default1418"></a>
+<a id="hevea_default1419"></a>
+<a id="hevea_default1420"></a>
+<a id="hevea_default1421"></a>
+<a id="hevea_default1422"></a>
+<a id="hevea_default1423"></a>
+<a id="hevea_default1424"></a>
+<a id="hevea_default1425"></a>
+<a id="hevea_default1426"></a>
+<a id="hevea_default1427"></a>
+<a id="hevea_default1428"></a>
+<a id="hevea_default1429"></a>
+<a id="hevea_default1430"></a></h3>
+<p>The <span style="font-family:monospace">debug</span> command starts the <span style="font-family:monospace">Xcas</span> debugger.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">debug</span> takes one argument:<br>
+ <span style="font-style:italic">fn(arg)</span>, a function and its argument.
+</li><li class="li-itemize"><span style="font-family:monospace">debug(</span><span style="font-style:italic">fn(arg)</span><span style="font-family:monospace">)</span>
+brings up a debug window which contains a pane with the program with
+the current line highlighted, an <span style="font-family:monospace">eval</span> entry box,
+a pane with the program including the breakpoints, a row of buttons,
+and a pane keeping track of the values of variables.
+</li></ul><p>
+By default, the
+value of all variables in the program are in this pane. The buttons
+are shortcuts for entering commands in the <span style="font-family:monospace">eval</span> box, but you
+can enter other commands in the <span style="font-family:monospace">eval</span> box to change the values
+of variables or to run a command in the context of the program.</p><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+With the <span style="font-family:monospace">sumprod</span> program:
 </p><div class="center">
-<span style="font-family:monospace">wilcoxonp(4)
-</span></div><p>
-you will get
+<table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">sumprod(a,b):= {</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">local s, p;</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">s:= a + b;</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">p:= a*b;</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">return [s,p];</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">}</span>
+</td></tr>
+</table>
+</div><p>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">poly1[1/16,1/16,1/16,1/8,1/8,1/8,1/8,1/8,1/16,1/16,1/16]
-</span></div><p>
-and if you enter
+<span style="font-family:monospace">debug(sumprod(2,3))</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
 </p><div class="center">
-<span style="font-family:monospace">wilcoxonp(4,3)
-</span></div><p>
-you will get
-</p><div class="center">
-<span style="font-family:monospace">poly1[1/35,1/35,2/35,3/35,4/35,4/35,1/7,4/35,4/35,3/35,2/35,1/35,1/35]
-</span></div>
-<h4 id="sec941" class="subsubsection">The Wilcoxon/Mann-Whitney statistic: <span style="font-family:monospace">wilcoxons</span><a id="hevea_default1290"></a></h4>
-<p>Given two lists, or one list and a real number (a median), the
-<span style="font-family:monospace">wilcoxons</span> command will return the Wilcoxon or Mann-Whitney statistic. 
-If you enter
-</p><div class="center">
-<span style="font-family:monospace">wilcoxons([1,3,4,5,7,8,8,12,15,17],10)
-</span></div><p>
-you will get
-</p><div class="center">
-<span style="font-family:monospace">18
-</span></div><p>
-and if you enter
-</p><div class="center">
-<span style="font-family:monospace">wilcoxons([1,3,4,5,7,8,8,12,15,17],[2,6,10,11,13,14,15,18,19,20])
-</span></div><p>
-you will get
-</p><div class="center">
-<span style="font-family:monospace">128.5
-</span></div>
-<h4 id="sec942" class="subsubsection">The Wilcoxon or Mann-Whitney test: <span style="font-family:monospace">wilcoxont</span></h4>
-<p>
-<a id="hevea_default1291"></a></p><p>The <span style="font-family:monospace">wilcoxont</span> command will perform the Wilcoxon or
-Mann-Whitney test, given two samples or one sample and a number (a
-median). It can additionally take an optional third argument of a
-function and an optional fourth argument of a real number.
-If you enter
-</p><div class="center">
-<span style="font-family:monospace">wilcoxont([1,2,3,4,5,7,8,8,12,15,17],[2,6,10,11,13,14,15,18,19,20])
-</span></div><p>
-you will get
-</p><pre class="verbatim">   Mann-Whitney 2-sample test, H0 same Median, H1 &lt;&gt;
-   ranksum 93.0, shifted ranksum 27.0
-   u1=83 ,u2=27, u=min(u1,u2)=27
-   Limit value to reject H0 26
-   P-value 9055/176358 (0.0513444244094), alpha=0.05 H0 not rejected 
-   1
-\end{center}
-If you enter
-\begin{center}
-  \tt
-  wilcoxont([1,3,4,5,7,8,8,12,15,17],[2,6,10,11,13,14,15,18,19,20],0.3)
-\end{center}
-you will get
-\begin{verbatim}
-   Mann-Whitney 2-sample test, H0 same Median, H1 &lt;&gt;
-   ranksum 81.5, shifted ranksum 26.5
-   u1=73.5 ,u2=26.5, u=min(u1,u2)=26.5
-   Limit value to reject H0 35
-   P-value 316/4199 (0.0752560133365), alpha=0.3 H0 rejected
-   0
-</pre><p>
-and if you enter
-</p><div class="center">
-<span style="font-family:monospace">wilcoxont([1,3,4,5,7,8,8,12,15,17] ,10,‘&gt;‘,0.05)
-</span></div><p>
-you will get
-</p><pre class="verbatim">   Wilcoxon 1-sample test, H0 Median=10, H1 M&lt;&gt;10
-   Wilcoxon statistic: 18, p-value: 0.375, confidence level: 0.05
-   1
-</pre>
+<img src="cascmd_en135.png">
+</div><p><br>
+</p><p>The debug window has the following buttons:
+</p><dl class="description"><dt class="dt-description">
+<span style="font-weight:bold">sst</span></dt><dd class="dd-description"> This button will run the
+<span style="font-family:monospace">sst</span> command, which takes no arguments and runs the
+highlighted line in the program before moving to the next line.</dd><dt class="dt-description"><span style="font-weight:bold">in</span></dt><dd class="dd-description">
+This button will run the
+<span style="font-family:monospace">sst_in</span> command, which takes no argument and runs one step in
+the program or a user defined function used in the program.</dd><dt class="dt-description"><span style="font-weight:bold">cont</span></dt><dd class="dd-description"> This button will run the
+<span style="font-family:monospace">cont</span> command, which takes no arguments and runs the commands
+from the highlighted line to a breakpoint.</dd><dt class="dt-description"><span style="font-weight:bold">kill</span></dt><dd class="dd-description"> This button will run the
+<span style="font-family:monospace">kill</span> command, which exits the debugger.</dd><dt class="dt-description"><span style="font-weight:bold">break</span></dt><dd class="dd-description"> This button will put the command
+<span style="font-family:monospace">breakpoint</span> in the <span style="font-family:monospace">eval</span> box, with default arguments
+of the current program and the current line. It sets a breakpoint at
+the given line of the given program. Alternatively, if you click on a
+line in the program in the top pane, you will get the
+<span style="font-family:monospace">breakpoint</span> command with that program and the line you clicked
+on.<p>You can set a breakpoint when you write a program with the
+<span style="font-family:monospace">halt()</span> command. When a program has a <span style="font-family:monospace">halt</span> command,
+then running the program will bring up the debugger. If you want to
+debug the program, though, it is still better to use the debug
+command. Also, you should remove any <span style="font-family:monospace">halt</span> commands when you
+are done debugging.</p></dd><dt class="dt-description"><span style="font-weight:bold">rmbrk</span></dt><dd class="dd-description"> This button will put the command
+<span style="font-family:monospace">rmbreakpoint</span> in the <span style="font-family:monospace">eval</span> box , with default
+arguments of the current program and the current line. It removes a
+breakpoint at the given line of the given program. Alternatively, you
+can click on the line in the program in the top pane with the bookmark
+you want to remove.</dd><dt class="dt-description"><span style="font-weight:bold">watch</span></dt><dd class="dd-description"> This button will put the command
+<span style="font-family:monospace">watch</span> in the <span style="font-family:monospace">eval</span> box, without the arguments filled
+in. It takes a list of variables as arguments, and will keep track of
+the values of these variables in the variable pane.</dd><dt class="dt-description"><span style="font-weight:bold">rmwtch</span></dt><dd class="dd-description"> This button will put the
+command <span style="font-family:monospace">rmwatch</span><a id="hevea_default1431"></a> in the <span style="font-family:monospace">eval</span> box
+without the arguments filled in. The arguments are the variables you
+want to remove from the watch list.
+</dd></dl>
 <hr>
 <a href="cascmd_en731.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

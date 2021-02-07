@@ -82,7 +82,6 @@ enum distribution_type {
 };
 
 bool is_graphe(const gen &g,std::string &disp_out,GIAC_CONTEXT);
-gen gt_command(gen (*gtfunc)(const gen &,const context *),const char *args,GIAC_CONTEXT);
 
 // GRAPH THEORY GIAC COMMANDS
 
@@ -276,6 +275,21 @@ gen _tonnetz(const gen &g,GIAC_CONTEXT);
 gen _truncate_graph(const gen &g,GIAC_CONTEXT);
 gen _find_cycles(const gen &g,GIAC_CONTEXT);
 gen _kspaths(const gen &g,GIAC_CONTEXT);
+gen _degree_centrality(const gen &g,GIAC_CONTEXT);
+gen _betweenness_centrality(const gen &g,GIAC_CONTEXT);
+gen _closeness_centrality(const gen &g,GIAC_CONTEXT);
+gen _katz_centrality(const gen &g,GIAC_CONTEXT);
+gen _information_centrality(const gen &g,GIAC_CONTEXT);
+gen _harmonic_centrality(const gen &g,GIAC_CONTEXT);
+gen _is_split_graph(const gen &g,GIAC_CONTEXT);
+gen _contract_subgraph(const gen &g,GIAC_CONTEXT);
+gen _greedy_clique(const gen &g,GIAC_CONTEXT);
+gen _greedy_independent_set(const gen &g,GIAC_CONTEXT);
+gen _minimum_vertex_cover(const gen &g,GIAC_CONTEXT);
+gen _find_vertex_cover(const gen &g,GIAC_CONTEXT);
+gen _vertex_cover_number(const gen &g,GIAC_CONTEXT);
+gen _is_reachable(const gen &g,GIAC_CONTEXT);
+gen _reachable(const gen &g,GIAC_CONTEXT);
 
 // GENERAL GIAC COMMANDS
 

@@ -4,64 +4,68 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>The gamma distribution</title>
+<title>Writing variable values to a file: write
+</title>
 </head>
 <body >
 <a href="cascmd_en722.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en724.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec910" class="subsection">8.4.9  The gamma distribution</h3>
-<h4 id="sec911" class="subsubsection">The probability density function for the gamma distribution: <span style="font-family:monospace">gammad</span><a id="hevea_default1255"></a></h4>
-<p>The gamma distribution depends on two parameters, <span style="font-style:italic">a</span>&gt;0 and <span style="font-style:italic">b</span>&gt;0; the
-value of the density function at <span style="font-style:italic">x</span> ≥ 0 is
-<span style="font-family:monospace">gammad</span>(<span style="font-style:italic">a</span>,<span style="font-style:italic">b</span>,<span style="font-style:italic">x</span>) = <span style="font-style:italic">x</span><sup><span style="font-style:italic">a</span>−1</sup><span style="font-style:italic">e</span><sup>−<span style="font-style:italic">bx</span></sup><span style="font-style:italic">b</span><sup><span style="font-style:italic">a</span></sup>/Γ(<span style="font-style:italic">a</span>). If you enter
+<h3 id="sec983" class="subsection">12.4.3  Writing variable values to a file: <span style="font-family:monospace">write</span>
+<a id="hevea_default1398"></a></h3>
+<p>The <span style="font-family:monospace">write</span> command saves variable values to a file, to be read
+later.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">write</span> takes two arguments:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">filename</span>, a string.
+</li><li class="li-itemize"><span style="font-style:italic">vars</span>, a sequence of variables.
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">write(</span><span style="font-style:italic">filename,vars</span><span style="font-family:monospace">)</span>
+writes the variables in <span style="font-style:italic">vars</span> assigned to their values in a
+file named <span style="font-style:italic">filename</span>.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">gammad(2,1,3)
-</span></div><p>
-for example, you will get
+<table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">a:=3.14</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">b:=7</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">write("foo",a,b)</span>
+</td></tr>
+</table>
+</div><p>
+creates a file named “foo” containing:
 </p><div class="center">
-<span style="font-family:monospace">3/exp(3) 
-</span></div>
-<h4 id="sec912" class="subsubsection">The cumulative distribution function for the gamma distribution: <span style="font-family:monospace">gammad_cdf</span><a id="hevea_default1256"></a></h4>
-<p>The cumulative distribution function for the gamma distribution with
-parameters <span style="font-style:italic">a</span> and <span style="font-style:italic">b</span> at a value <span style="font-style:italic">x</span> is
-<span style="font-family:monospace">gammad_cdf</span>(<span style="font-style:italic">n</span>,<span style="font-style:italic">x</span>) = <span style="font-family:monospace">Prob</span>(<span style="font-style:italic">X</span> ≤ <span style="font-style:italic">x</span>). It turns out that
-<span style="font-family:monospace">gammad_cdf</span>(<span style="font-style:italic">n</span>,<span style="font-style:italic">x</span>) = <span style="font-family:monospace">igamma</span>(<span style="font-style:italic">a</span>, <span style="font-style:italic">bx</span>, 1) where
-<span style="font-family:monospace">igamma</span> is the incomplete gamma function; 
-<span style="font-family:monospace">igamma</span>(<span style="font-style:italic">a</span>,<span style="font-style:italic">x</span>,1) = ∫<sub>0</sub><sup><span style="font-style:italic">x</span></sup> <span style="font-style:italic">e</span><sup>−<span style="font-style:italic">t</span></sup><span style="font-style:italic">t</span><sup><span style="font-style:italic">a</span>−1</sup><span style="font-style:italic">dt</span>/Γ(<span style="font-style:italic">a</span>).
-If you
-enter
+<table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">a:=(3.14);</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" ><span style="font-family:monospace">b:=7;</span>
+</td></tr>
+</table>
+</div><p>
+If you wanted to store the first million digits of π to a file,
+you could set it equal to a variable and store it in a file:
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">gammad_cdf(2,1,0.5)
-</span></div><p>
-you will get
+<table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" > <span style="font-family:monospace">pidec:= evalf(pi,10^6):;</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" > <span style="font-family:monospace">write("pi1million",pidec)</span>
+</td></tr>
+</table>
+</div><p><br>
+</p><p>The file is written so that it can be loaded with the <span style="font-family:monospace">read</span>
+command (Section <a href="cascmd_en064.html#ssec%3Aread">5.6.2</a>), which simply takes a file name as a
+string. This allows you to restore the values of variables saved
+this way, for example in a different session or if you have purged the
+variables.</p><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+If, in a different session, you want to use the
+values of <span style="font-family:monospace">a</span> and <span style="font-family:monospace">b</span> above, you can enter:<br>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">0.090204010431
-</span></div><p>If you give <span style="font-family:monospace">gammad_cdf</span> an extra argument,
-you will get the probability that
-the random variable lies between two values;
-<span style="font-family:monospace">gammad_cdf(</span><span style="font-style:italic">a</span><span style="font-family:monospace">,</span><span style="font-style:italic">b</span><span style="font-family:monospace">,</span><span style="font-style:italic">x</span><span style="font-family:monospace">,</span><span style="font-style:italic">y</span><span style="font-family:monospace">)</span> = Prob(<span style="font-style:italic">x</span> ≤ <span style="font-style:italic">X</span> ≤ <span style="font-style:italic">y</span>). If you
-enter
-</p><div class="center">
-<span style="font-family:monospace">gammad_cdf(2,1,0.5,1.5)
-</span></div><p>
-you will get
-</p><div class="center">
-<span style="font-family:monospace">0.351970589198
-</span></div>
-<h4 id="sec913" class="subsubsection">The inverse distribution function for the gamma distribution: <span style="font-family:monospace">gammad_icdf</span><a id="hevea_default1257"></a></h4>
-<p>The inverse distribution function for the gamma
-distribution with parameters <span style="font-style:italic">a</span> and <span style="font-style:italic">b</span> is computed with
-<span style="font-family:monospace">gammad_icdf(</span><span style="font-style:italic">a</span><span style="font-family:monospace">,</span><span style="font-style:italic">b</span><span style="font-family:monospace">,</span><span style="font-style:italic">h</span><span style="font-family:monospace">)</span>; recall that this will return the
-value <span style="font-style:italic">x</span> with <span style="font-family:monospace">gammad_cdf</span>(<span style="font-style:italic">a</span>,<span style="font-style:italic">b</span>,<span style="font-style:italic">x</span>) = <span style="font-style:italic">h</span>. If you enter
-</p><div class="center">
-<span style="font-family:monospace">gammad_icdf(2,1,0.5)
-</span></div><p>
-you will get
-</p><div class="center">
-<span style="font-family:monospace">1.67834699002
-</span></div>
+<span style="font-family:monospace">read("foo")</span>
+</div><p>
+This will reassign the values <span style="font-family:monospace">3.14</span> and <span style="font-family:monospace">7</span> to
+<span style="font-family:monospace">a</span> and <span style="font-family:monospace">b</span>. Be careful, this will silently overwrite
+any values that <span style="font-family:monospace">a</span> and <span style="font-family:monospace">b</span> might have had.</p>
 <hr>
 <a href="cascmd_en722.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

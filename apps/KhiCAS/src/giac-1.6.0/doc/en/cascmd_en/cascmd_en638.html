@@ -4,86 +4,60 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Solving equation(s): solve</title>
+<title>The multinomial probability function: multinomial
+
+</title>
 </head>
 <body >
 <a href="cascmd_en637.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en639.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec762" class="subsection">5.60.6  Solving equation(s): <span style="font-family:monospace">solve</span></h3>
-<p><a id="hevea_default994"></a>
-<span style="font-family:monospace">solve</span> solves an equation or a system of polynomial
-equations. It takes 2 arguments:
+<h3 id="ssec:multinomial" class="subsection">9.4.5  The multinomial probability function: <span style="font-family:monospace">multinomial</span>
+<a id="hevea_default1199"></a>
+</h3>
+<p>If <span style="font-style:italic">X</span> follows a multinomial probability distribution with <span style="font-style:italic">P</span> =
+[<span style="font-style:italic">p</span><sub>0</sub>,<span style="font-style:italic">p</span><sub>1</sub>,…,<span style="font-style:italic">p</span><sub><span style="font-style:italic">j</span></sub>] (where <span style="font-style:italic">p</span><sub>0</sub> + … + <span style="font-style:italic">p</span><sub><span style="font-style:italic">j</span></sub> = 1), then for
+<span style="font-style:italic">K</span>=[<span style="font-style:italic">k</span><sub>0</sub>,…,<span style="font-style:italic">k</span><sub><span style="font-style:italic">j</span></sub>] with <span style="font-style:italic">k</span><sub>0</sub> + … + <span style="font-style:italic">k</span><sub><span style="font-style:italic">j</span></sub> = <span style="font-style:italic">n</span>, the probability that
+<span style="font-style:italic">X</span>=<span style="font-style:italic">K</span> is given by 
+</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><a id="eq:multinomial"></a>
+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">n</span>!</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">k</span><sub>0</sub>!<span style="font-style:italic">k</span><sub>1</sub>!… <span style="font-style:italic">k</span><sub><span style="font-style:italic">j</span></sub>!</td></tr>
+</table></td><td class="dcell">(<span style="font-style:italic">p</span><sub>0</sub><sup><span style="font-style:italic">k</span><sub>0</sub></sup><span style="font-style:italic">p</span><sub>1</sub><sup><span style="font-style:italic">k</span><sub>1</sub></sup>… <span style="font-style:italic">p</span><sub><span style="font-style:italic">j</span></sub><sup><span style="font-style:italic">k</span><sub><span style="font-style:italic">j</span></sub></sup>.
+    (3)</td></tr>
+</table><p>
+The <span style="font-family:monospace">multinomial</span> command computes the density function for the
+multinomial distribution.
 </p><ul class="itemize"><li class="li-itemize">
-Solving an equation<br>
-<span style="font-family:monospace">solve</span> takes as arguments an equation between two expressions or an 
-expression (<span style="font-family:monospace">=0</span> is omitted), and a variable name (by default <span style="font-family:monospace">x</span>).<br>
-<span style="font-family:monospace">solve</span> solves this equation.
-</li><li class="li-itemize">Solving a system of polynomial equations<br>
-<span style="font-family:monospace">solve</span> takes as arguments two vectors : 
-a vector of polynomial equations and a 
-vector of variable names. <br>
-<span style="font-family:monospace">solve</span> solves this polynomial equation system.
-</li></ul><p>
-<span style="font-weight:bold">Remarks</span>:
-</p><ul class="itemize"><li class="li-itemize">
-In real mode, <span style="font-family:monospace">solve</span> returns only real solutions. To have 
-the complex solutions, switch to complex mode, e.g. by checking 
-<span style="font-family:monospace">Complex</span> in the cas configuration, or use the <span style="font-family:monospace">cSolve</span>
-command.
-</li><li class="li-itemize">For trigonometric equations, <span style="font-family:monospace">solve</span> returns by default the principal
-solutions. To have all the solutions check <span style="font-family:monospace">All_trig_sol</span> in the cas
-configuration.
-</li></ul><p>
-<span style="font-weight:bold">Examples</span> :
-</p><ul class="itemize"><li class="li-itemize">
-Solve <span style="font-style:italic">x</span><sup>4</sup>−1=3<br>
- Input :
-<div class="center"><span style="font-family:monospace">solve(x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">4-1=3)</span></div>
-Output in real mode :
-<div class="center"><span style="font-family:monospace">[sqrt(2),-(sqrt(2))]</span></div>
-Output in complex mode :
-<div class="center"><span style="font-family:monospace">[sqrt(2),-(sqrt(2)),(i)*sqrt(2),-((i)*sqrt(2))]</span></div>
-</li><li class="li-itemize">Solve exp(<span style="font-style:italic">x</span>)=2 <br>
-Input :
-<div class="center"><span style="font-family:monospace">solve(exp(x)=2)</span></div>
-Output in real mode :
-<div class="center"><span style="font-family:monospace">[log(2)]</span></div>
-</li><li class="li-itemize">Find <span style="font-style:italic">x</span>,<span style="font-style:italic">y</span> such that <span style="font-style:italic">x</span>+<span style="font-style:italic">y</span>=1,<span style="font-style:italic">x</span>−<span style="font-style:italic">y</span>=0<br>
- Input :
-<div class="center"><span style="font-family:monospace">solve([x+y=1,x-y],[x,y])</span></div>
-Output :
-<div class="center"><span style="font-family:monospace">[[1/2,1/2]] </span></div>
-</li><li class="li-itemize">Find <span style="font-style:italic">x</span>,<span style="font-style:italic">y</span> such that <span style="font-style:italic">x</span><sup>2</sup>+<span style="font-style:italic">y</span>=2,<span style="font-style:italic">x</span>+<span style="font-style:italic">y</span><sup>2</sup>=2<br>
-Input :
-<div class="center"><span style="font-family:monospace">solve([x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2+y=2,x+y</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2=2],[x,y])</span></div>
-Output :
-<div class="center"><span style="font-family:monospace">[[-2,-2],[1,1],[(-sqrt(5)+1)/2,(1+sqrt(5))/2],</span></div>
-<div class="center"><span style="font-family:monospace">[(sqrt(5)+1)/2,(1-sqrt(5))/2]] </span></div>
-</li><li class="li-itemize">Find <span style="font-style:italic">x</span>,<span style="font-style:italic">y</span>,<span style="font-style:italic">z</span> such that <span style="font-style:italic">x</span><sup>2</sup>−<span style="font-style:italic">y</span><sup>2</sup>=0,<span style="font-style:italic">x</span><sup>2</sup>−<span style="font-style:italic">z</span><sup>2</sup>=0<br>
-Input :
-<div class="center"><span style="font-family:monospace">solve([x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2-y</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2=0,x</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2-z</span><code><span style="font-family:monospace">^</span></code><span style="font-family:monospace">2=0],[x,y,z])</span></div>
-Output :
-<div class="center"><span style="font-family:monospace">[[x,x,x],[x,-x,-x],[x,-x,x],[x,x,-x]]</span></div>
-</li><li class="li-itemize">Solve cos(2*<span style="font-style:italic">x</span>)=1/2<br>
-Input :
-<div class="center"><span style="font-family:monospace">solve(cos(2*x)=1/2)</span></div>
-Output :
-<div class="center"><span style="font-family:monospace">[pi/6,(-pi)/6]</span></div>
-Output with <span style="font-family:monospace">All_trig_sol</span> checked :
-<div class="center"><span style="font-family:monospace">[(6*pi*n_0+pi)/6,(6*pi*n_0-pi)/6]</span></div>
-</li><li class="li-itemize">Find the intersection of a straight line 
-(given by a list of equations) and a plane.<br>
-For example,
-let <span style="font-style:italic">D</span> be the straight line of cartesian equations 
-[<span style="font-style:italic">y</span>−<span style="font-style:italic">z</span>=0,<span style="font-style:italic">z</span>−<span style="font-style:italic">x</span>=0] and let <span style="font-style:italic">P</span> the plane of equation <span style="font-style:italic">x</span>−1+<span style="font-style:italic">y</span>+<span style="font-style:italic">z</span>=0.
-Find the intersection of <span style="font-style:italic">D</span> and <span style="font-style:italic">P</span>.<br>
-Input :
-<div class="center"><span style="font-family:monospace">solve([[y-z=0,z-x=0],x-1+y+z=0],[x,y,z])</span></div>
-Output :
-<div class="center"><span style="font-family:monospace">[[1/3,1/3,1/3]]</span></div>
+<span style="font-style:italic">multinomial</span> takes three arguments:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">n</span>, an integer.
+</li><li class="li-itemize"><span style="font-style:italic">P</span> = [<span style="font-style:italic">p</span><sub>0</sub>,<span style="font-style:italic">p</span><sub>1</sub>,…,<span style="font-style:italic">p</span><sub><span style="font-style:italic">j</span></sub>], a probability vector 
+(i.e., <span style="font-style:italic">p</span><sub><span style="font-style:italic">k</span></sub>≥ 0 for all <span style="font-style:italic">k</span> and <span style="font-style:italic">p</span><sub>0</sub> + … + <span style="font-style:italic">p</span><sub><span style="font-style:italic">j</span></sub> = 1).
+</li><li class="li-itemize"><span style="font-style:italic">K</span>=[<span style="font-style:italic">k</span><sub>0</sub>,…,<span style="font-style:italic">k</span><sub><span style="font-style:italic">j</span></sub>], a list of integers with <span style="font-style:italic">k</span><sub>0</sub> +
+… + <span style="font-style:italic">k</span><sub><span style="font-style:italic">j</span></sub> = <span style="font-style:italic">n</span>.
 </li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">multinomial(</span><span style="font-style:italic">n</span>,<span style="font-style:italic">P</span>,<span style="font-style:italic">K</span><span style="font-family:monospace">)</span> returns the probability that
+<span style="font-style:italic">X</span>=<span style="font-style:italic">K</span>, given in (<a href="#eq%3Amultinomial">3</a>).
+</li></ul><p>
+You will get an error if
+<span style="font-style:italic">k</span><sub>0</sub> + … + <span style="font-style:italic">k</span><sub><span style="font-style:italic">j</span></sub> is not equal to <span style="font-style:italic">n</span>, although you won’t get one if
+<span style="font-style:italic">p</span><sub>0</sub> + … + <span style="font-style:italic">p</span><sub><span style="font-style:italic">j</span></sub> is not equal to 1.</p><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+Suppose you make 10 choices, where each choice is one of
+three items; the first has a 0.2 probability of being chosen, the
+second a 0.3 probability and the third a 0.5 probability.
+The probability that you end up with 3 of the first item, 2 of the 
+second and 5 of the third will be:<br>
+<span style="font-style:italic">Input:</span>
+</p><div class="center">
+<span style="font-family:monospace">multinomial(10,[0.2,0.3,0.5],[3,2,5])</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
+</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">0.0567
+</td></tr>
+</table>
 <hr>
 <a href="cascmd_en637.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

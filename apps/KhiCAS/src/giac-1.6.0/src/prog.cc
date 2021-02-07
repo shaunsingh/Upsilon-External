@@ -76,6 +76,10 @@ extern "C" {
 #undef HAVE_LIBPARI
 #endif
 
+#ifdef NSPIRE_NEWLIB
+#include <os.h>
+#endif
+
 //#ifdef BESTA_OS
 //unsigned int PrimeGetNow(); 
 //#endif
@@ -89,7 +93,7 @@ extern "C" uint32_t mainThreadStack[];
 #endif
 #endif
 
-#ifdef EMCC
+#if defined(EMCC) || defined(EMCC2)
 #include <emscripten.h>
 #endif
 
@@ -113,7 +117,7 @@ namespace giac {
 #endif
 
   void alert(const string & s,GIAC_CONTEXT){
-#ifdef EMCC
+#if defined(EMCC) || defined(EMCC2)
     EM_ASM_ARGS({
 	if (UI.warnpy){
           var msg = UTF8ToString($0);// Pointer_stringify($0); // Convert message to JS string
@@ -3427,6 +3431,15 @@ namespace giac {
 	return feuille_(args._VECTptr->front(),args._VECTptr->back(),contextptr);
       return gen(*args._VECTptr,_SEQ__VECT);
     }
+    if (args.type==_MAP){
+      const gen_map & m=*args._MAPptr;
+      gen_map::const_iterator it=m.begin(),itend=m.end();
+      vecteur res;
+      for (;it!=itend;++it){
+	res.push_back(makevecteur(it->first,it->second));
+      }
+      return res;
+    }
     if (args.type!=_SYMB)
       return args;
     gen tmp=args._SYMBptr->feuille;
@@ -4240,7 +4253,7 @@ namespace giac {
   gen _sample(const gen & args,GIAC_CONTEXT){
     if (args.is_symb_of_sommet(at_discreted) || is_distribution(args)>0)
       return _rand(args,contextptr);
-    if (args.type==_SYMB)
+    if (args.type==_SYMB || args.type==_IDNT)
       return _randvector(makesequence(1,args),contextptr)._VECTptr->front();
     if (args.type!=_VECT || args._VECTptr->size()<2)
       return gensizeerr(contextptr);
@@ -4258,7 +4271,7 @@ namespace giac {
     }
     if (args._VECTptr->size()!=2 || !is_integral(b) || b.type==_ZINT || b.val<0)
       return gensizeerr(contextptr);
-    if (a.is_symb_of_sommet(at_discreted) || is_distribution(a)>0 || a.type==_SYMB)
+    if (a.is_symb_of_sommet(at_discreted) || is_distribution(a)>0 || a.type==_SYMB || a.type==_IDNT)
       return _randvector(makesequence(b,a),contextptr);
     if (a.type!=_VECT)
       return gensizeerr(contextptr);
@@ -5643,7 +5656,7 @@ namespace giac {
     } // end while(1)
   }
 #else // KHICAS
-#if defined EMCC && !defined GIAC_GGB
+#if (defined EMCC || defined EMCC2 ) && !defined GIAC_GGB
   void debug_loop(gen &res,GIAC_CONTEXT){
     if (!debug_ptr(contextptr)->debug_allowed || (!debug_ptr(contextptr)->sst_mode && !equalposcomp(debug_ptr(contextptr)->sst_at,debug_ptr(contextptr)->current_instruction)) )
       return;
@@ -8187,7 +8200,7 @@ namespace giac {
     gen g(s,contextptr);
     return g;
 #else // KHICAS
-#ifdef EMCC
+#if defined(EMCC) || defined(EMCC2)
     string s=fetch(fichier);
     return gen(s,contextptr);
 #endif
@@ -8364,6 +8377,41 @@ namespace giac {
   static const char _read32_s []="read32";
   static define_unary_function_eval (__read32,&_read32,_read32_s);
   define_unary_function_ptr5( at_read32 ,alias_at_read32 ,&__read32,0,true);
+
+#ifdef NSPIRE_NEWLIB
+  gen _read_nand(const gen & args,GIAC_CONTEXT){
+    if ( args.type==_STRNG &&  args.subtype==-1)
+      return  args;
+    size_t addr;
+    if (args.type==_VECT && args._VECTptr->size()==2 && args._VECTptr->back().type==_INT_){
+      int n=args._VECTptr->back().val;
+      if (n<=0 || !is_address(args._VECTptr->front(),addr)) 
+	return undef;
+      // void read_nandd(void* dest, int size, int nand_offset, int unknown, int percent_max, void* progress_cb); // terminer par (...,0,0,NULL)
+      char * dest=(char *)malloc(4*n);
+      read_nand(dest,4*n,addr,0,0,NULL);
+      char buf[5]="aaaa";
+      vecteur res;
+      for (int i=0;i<n;++i,addr+=4,dest+=4){
+	strncpy(buf,dest,4);
+	res.push_back(makevecteur((longlong) addr,int(*dest),int(*(dest+1)),int(*(dest+2)),int(*(dest+3)),string2gen(buf,false)));
+      }
+      free(dest-4*n);
+      return res;
+    }
+    if (is_address(args,addr))
+      return _read_nand(makesequence(args,1),contextptr);
+    return gensizeerr(contextptr);
+  }
+#else
+  gen _read_nand(const gen & args,GIAC_CONTEXT){
+    return undef;
+  }
+#endif
+  static const char _read_nand_s []="read_nand";
+  static define_unary_function_eval (__read_nand,&_read_nand,_read_nand_s);
+  define_unary_function_ptr5( at_read_nand ,alias_at_read_nand ,&__read_nand,0,true);
+
 
   gen _write(const gen & args,GIAC_CONTEXT){
     if ( args.type==_STRNG &&  args.subtype==-1) return  args;
@@ -8596,7 +8644,7 @@ namespace giac {
 #endif
     const char *cmdname=argss.c_str(),* howto=0, * syntax=0, * related=0, *examples=0;
     if (has_static_help(cmdname,lang,howto,syntax,examples,related)){
-#ifdef EMCC
+#if defined(EMCC) || defined(EMCC2)
       if (argss.size()>2 && argss[0]=='\'' && argss[argss.size()-1]=='\'')
 	argss=argss.substr(1,argss.size()-2);
       // should split related at commas, and display buttons
@@ -8618,7 +8666,27 @@ namespace giac {
       COUT << "Examples: " << examples << '\n';
       return 1;
 #else
-      return string2gen(string(howto?howto:"")+'\n'+string(syntax)+'\n'+string(related)+'\n'+string(examples),false);
+      string related_str(related);
+      for (int i=related_str.size();i-->0;) {
+	if (related_str[i]==',')
+	  related_str.insert(related_str.begin()+i+1,' ');
+      }
+      string examples_str(examples);
+      for (int i=examples_str.size();i-->0;) {
+	if (i>0 && examples_str.substr(i-1,2)==";\\")
+	  examples_str.replace(i-1,2,"\n");
+      }
+      string helptext;
+      if (howto!=NULL && strlen(howto)>0)
+        helptext = string("Description: ") + howto + "\n";
+      if (strlen(syntax)>0)
+        helptext += "Usage: " + string(cmdname).substr(1,strlen(cmdname)-2) + "(" + syntax + ")\n";
+      if (related_str.size()>0)
+        helptext += "Related: " + related_str + "\n";
+      if (examples_str.size()>0)
+        helptext += "Examples:\n" + examples_str;
+      return string2gen(helptext,false);
+      // return string2gen(string(howto?howto:"")+'\n'+string(syntax)+'\n'+string(related)+'\n'+string(examples),false);
 #endif
     }
 #ifndef GIAC_HAS_STO_38
@@ -8747,6 +8815,9 @@ namespace giac {
     gen graphe=symbolic(at_plotfunc,
 			gen(makevecteur(_cell(makevecteur(vecteur(1,minus_one),vecteur(1,zero)),contextptr),
 					symb_equal(_cell(makevecteur(vecteur(1,minus_one),vecteur(1,minus_one)),contextptr),symb_interval(xstart,xmax))
+#ifdef NUMWORKS
+					,symb_equal(change_subtype(_NSTEP,_INT_PLOT),100)
+#endif
 				    ),_SEQ__VECT));
     graphe.subtype=_SPREAD__SYMB;
     vecteur l1(makevecteur(step,graphe));
@@ -9272,7 +9343,7 @@ namespace giac {
   // Eval everything except IDNT and symbolics with
   vecteur inputform_pre_analysis(const gen & g,GIAC_CONTEXT){
     vecteur v(gen2vecteur(g));
-    if (python_compat(contextptr)){
+    if (python_compat(contextptr) && (v.empty() || v.front()!=at_getKey)){
       gen g_=eval(g,1,contextptr);
       if (g_.type!=_STRNG)
 	g_=string2gen(g_.print(contextptr),false);
@@ -9643,7 +9714,7 @@ namespace giac {
 #ifdef FXCG
     return RTC_GetTicks();
 #else
-#if defined __APPLE__ || defined EMCC || !defined HAVE_LIBRT
+#if defined __APPLE__ || defined EMCC || defined EMCC2 || !defined HAVE_LIBRT
     return (int) clock();
 #else
     timespec t;
@@ -9897,7 +9968,7 @@ namespace giac {
 
 #ifndef KHICAS // see kadd.cc
   gen current_sheet(const gen & g,GIAC_CONTEXT){
-#if defined EMCC && !defined GIAC_GGB
+#if (defined EMCC || defined EMCC2 ) && !defined GIAC_GGB
     if (ckmatrix(g,true)){
       matrice m=*g._VECTptr;
       int R=m.size(),C=m.front()._VECTptr->size();

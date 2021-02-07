@@ -101,6 +101,10 @@ inline double giac_log(double d){
 #include "tinymt32.h"
 #endif
 
+#if defined(HAVE_NO_SYS_TIMES_H) && defined(__MINGW_H)
+#include <time.h>
+#endif
+
 extern "C" int ctrl_c_interrupted(int exception);
 #if defined HAVE_LIBMICROPYTHON
 #include <string>
@@ -203,7 +207,11 @@ Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd);
   void usleep(int );
 #endif
 
+#ifndef HAVE_NO_SYS_TIMES_H
   double delta_tms(struct tms tmp1,struct tms tmp2);
+#elif defined(__MINGW_H)
+  double delta_tms(clock_t tmp1,clock_t tmp2);
+#endif
 
 #define GIAC_DATA_BEGIN   ((char) 2)
 #define GIAC_DATA_END     ((char) 5)
@@ -292,7 +300,7 @@ Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd);
   extern volatile bool ctrl_c,interrupted,kbd_interrupted;
   void ctrl_c_signal_handler(int signum);
 #ifdef TIMEOUT
-#ifndef EMCC
+#if !defined(EMCC) && !defined(EMCC2)
   double time(int );
 #endif
   extern time_t caseval_begin,caseval_current;

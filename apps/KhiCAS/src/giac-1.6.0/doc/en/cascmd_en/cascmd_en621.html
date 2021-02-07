@@ -4,50 +4,52 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Gram-Schmidt orthonormalization : gramschmidt</title>
+<title>Producing random numbers with a multinomial distribution: randmultinomial
+
+</title>
 </head>
 <body >
 <a href="cascmd_en620.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en622.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec743" class="subsection">5.58.5  Gram-Schmidt orthonormalization : <span style="font-family:monospace">gramschmidt</span></h3>
-<p><a id="hevea_default968"></a>
-<span style="font-family:monospace">gramschmidt</span> takes one or two arguments : 
+<h3 id="ssec:randmultinomial" class="subsection">9.3.4  Producing random numbers with a multinomial distribution: <span style="font-family:monospace">randmultinomial</span>
+<a id="hevea_default1170"></a>
+</h3>
+<p>The <span style="font-family:monospace">randmultinomial</span> command finds random numbers chosen
+according to a multinomial distribution (see Section <a href="cascmd_en638.html#ssec%3Amultinomial">9.4.5</a>).
 </p><ul class="itemize"><li class="li-itemize">
-a matrix viewed as a list of row vectors, 
-the scalar product being the canonical
-scalar product, or
-</li><li class="li-itemize">a list of elements 
-that is a basis of a vector subspace, and a function that defines a scalar 
-product on this vector space.
-</li></ul><p>
-<span style="font-family:monospace">gramschmidt</span> returns an orthonormal basis for this scalar product.<br>
-Input :
-</p><div class="center"><span style="font-family:monospace">normal(gramschmidt([[1,1,1],[0,0,1],[0,1,0]]))</span></div><p>
-Or input :
-</p><div class="center"><span style="font-family:monospace">normal(gramschmidt([[1,1,1],[0,0,1],[0,1,0]],dot))</span></div><p>
-Output :
-</p><div class="center"><span style="font-family:monospace">[[(sqrt(3))/3,(sqrt(3))/3,(sqrt(3))/3],[(-(sqrt(6)))/6,</span><br>
- <span style="font-family:monospace">(-(sqrt(6)))/6,(sqrt(6))/3],[(-(sqrt(2)))/2,(sqrt(2))/2,0]]</span></div><p>
-<span style="font-weight:bold">Example</span><br>
-We define a scalar product on the vector space of 
-polynomials by: 
-</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">P</span>· <span style="font-style:italic">Q</span>=</td><td class="dcell"><span style="font-size:xx-large">∫</span></td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:left">1</td></tr>
-<tr><td class="dcell" style="text-align:left"><br>
-<br>
+<span style="font-family:monospace">randmultinomial</span> takes one mandatory and one optional argument:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">P</span>, a list <span style="font-style:italic">P</span>=[<span style="font-style:italic">p</span><sub>0</sub>,…,<span style="font-style:italic">p</span><sub><span style="font-style:italic">n</span>−1</sub>] of <span style="font-style:italic">n</span> probabilities
+which add to 1 (representing the probability that one of several
+mutually exclusive events occurs).
+</li><li class="li-itemize">Optionally, <span style="font-style:italic">K</span>, a list of length <span style="font-style:italic">n</span>.
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">randmultinomial(</span><span style="font-style:italic">L</span><span style="font-family:monospace">)</span> returns an index chosen randomly
+according to the corresponding multinomial distribution.
+</li><li class="li-itemize"><span style="font-family:monospace">randmultinomial(</span><span style="font-style:italic">L</span>,<span style="font-style:italic">K</span><span style="font-family:monospace">)</span> returns an element of <span style="font-style:italic">K</span>
+whose index is chosen randomly.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Examples.</span>
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">randmultinomial([1/2, 1/3, 1/6])</span>
+</div>
+<span style="font-style:italic">Output (for example):</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">1
 </td></tr>
-<tr><td class="dcell" style="text-align:left">−1</td></tr>
-</table></td><td class="dcell"><span style="font-style:italic">P</span>(<span style="font-style:italic">x</span>) <span style="font-style:italic">Q</span>(<span style="font-style:italic">x</span>)<span style="font-style:italic">dx</span> </td></tr>
-</table><p>
-Input :
-</p><div class="center"><span style="font-family:monospace">gramschmidt([1,1+x],(p,q)-&gt;integrate(p*q,x,-1,1))</span></div><p>
-Or define the function <span style="font-family:monospace">p_scal</span>, input :<br>
-<span style="font-family:monospace">p_scal(p,q):=integrate(p*q,x,-1,1)</span><br>
-then input :
-</p><div class="center"><span style="font-family:monospace">gramschmidt([1,1+x],p_scal)</span></div><p>
-Output :
-</p><div class="center"><span style="font-family:monospace">[1/(sqrt(2)),(1+x-1)/sqrt(2/3)]</span></div>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">randmultinomial([1/2, 1/3, 1/6],["R","V","B"])</span>
+</div>
+<span style="font-style:italic">Output (for example):</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">"R"
+</td></tr>
+</table>
+</li></ul>
 <hr>
 <a href="cascmd_en620.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

@@ -847,9 +847,9 @@ namespace giac {
 	      bool b=calc_mode(contextptr)==1;
 	      if (b)
 		calc_mode(0,contextptr);
-	      gen tmp=_lin(c[i]*exp(-rac[i]*x,contextptr),contextptr);
+	      gen tmp=_lin(makesequence(c[i]*exp(-rac[i]*x,contextptr),at_sqrt),contextptr);
 	      tmp = _integrate(makesequence(tmp,x),contextptr);
-	      part += _lin(tmp*exp(rac[i]*x,contextptr),contextptr);
+	      part += _lin(makesequence(tmp*exp(rac[i]*x,contextptr),at_sqrt),contextptr);
 	      if (b)
 		calc_mode(1,contextptr);
 	    }
@@ -2104,7 +2104,7 @@ namespace giac {
     gen laur=_series(makesequence(r,x,inf,1,_POLY1__VECT),contextptr);
     bool success=false;
     if (kovacic_iscase1(poles,dinf)) {
-      cerr << "Case 1 of Kovacic algorithm" << '\n';
+      //cerr << "Case 1 of Kovacic algorithm" << '\n';
       /* step 1 */
       gen_map alpha_plus,alpha_minus,sqrt_r;
       gen alpha_inf_plus,alpha_inf_minus;
@@ -2205,7 +2205,7 @@ namespace giac {
       }
     }
     if (!success && kovacic_iscase2(poles)) {
-      cerr << "Case 2 of Kovacic algorithm" << '\n';
+      //cerr << "Case 2 of Kovacic algorithm" << '\n';
       /* step 1 */
       gen_map E;
       for (const_iterateur it=poles.begin();it!=poles.end();++it) {
@@ -2298,7 +2298,7 @@ namespace giac {
       }
     }
     if (!success && kovacic_iscase3(cpfr,x,poles,dinf,contextptr)) {
-      cerr << "Case 3 of Kovacic algorithm" << '\n';
+      //cerr << "Case 3 of Kovacic algorithm" << '\n';
       vector<int> nv=vecteur_2_vector_int(makevecteur(4,6,12));
       for (vector<int>::const_iterator nt=nv.begin();nt!=nv.end();++nt) {
 	int n=*nt;
@@ -2367,7 +2367,7 @@ namespace giac {
 	  v=vecteur(vars.begin(),vars.begin()+deg);
 	  for (int i=0;i<deg;++i) P[n+1]-=v[i]*pow(x,i);
 	  P[n+1]-=pow(x,deg);
-	  P[n]=-S*(_derive(makesequence(P[n+1],x),contextptr)+th*P[n+1]),contextptr;
+	  P[n]=-S*(_derive(makesequence(P[n+1],x),contextptr)+th*P[n+1]);
 	  if (P[n].type==_SYMB) P[n]=_collect(P[n],contextptr);
 	  for (int i=n;i-->0;) {
 	    P[i]=-S*_derive(makesequence(P[i+1],x),contextptr)+((n-i)*dS-S*th)*P[i+1]-(n-i)*(i+1)*sq(S)*r*P[i+2];
@@ -2385,7 +2385,7 @@ namespace giac {
 	    for (int i=0;i<=n;++i) {
 	      ac[i]=_collect(pow(S,i)*P[i+1]/_factorial(n-i,contextptr),contextptr);
 	    }
-	    *logptr(contextptr) << "Warning: outputting the algebraic expression for ω" << '\n';
+        //*logptr(contextptr) << "Warning: outputting the algebraic expression for ω" << '\n';
 	    ac=strip_gcd(ac,contextptr);
 	    gen omg=pow(w,4)*ac[4]+pow(w,3)*ac[3]+pow(w,2)*ac[2]+w*ac[1]+ac[0];
 	    if (!is_zero(dy_coeff)) {

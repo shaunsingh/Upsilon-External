@@ -4,61 +4,57 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Orthogonal projection in the plane: projection</title>
+<title>Checking if an object in space is a rhombus: is_rhombus
+</title>
 </head>
 <body >
 <a href="cascmd_en905.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en907.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec1167" class="subsection">12.15.8  Orthogonal projection in the plane: <span style="font-family:monospace">projection</span><a id="hevea_default1582"></a></h3>
-<p>
-<a id="sec:2dprojection"></a></p><p>See section <a href="cascmd_en998.html#sec%3A3dprojection">13.14.8</a> for projections in space.</p><p>The <span style="font-family:monospace">projection</span> command takes one or two arguments.</p><p>If <span style="font-family:monospace">projection</span> has one argument, it is a geometric object.
-<span style="font-family:monospace">projection</span> returns a new command which projects points onto
-the object.<br>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">p1 := projection(line(-1,i))
-</span></div><p>
-then:
-</p><div class="center">
-<span style="font-family:monospace">p1(i+1)
-</span></div><p>
-Output:
-</p><div class="center">
-<img src="cascmd_en175.png">
-</div><p>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">p2 := projection(circle(-1,1))
-</span></div><p>
-then:
-</p><div class="center">
-<span style="font-family:monospace">p2(i)
-</span></div><p>
-Output:
-</p><div class="center">
-<img src="cascmd_en176.png">
-</div><p>If <span style="font-family:monospace">projection</span> has two arguments, the first arguments is a
-geometric object as above, and the second argument is a point.
-<span style="font-family:monospace">projection</span> returns and draws the projection of the point onto
-the object.<br>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">projection(line(-1, i), 1+i)
-</span></div><p>
-Output:
-</p><div class="center">
-<img src="cascmd_en177.png">
-</div><p>
-Input:
-</p><div class="center">
-<span style="font-family:monospace">projection(circle(-1,1), i)
-</span></div><p>
-Output:
-</p><div class="center">
-<img src="cascmd_en178.png">
+<h3 id="ssec:3dcheckrhombus" class="subsection">14.13.13  Checking if an object in space is a rhombus: <span style="font-family:monospace">is_rhombus</span>
+<a id="hevea_default1639"></a></h3>
+<p>See Section <a href="cascmd_en832.html#ssec%3A2dcheckrhombus">13.16.9</a> for checking for rhombuses in
+two-dimensional geometry.</p><p>The <span style="font-family:monospace">is_rhombus</span> command determines whether or not a
+geometric object is a rhombus.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">is_rhombus</span> takes one argument:<br>
+ <span style="font-style:italic">G</span>, a geometric object or a sequence of four points assumed to be
+the vertices of a quadrilateral.
+</li><li class="li-itemize"><span style="font-family:monospace">is_square(</span><span style="font-style:italic">G</span><span style="font-family:monospace">)</span> returns 1 if <span style="font-style:italic">G</span>
+is a rhombus but not a square, returns 2 if <span style="font-style:italic">G</span> is a square and
+returns 0 otherwise. 
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Examples.</span>
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">is_rhombus([2,0,0],[0,1,0],[-2,0,0],[0,-1,0])</span>
 </div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">1
+</td></tr>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="text-align:left;white-space:nowrap" > <span style="font-family:monospace">R:= rhombus([0,0,0],[2,0,0],[[0,0,1],pi/4])</span></td></tr>
+<tr><td style="text-align:left;white-space:nowrap" > <span style="font-family:monospace">is_rhombus(S)</span>
+</td></tr>
+</table>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">1
+</td></tr>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">is_rhombus([2,2,0],[-2,2,0],[-2,-1,0],[2,-1,0])</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">0
+</td></tr>
+</table>
+</li></ul>
 <hr>
 <a href="cascmd_en905.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

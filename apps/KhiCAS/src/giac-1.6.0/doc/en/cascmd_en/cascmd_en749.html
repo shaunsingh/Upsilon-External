@@ -4,74 +4,65 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Difference between the representation of (3.1-3) and of 0.1</title>
+<title>Finding a point of intersection of two objects in the plane: single_inter line_inter
+
+</title>
 </head>
 <body >
 <a href="cascmd_en748.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en750.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec962" class="subsection">9.1.4  Difference between the representation of (3.1-3) and of 0.1</h3>
+<h3 id="ssec:single2dintersection" class="subsection">13.6.6  Finding a point of intersection of two objects in the plane: <span style="font-family:monospace">single_inter</span> <span style="font-family:monospace">line_inter</span>
+<a id="hevea_default1462"></a>
+<a id="hevea_default1463"></a></h3>
+<p>See Section <a href="cascmd_en853.html#ssec%3A3dsingleintersection">14.4.3</a> for single points of
+intersection of objects in space.</p><p>The <span style="font-family:monospace">single_inter</span> command 
+finds an intersection point of two geometric objects.<br>
+<span style="font-family:monospace">line_inter</span> is a synonym for <span style="font-family:monospace">single_inter</span>
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">single_inter</span> takes two mandatory arguments and one
+optional argument.
 <ul class="itemize"><li class="li-itemize">
-representation of 0.1 :<br>
-We have :
-<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">0.1=2<sup>−4</sup>*(1+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2</td></tr>
-</table></td><td class="dcell">+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2<sup>4</sup></td></tr>
-</table></td><td class="dcell">+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2<sup>5</sup></td></tr>
-</table></td><td class="dcell">+
-</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2<sup>8</sup></td></tr>
-</table></td><td class="dcell">+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2<sup>9</sup></td></tr>
-</table></td><td class="dcell">+...)=
-2<sup>−4</sup>*</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">∞</td></tr>
-<tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">∑</span></td></tr>
-<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">k</span>=0</td></tr>
-</table></td><td class="dcell">(</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2<sup>4*<span style="font-style:italic">k</span></sup></td></tr>
-</table></td><td class="dcell">+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">1</td></tr>
-<tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">2<sup>4*<span style="font-style:italic">k</span>+1</sup></td></tr>
-</table></td><td class="dcell">) </td></tr>
-</table>
-hence α=1 and <span style="font-style:italic">m</span>=1/2+
-∑<sub><span style="font-style:italic">k</span>=1</sub><sup>∞</sup>(1/2<sup>4*<span style="font-style:italic">k</span></sup>+1/2<sup>4*<span style="font-style:italic">k</span>+1</sup>),
-therefore the representation of 0.1 is
-<pre class="verbatim">3f (00111111), b9 (10111001), 99 (10011001), 99 (10011001),
-99 (10011001), 99 (10011001), 99 (10011001), 9a (10011010),
-</pre>
-the last octet is 1010, indeed the 2 last bits 
-01 became 10 because the following digit is 1 (upper rounding).</li><li class="li-itemize">representation of a:=3.1-3 :<br>
-Computing a is done by adjusting exponents (here nothing
-to do), then subtract the mantissa, and adjust the
-exponent of the result to have a normalized float.
-The exponent is α=−4 (that corresponds at 2*2<sup>−5</sup>) 
-and the bits 
-corresponding to the mantissa begin at 1/2=2*2<sup>−6</sup> :
-the bits of the mantissa are shifted to the left of 5 positions
-and we have :
-<pre class="verbatim">3f (00111111), b9 (10111001), 99 (10011001), 99 (10011001),
-99 (10011001), 99 (10011001), 99 (10011001), 9a (10100000),
-</pre>
-Therefore
-<span style="font-style:italic">a</span>&gt;0.1 and <span style="font-style:italic">a</span>−0.1=1/2<sup>50</sup>+1/2<sup>51</sup> 
-(since 100000-11010=110)
-</li></ul><p>
-<span style="font-weight:bold">Remark</span><br>
-This is the reason why
+<span style="font-style:italic">obj</span><sub>1</sub>, <span style="font-style:italic">obj</span><sub>2</sub>, two geometric objects.
+</li><li class="li-itemize">Optionally, <span style="font-style:italic">pt</span>, a point or list of points.
+</li></ul>
+<span style="font-family:monospace">line_inter(</span><span style="font-style:italic">obj</span><sub>1</sub><span style="font-style:italic">,obj</span><sub>2</sub> ⟨<span style="font-style:italic">pt</span>⟩<span style="font-family:monospace">)</span>
+returns one of the points of
+intersection of <span style="font-style:italic">obj</span><sub>1</sub> and <span style="font-style:italic">obj</span><sub>2</sub>.<br>
+ If <span style="font-style:italic">pt</span> is a single point, then the command returns the point
+of intersection closest to <span style="font-style:italic">pt</span>.<br>
+ If <span style="font-style:italic">pt</span> is a list of points, then the command tries to return
+a point not in <span style="font-style:italic">pt</span>.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+The command <span style="font-family:monospace">circle(0,1)</span> creates the unit circle and
+<span style="font-family:monospace">line(-1,i)</span> creates a line, these two objects intersect at the
+points (−1,0) and (0,1).<br>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">floor(1/(3.1-3))</span> 
+<span style="font-family:monospace">single_inter(circle(0,1),line(-1,i))</span>
 </div><p>
-returns <span style="font-family:monospace">9</span> and not <span style="font-family:monospace">10</span> when <span style="font-family:monospace">Digits:=14</span>.</p>
+<span style="font-style:italic">Output:</span>
+</p><div class="center">
+<img src="cascmd_en162.png">
+</div><p>
+which is the point (−1,0).<br>
+<span style="font-style:italic">Input:</span>
+</p><div class="center">
+<span style="font-family:monospace">single_inter(circle(0,1),line(-1,i),[-1])</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
+</p><div class="center">
+<img src="cascmd_en163.png">
+</div><p>
+which is the point (0,1). Similarly, since this second
+point of intersection is closest to (0,1/2), entering:<br>
+<span style="font-style:italic">Input:</span>
+</p><div class="center">
+<span style="font-family:monospace">single_inter(circle(0,1),line(-1,i),i/2)</span>
+</div><p>
+also draws the second point.</p>
 <hr>
 <a href="cascmd_en748.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

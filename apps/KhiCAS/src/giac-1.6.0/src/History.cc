@@ -59,12 +59,15 @@ const int xwaspy_shift=33;
 #include <strstream>
 #endif
 #ifdef WIN32
-#ifndef GNUWINCE
+#if !defined(GNUWINCE) && !defined(__MINGW_H)
 #include <sys/cygwin.h>
 #endif
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef __MINGW_H
+#include <direct.h>
 #endif
 
 using namespace std;
@@ -281,6 +284,16 @@ namespace xcas {
   void set_colors(Fl_Widget * w,bool do_redraw){
     if (do_redraw)
       w->redraw();
+    if (Fl_Window * win=dynamic_cast<Fl_Window *>(w)){
+      win->cursor(FL_CURSOR_ARROW,Xcas_editor_color,Xcas_editor_background_color);
+    }
+    if (Xcas_Text_Editor * ed=dynamic_cast<Xcas_Text_Editor *>(w)){
+      ed->cursor_color(Xcas_editor_color);
+      ed->textcolor(Xcas_editor_color);
+      ed->color(Xcas_editor_background_color);
+      ed->styletable[0].color=Xcas_editor_color;
+      return;
+    }
     if (Fl_Group * g= dynamic_cast<Fl_Group *>(w)){
       int n=g->children();
       for (int i=0;i<n;++i)
@@ -308,10 +321,6 @@ namespace xcas {
       return;
     }
     if (Editeur * ed=dynamic_cast<Editeur *>(w)){
-      ed->color(Xcas_editor_background_color);
-      return;
-    }
-    if (Xcas_Text_Editor * ed=dynamic_cast<Xcas_Text_Editor *>(w)){
       ed->color(Xcas_editor_background_color);
       return;
     }
@@ -1692,6 +1701,10 @@ namespace xcas {
 
 #ifdef WIN32
   std::string unix_path(const std::string & winpath){
+#ifdef __MINGW_H
+	string res=winpath;
+	std::replace(res.begin(),res.end(),'\\','/');
+#else
 #ifdef x86_64
     int s = cygwin_conv_path (CCP_WIN_A_TO_POSIX , winpath.c_str(), NULL, 0);
     char * unixpath = (char *) malloc(s);
@@ -1702,6 +1715,7 @@ namespace xcas {
 #endif
     string res=unixpath;
     free(unixpath);
+#endif
     return res;
   }
 #else
@@ -2282,6 +2296,7 @@ namespace xcas {
       vector<Fl_Text_Display::Style_Table_Entry> & v=ed->styletable;
       for (unsigned i=0;i<v.size();++i)
 	v[i].size=labelsize();
+      v[0].color=Xcas_editor_color;
     }
     if (q->w()>w()-_printlevel_w)
       q->resize(q->x(),q->y(),w()-_printlevel_w,q->h());
@@ -2347,8 +2362,10 @@ namespace xcas {
     w->scrollbar_width(12);
     w->when(FL_WHEN_ENTER_KEY|FL_WHEN_NOT_CHANGED);
     w->callback(History_Pack_cb_eval,0);
-    w->textcolor(Xcas_input_color);
-    w->color(Xcas_input_background_color);
+    w->textcolor(Xcas_editor_color);
+    w->color(Xcas_editor_background_color);
+    w->styletable[0].color=Xcas_editor_color;
+    w->cursor_color(Xcas_editor_color);
     w->buffer()->add_modify_callback(style_update, w); 
     return w;
   }
@@ -4163,9 +4180,15 @@ namespace xcas {
 	  )
 	return;
       stop_button->deactivate();
+      if (getkeywin)
+	getkeywin->hide();
     }
     if (current_status){
-      current_status->color((python_compat(ptr)&4)?FL_YELLOW:245);
+      current_status->color(
+#ifdef HAVE_LIBMICROPYTHON
+			    (python_compat(ptr)&4)?FL_YELLOW:
+#endif
+			    245);
       string mode_s="Config ";
       if (pack->url)
 	mode_s += '\''+remove_path(*pack->url)+'\'';
@@ -4198,9 +4221,11 @@ namespace xcas {
       switch (giac::xcas_mode(ptr)){
       case 0: 
 	if (python_compat(ptr)){
+#ifdef HAVE_LIBMICROPYTHON
 	  if (python_compat(ptr)&4)
 	    mode_s += "MicroPython ";
 	  else
+#endif
 	    mode_s += python_compat(ptr)==2?"python ^==xor ":"python ^=** ";
 	}
 	else
@@ -4222,7 +4247,7 @@ namespace xcas {
       // mode_s += "Time: ";
       // double t=double(clock());
       // mode_s += xcas::print_DOUBLE_(t/CLOCKS_PER_SEC);
-#ifdef HAVE_MALLOC_H //
+#if defined(HAVE_MALLOC_H) && !defined(__MINGW_H)
       struct mallinfo mem=mallinfo();
       double memd=mem.arena+mem.hblkhd;
       mode_s +=xcas::print_DOUBLE_(memd/1048576);

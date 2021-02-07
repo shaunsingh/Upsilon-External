@@ -4,61 +4,60 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>The exponential distribution</title>
+<title>Converting a real number into a string: format
+</title>
 </head>
 <body >
 <a href="cascmd_en727.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en729.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec930" class="subsection">8.4.14  The exponential distribution</h3>
-<h4 id="sec931" class="subsubsection">The probability density function for the exponential distribution: <span style="font-family:monospace">exponential</span><a id="hevea_default1276"></a> <span style="font-family:monospace">exponentiald</span><a id="hevea_default1277"></a></h4>
-<p>The exponential distribution depends on one parameters, λ&gt;0; the
-value of the density function at <span style="font-style:italic">x</span> ≥ 0 is
-<span style="font-family:monospace">exponential</span>(λ,<span style="font-style:italic">x</span>) =
-λ <span style="font-style:italic">e</span><sup>−λ <span style="font-style:italic">x</span></sup>. If you enter
+<h3 id="sec988" class="subsection">12.4.8  Converting a real number into a string: <span style="font-family:monospace">format</span>
+<a id="hevea_default1406"></a></h3>
+<p>The <span style="font-family:monospace">format</span> command converts real numbers into strings.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">format</span> takes two arguments:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">r</span>, a real number.
+</li><li class="li-itemize"><span style="font-style:italic">str</span>, a string used for formatting.
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">format(</span><span style="font-style:italic">str</span><span style="font-family:monospace">)</span> returns <span style="font-style:italic">r</span>
+as a string with the requested formatting.
+</li></ul><p>
+The formatting string can be one of the following:
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">f</span> (for <em>floating</em> format) followed by the number
+of digits to put after the decimal point.<p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">exponential(2.1,3.5)
-</span></div><p>
-for example, you will get
+<span style="font-family:monospace">format(sqrt(2)*10^10,"f13")</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
 </p><div class="center">
-<span style="font-family:monospace">0.00134944395675
-</span></div>
-<h4 id="sec932" class="subsubsection">The cumulative distribution function for the exponential distribution: <span style="font-family:monospace">exponential_cdf</span><a id="hevea_default1278"></a> <span style="font-family:monospace">exponentiald_cdf</span><a id="hevea_default1279"></a></h4>
-<p>The cumulative distribution function for the exponential distribution with
-parameter λ &gt; 0 at a value <span style="font-style:italic">x</span> ≥ 0 is
-<span style="font-family:monospace">exponential_cdf</span>(λ,<span style="font-style:italic">x</span>) = <span style="font-family:monospace">Prob</span>(<span style="font-style:italic">X</span> ≤ <span style="font-style:italic">x</span>).
-If you enter
+<span style="font-family:monospace">"14142135623.7308959960938"</span>
+</div></li><li class="li-itemize"><span style="font-family:monospace">s</span> (for <em>scientific</em> format) followed by the
+number of significant digits.<p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+ <span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">exponential_cdf(2.3,3.2)
-</span></div><p>
-for example, you will get
+<span style="font-family:monospace">format(sqrt(2)*10^10,"s13")</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
 </p><div class="center">
-<span style="font-family:monospace">0.99936380154
-</span></div><p>If you give <span style="font-family:monospace">exponential_cdf</span> an extra argument <span style="font-style:italic">y</span> &gt; <span style="font-style:italic">x</span>,
-you will get the probability that
-the random variable lies between the two values;
-<span style="font-family:monospace">exponential_cdf(</span>λ<span style="font-family:monospace">,</span><span style="font-style:italic">x</span><span style="font-family:monospace">,</span><span style="font-style:italic">y</span><span style="font-family:monospace">)</span> = Prob(<span style="font-style:italic">x</span> ≤ <span style="font-style:italic">X</span> ≤ <span style="font-style:italic">y</span>). 
-If you enter
+<span style="font-family:monospace">"14142135623.73"
+</span></div></li><li class="li-itemize"><span style="font-family:monospace">e</span> (for <em>engineering</em> format) followed by the
+number of digits to put after the decimal point, with one digit
+before the decimal points.<p><br>
+</p><p><span style="font-weight:bold">Example.</span><br>
+<span style="font-style:italic">Input:</span>
 </p><div class="center">
-<span style="font-family:monospace">exponential_cdf(2.3,0.9,3.2)
-</span></div><p>
-you will get
+<span style="font-family:monospace">format(sqrt(2)*10^10,"e13")</span>
+</div><p>
+<span style="font-style:italic">Output:</span>
 </p><div class="center">
-<span style="font-family:monospace">0.125549583246
-</span></div>
-<h4 id="sec933" class="subsubsection">The inverse distribution function for the exponential distribution: <span style="font-family:monospace">exponential_icdf</span><a id="hevea_default1280"></a> <span style="font-family:monospace">exponentiald_icdf</span><a id="hevea_default1281"></a></h4>
-<p>The inverse distribution function for the exponential
-distribution with parameter λ &gt; 0 is computed with
-<span style="font-family:monospace">exponential_icdf(</span>λ<span style="font-family:monospace">,</span><span style="font-style:italic">h</span><span style="font-family:monospace">)</span>; recall that this will return the
-value <span style="font-style:italic">x</span> with <span style="font-family:monospace">exponential_cdf</span>(λ,<span style="font-style:italic">x</span>) = <span style="font-style:italic">h</span>. If you enter
-</p><div class="center">
-<span style="font-family:monospace">exponential_icdf(2.3,0.87)
-</span></div><p>
-you will get
-</p><div class="center">
-<span style="font-family:monospace">0.887052534142
-</span></div>
+<span style="font-family:monospace">"1.4142135623731e+10"</span>
+</div></li></ul>
 <hr>
 <a href="cascmd_en727.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>

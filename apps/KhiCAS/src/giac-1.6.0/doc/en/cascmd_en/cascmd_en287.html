@@ -4,31 +4,74 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="hevea 2.29+5 of 2017-05-18">
 <link rel="stylesheet" type="text/css" href="cascmd_en.css">
-<title>Rectangle function : rect</title>
+<title>Converting from a symbolic polynomial: e2r symb2poly
+
+</title>
 </head>
 <body >
 <a href="cascmd_en286.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
 <a href="cascmd_en288.html"><img src="next_motif.gif" alt="Next"></a>
 <hr>
-<h3 id="sec357" class="subsection">5.27.2  Rectangle function : <span style="font-family:monospace">rect</span><a id="hevea_default505"></a></h3>
-<p><a id="sec:rect"></a>
-The <span style="font-family:monospace">rect</span> command takes an identifier or an expression  <span style="font-style:italic">x</span>  and returns the value of the rectangle function at  <span style="font-style:italic">x</span> , which is defined by  Π(<span style="font-style:italic">x</span>)=<span style="font-style:italic">u</span>(<span style="font-style:italic">x</span>+1/2)−<span style="font-style:italic">u</span>(<span style="font-style:italic">x</span>−1/2)  where  <span style="font-style:italic">u</span>  is the Heaviside function. The rectangle function is a special case of boxcar function (see Section <a href="cascmd_en286.html#sec%3Aboxcar">5.27.1</a>) for  <span style="font-style:italic">a</span>=−1/2  and  <span style="font-style:italic">b</span>=1/2 .</p><p>For example, input :
-</p><div class="center">
-<span style="font-family:monospace">rect(x/2)
-</span></div><p>
-Output :
-</p><div class="center">
-<span style="font-family:monospace">Heaviside(x/2+1/2)-Heaviside(x/2-1/2)
-</span></div><p>To compute the convolution of the rectangle function with itself, use the convolution theorem. Input :
-</p><div class="center">
-<span style="font-family:monospace">R:=fourier(rect(x),x,s):; ifourier(R^2,s,x)
-</span></div><p>
-Output :
-</p><div class="center">
-<span style="font-family:monospace">Heaviside(x+1)-Heaviside(x-1)-2*x*Heaviside(x)+ x*Heaviside(x+1)+x*Heaviside(x-1)
-</span></div><p>
-The above result is the triangle function  <span style="font-style:italic">tri</span>(<span style="font-style:italic">x</span>)  (see Section <a href="cascmd_en288.html#sec%3Atri">5.27.3</a>).</p>
+<h3 id="sec356" class="subsection">6.27.5  Converting from a symbolic polynomial: <span style="font-family:monospace">e2r</span> <span style="font-family:monospace">symb2poly</span>
+<a id="hevea_default522"></a>
+<a id="hevea_default523"></a></h3>
+<p>The <span style="font-family:monospace">e2r</span> command converts a symbolic
+polynomial into a list (for single variable polynomials) or a sum of
+monomials.<br>
+<span style="font-family:monospace">symb2poly</span> is a synonym for <span style="font-family:monospace">e2r</span>.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">e2r</span> takes two arguments:
+<ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">P</span>, a symbolic polynomial.
+</li><li class="li-itemize"><span style="font-style:italic">vars</span>, the variable name (for one variable
+polynomials) or a list of variable names (for multivariable
+polynomials).<br>
+ For one variable polynomials, this is optional and defaults to
+<span style="font-family:monospace">x</span>.
+</li></ul>
+</li><li class="li-itemize"><span style="font-family:monospace">e2r(</span><span style="font-style:italic">P</span> ⟨,<span style="font-style:italic">vars</span>⟩<span style="font-family:monospace">)</span> returns:<br>
+ the representation of the polynomial as a list of
+coefficients written in decreasing order, if <span style="font-style:italic">vars</span> is a
+variable name.<br>
+ a sum of monomials (sparse representation of multivariate
+polynomials) if <span style="font-style:italic">vars</span> is a list.
+</li></ul><p><br>
+</p><p><span style="font-weight:bold">Examples:</span>
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">e2r(x^2-1)</span>
+</div>
+<span style="font-style:italic">or:</span>
+<div class="center">
+<span style="font-family:monospace">symb2poly(x^2-1)</span>
+</div>
+<span style="font-style:italic">or:</span>
+<div class="center">
+<span style="font-family:monospace">symb2poly(y^2-1,y)</span>
+</div>
+<span style="font-style:italic">or:</span>
+<div class="center">
+<span style="font-family:monospace">e2r(y^2-1,y)</span>
+</div>
+<span style="font-style:italic">Output:</span>
+<table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">  ▯ 1,0,−1 ▯
+</td></tr>
+</table>
+</li><li class="li-itemize"><span style="font-style:italic">Input:</span>
+<div class="center">
+<span style="font-family:monospace">e2r(x^2-x*y+y, [x,y])</span>
+</div>
+<span style="font-style:italic">or:</span>
+<div class="center">
+<span style="font-family:monospace">symb2poly(x^2-x*y+2*y, [x,y])</span>
+</div>
+<span style="font-style:italic">Output:</span> 
+<div class="center">
+<span style="font-family:monospace">%%%{1,[2,0]%%%}+%%%{-1,[1,1]%%%}+%%%{2,[0,1]%%%}</span>
+</div> 
+</li></ul>
 <hr>
 <a href="cascmd_en286.html"><img src="previous_motif.gif" alt="Previous"></a>
 <a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
