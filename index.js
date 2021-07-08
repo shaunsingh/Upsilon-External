@@ -338,8 +338,14 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
         });
       }
     ).catch(error => {
+      console.log(error);
       $scope.$apply(function() {
-        $scope.error = error;
+        if(error.match("Address .*? outside of memory map")) {
+          $scope.error = $translate.instant("TOO_MUCH_FILES");
+        }
+        else {
+          $scope.error = error;
+        }
         $scope.allDone = false;
       });
     });
@@ -459,6 +465,7 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
       DFU_ERASING: "Erasing",
       DFU_COPYING: "Copying data",
       DFU_WROTE: "Done",
+      TOO_MUCH_FILES: "Not enough space on the device",
       OR: "or",
       CHECK_ICONS: "Enable experimental icons support.",
     })
@@ -487,6 +494,7 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
       DFU_ERASING: "Effacement",
       DFU_COPYING: "Copie des fichiers",
       DFU_WROTE: "Terminé",
+      TOO_MUCH_FILES: "Pas assez de place sur l'appareil",
       OR: "ou",
       CHECK_ICONS: "Activer le support des icons (Expérimental)",
     })
