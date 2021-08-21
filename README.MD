@@ -7,10 +7,7 @@ The modified sources can be found here : https://github.com/Delta-NumWorks/delta
 
 # If something goes wrong
 
-Do an official firmware upgrade. Follow the instructions on https://workshop.numworks.com/devices/upgrade.
-You can always restore the calculator using this method.
-
-I'm not affiliated with NumWorks. If your calculator is buggy when using this firmware, please restore the official one.
+Reinstall Omega frop https://getomega.dev/, doing a device recovery from there if necessary.
 
 # Included applications
 
