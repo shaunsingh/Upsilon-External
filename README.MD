@@ -7,7 +7,7 @@ The modified sources can be found here : https://github.com/Delta-NumWorks/delta
 
 # If something goes wrong
 
-Reinstall Omega frop https://getomega.dev/, doing a device recovery from there if necessary.
+Reinstall Omega from https://getomega.dev/, doing a device recovery from there if necessary.
 
 # Included applications
 
