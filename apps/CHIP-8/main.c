@@ -28,11 +28,10 @@ void extapp_main(void) {
 
     extapp_drawTextSmall("[OK] Rom loaded successfully!", 0, 20*4, 0x0000, 0xFFFF, false);
 
-    char * memory_str;
-    for (int i = 0; i < 12; ++i) {
-        sprintf(memory_str, "%x", memory[0x200+i]);
-        extapp_drawTextSmall(memory_str, 15*i, 20*6, 0x0000, 0xFFFF, false);
-    }
+    extapp_drawTextSmall("[7][8][9][(]", 20, 20*7, 0x3333, 0xFFFF, false);
+    extapp_drawTextSmall("[4][5][6][x]", 20, 20*8, 0x3333, 0xFFFF, false);
+    extapp_drawTextSmall("[1][2][3][+]", 20, 20*9, 0x3333, 0xFFFF, false);
+    extapp_drawTextSmall("[0][.][e][A]", 20, 20*10, 0x3333, 0xFFFF, false);
 
     while (1) {
         if (draw_flag) {

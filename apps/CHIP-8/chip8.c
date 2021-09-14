@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 void debug_print(char * msg) {
-    extapp_drawTextSmall(msg, 0, 20*8, 0x0000, 0xFFFF, false);
+    extapp_drawTextSmall(msg, 0, 20*5, 0x0000, 0xFFFF, false);
 }
 
 /*

@@ -47,9 +47,9 @@ void draw(unsigned char* display, char * rom_filename) {
     for (int y = 0; y < 32; y++) {
         for (int x = 0; x < 64; x++) {
             if (display[x + (y * 64)]) {
-                extapp_pushRectUniform(x * 3 + 125, y * 3 + 140, 3, 3, 0xFFFF);
+                extapp_pushRectUniform(x * 3 + 125, y * 3 + 130, 3, 3, 0xFFFF);
             } else {
-                extapp_pushRectUniform(x * 3 + 125, y * 3 + 140, 3, 3, 0x0000);
+                extapp_pushRectUniform(x * 3 + 125, y * 3 + 130, 3, 3, 0x0000);
             }
         }
     }
