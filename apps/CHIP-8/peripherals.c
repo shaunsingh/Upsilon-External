@@ -1,5 +1,7 @@
 #include "inc/peripherals.h"
+#include "inc/chip8.h"
 #include "extapp_api.h"
+#include <string.h>
 
 
 /**
@@ -57,6 +59,17 @@ uint64_t kbd_handler(void) {
     uint64_t kb = extapp_scanKeyboard();
     if (kb & SCANCODE_Back || kb & SCANCODE_OnOff || kb & SCANCODE_Home) {
         QUIT = 1;
+    } else if (kb & SCANCODE_Backspace) {
+        memset(V, 0, sizeof(V));
+        I = 0;
+        pc = 0x200;
+        sp = 0;
+        memset(stack, 0, sizeof(stack));
+        memset(display, 0, sizeof(display));
+        dt = 0;
+        st = 0;
+        draw_flag = 1;
+        sound_flag = 0;
     }
     return kb;
 }
