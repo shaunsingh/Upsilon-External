@@ -162,6 +162,54 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
     return compressed;
   }
 */
+  let normalizeTextFile = async function normalizeTextFile(file) {
+
+    // We accept codepoints between 0x20 and 0x7e annd
+    const otherAcceptedCodepoints = [
+      0xb0, 0xb7, 
+      0xc6, 0xd0, 0xd7, 0xd8, 0xde, 0xdf, 0xe6, 0xf0, 0xf7, 0xf8, 0xfe, 
+      0x300, 0x301, 0x302, 0x303, 0x305, 0x308, 0x30a, 0x30b, 0x327, 
+      0x393, 0x394, 0x3a9, 0x3b8, 0x3bb, 0x3bc, 0x3c0, 0x3c3, 0x1d07, 0x212f, 0x2192, 0x2211, 0x221a, 0x221e, 0x222b, 0x2248, 0x2264, 0x2265, 0xFFFD, 0x1d422,
+      0x0, 0x1,
+      0x9, 0xa];
+
+
+    const replaceAtIndex = (str, index, chr) => {
+      if(index > str.length-1) return str;
+      return str.substring(0,index) + chr + str.substring(index+1);
+    }
+
+    let blob = new Blob([file.binary], {type:'text/plain'});
+    return new Promise((resolve, reject) => {
+      blob.text().then(text => {
+        // TODO: Improve this, it is very unefficient
+        text = text.replaceAll("’", "'")
+        text = text.replaceAll(" «", '"')
+        text = text.replaceAll(" »", '"')
+        text = text.replaceAll("«", '"')
+        text = text.replaceAll("»", '"')
+        text = text.replaceAll("“", '"')
+        text = text.replaceAll("”", '"')
+        text = text.replaceAll("–", "-")
+        text = text.replaceAll("œ", "oe")
+        text = text.replaceAll("\r\n", "\n")
+        text = text.replaceAll("\r", "\n")
+        text = text.normalize('NFKD');
+        for (let i = 0; i < text.length; i++) {
+          const codePoint = text.codePointAt(i);
+          
+          if ((codePoint >= 0x20 && codePoint <= 0x7e) || (otherAcceptedCodepoints.includes(codePoint))) {
+            continue;
+          }
+
+          text = replaceAtIndex(text, i, String.fromCodePoint(0xFFFD))
+        }
+        let t = new TextEncoder("UTF-8").encode(text);
+        resolve(t);
+      });
+    });
+  };
+
   let fromPNGToOBM = function fromPNGToOBM(dataURL) {
     //OBM (Omega Bit Map) is the wallpaper format of Omega
     let img = new Image();
@@ -260,6 +308,15 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
         $scope.$apply(function() {
           $scope.lastAction = $translate.instant("ADDING") + " " + file.name;
         });
+
+        if(file.name.endsWith(".txt")) {
+          console.log("Normalizing", file.name);
+          let normalized = await normalizeTextFile(file);
+          file = {
+            name: file.name,
+            binary: normalized
+          };
+        }
         tar.addFileArrayBuffer(file.name, file.binary, {mode: "664"});
       }
 
@@ -340,7 +397,7 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
     ).catch(error => {
       console.log(error);
       $scope.$apply(function() {
-        if(error.match("Address .*? outside of memory map")) {
+        if(error.message != undefined && error.message.match("Address .*? outside of memory map")) {
           $scope.error = $translate.instant("TOO_MUCH_FILES");
         }
         else {
