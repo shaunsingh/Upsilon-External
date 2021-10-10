@@ -44,14 +44,19 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
         let img = document.createElement('img');
         img.onload = function () { 
           $scope.$apply(function () {
-            if(img.width == 320 && img.height == 222) {
-              $scope.wallpaper = {name: file.name, imagesrc:reader.result};
-              document.getElementById("wallpaper-name").innerText = file.name;
-              document.getElementById("wallpaper-file-input").classList.remove("is-invalid");
-            }
-            else {
-              document.getElementById("wallpaper-file-input").classList.add("is-invalid");
-            }
+            let cropperDiv = document.getElementById("cropperDiv");
+            cropperDiv.innerText = "";
+            cropperDiv.appendChild(img);
+            $('#imageModal').modal('show');
+            img.style = "max-width: 100%;";
+
+            $scope.wallpaper = {
+              name: file.name,
+              cropper: new Cropper(img, {
+                aspectRatio: 320 / 222,
+                viewMode: 1
+              })
+            };
           });
         };
         img.src = reader.result;
@@ -61,6 +66,23 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
       reader.readAsDataURL(file);
     }
   };
+
+  $scope.saveCroppedWallpaper = function saveCroppedWallpaper() {
+    // Resize image
+    var canvas = document.createElement('canvas'),
+        ctx = canvas.getContext('2d');
+    canvas.width = 320;
+    canvas.height = 222;
+
+    ctx.drawImage($scope.wallpaper.cropper.getCroppedCanvas(), 0, 0, 320, 222);
+
+    $scope.wallpaper = {
+      name: $scope.wallpaper.name, 
+      imagesrc: canvas.toDataURL("image/png")
+    };
+    document.getElementById("wallpaper-name").innerText = $scope.wallpaper.name;
+    $('#imageModal').modal('hide');
+  }
 
   $scope.removeWallpaper = function removeWallpaper() {
     $scope.wallpaper = null;
@@ -491,6 +513,8 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
     link: function($scope, el) {
       el.bind("change", function(e) {
         $scope.setWallpaper(el);
+      }).bind("click", function(e) {
+        $scope.removeWallpaper();
       })
     }
   }
@@ -525,6 +549,9 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
       TOO_MUCH_FILES: "Not enough space on the device",
       OR: "or",
       CHECK_ICONS: "Enable experimental icons support.",
+      CROP_IMAGE_TITLE: "Crop wallpaper",
+      CROP_IMAGE_SAVE: "Save",
+      CROP_IMAGE_CANCEL: "Cancel",
     })
     .translations('fr', {
       TITLE: 'Dépôt d\'application N110 non officiel',
@@ -554,6 +581,9 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
       TOO_MUCH_FILES: "Pas assez de place sur l'appareil",
       OR: "ou",
       CHECK_ICONS: "Activer le support des icons (Expérimental)",
+      CROP_IMAGE_TITLE: "Recadrer le fond d'écran",
+      CROP_IMAGE_SAVE: "Sauvegarder",
+      CROP_IMAGE_CANCEL: "Annuler",
     })
     .registerAvailableLanguageKeys(['en', 'fr'], {
       'en_*': 'en',
