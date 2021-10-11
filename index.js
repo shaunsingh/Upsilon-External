@@ -38,6 +38,7 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
 
   $scope.setWallpaper = function setWallpaper(el) {
     let file = el[0].files[0];
+    el.value = null;
     let reader = new FileReader();
     
     reader.addEventListener("load", function() {
@@ -513,8 +514,6 @@ angular.module('nwas', ['ngSanitize', 'pascalprecht.translate']).controller('mai
     link: function($scope, el) {
       el.bind("change", function(e) {
         $scope.setWallpaper(el);
-      }).bind("click", function(e) {
-        $scope.removeWallpaper();
       })
     }
   }
