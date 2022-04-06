@@ -9,5 +9,7 @@ angular.module('nwas').service('apps', function() {
     { name: "HexEdit", description: {en: "Hexadecimal editor", fr: "Éditeur hexadécimal"} },
     { name: "BadApple", description: {en: "Bad Apple demo", fr: "Démo Bad Apple"} },
     { name: "CHIP-8", description: {en: "CHIP-8 interpreter", fr: "Interpréteur CHIP-8"} },
+    { name: "nw-41", description: {en: "41CX Emulator", fr: "Émulateur 41CX"} },
+  ];
   ];
 });
