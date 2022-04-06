@@ -1,17 +1,17 @@
 /*
  *--------------------------------------
  * Program Name: hp41c
- * Author: O2S
+ * Author: shaunsingh
  * License: free
  * Description: keypad part
  *--------------------------------------
 */
 
 #include "scanner.h"
-#include "lcd.h"
-#include "nut.h"
+#include "../lcd/lcd.h"
+#include "../emu/nut.h"
 
-#include "../../api/extapp_api.h"
+#include "../../../api/extapp_api.h"
 
 uint8_t bkey = 54;
 

@@ -1,18 +1,18 @@
 /*
  *--------------------------------------
  * Program Name: hp41c
- * Author: O2S
+ * Author: shaunsingh
  * License: free
  * Description: phineas timer emulator
  *--------------------------------------
 */
 
-#include "main.h"
+#include "../main.h"
 
 #include "nut.h"
-#include "lcd.h"
+#include "../lcd/lcd.h"
 
-#include "../../api/extapp_api.h"
+#include "../../../api/extapp_api.h"
 
 static uint8_t sela = 1;				// select A or B
 static uint8_t hold = 0;				// to initiate read and hold

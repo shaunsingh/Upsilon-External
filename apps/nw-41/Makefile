@@ -6,7 +6,7 @@ LDFLAGS=-Wl,-L$(API) -Wl,--gc-sections -Wl,--entry=entrypoint --specs=nosys.spec
 
 CFLAGS += -I./
 
-OBJS = main.o nut.o lcd.o keys.o scanner.o phi.o
+OBJS = main.o emu/nut.o lcd/lcd.o keys/keys.o keys/scanner.o emu/phi.o
 
 app.elf: $(OBJS)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)

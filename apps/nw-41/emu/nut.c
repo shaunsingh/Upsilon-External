@@ -1,7 +1,7 @@
 /*
  *--------------------------------------
  * Program Name: hp41c
- * Author: O2S
+ * Author: shaunsingh
  * License: free
  * Description: nut processor emulator
  *--------------------------------------
@@ -9,22 +9,20 @@
 
 #define HP41CX
 
-// #define DEBUG
+#include "../main.h"
 
-#include "main.h"
-
-#include "lcd.h"
-#include "scanner.h"
-#include "keys.h"
+#include "../lcd/lcd.h"
+#include "../keys/scanner.h"
+#include "../keys/keys.h"
 #include "phi.h"
 
 #ifdef HP41CX
-#include "Roms/hp41xrom.h" 
+#include "../Roms/hp41xrom.h" 
 #else
-#include "Roms/hp41rom.h" 
+#include "../Roms/hp41rom.h" 
 #endif
 
-#include "../../api/extapp_api.h"
+#include "../../../api/extapp_api.h"
 
 #define WSIZE 14
 #define WSIZE_1 13

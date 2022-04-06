@@ -1,8 +1,8 @@
 app_external_src += $(addprefix apps/external/app/,\
-	nut.c \
-	lcd.c \
-	keys.c \
-	scanner.c \
-	phi.c \
+	emu/nut.c \
+	lcd/lcd.c \
+	keys/keys.c \
+	keys/scanner.c \
+	emu/phi.c \
 	main.c \
 )

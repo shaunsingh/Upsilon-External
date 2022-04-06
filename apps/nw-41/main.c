@@ -1,7 +1,7 @@
 /*
  *--------------------------------------
  * Program Name: HP41
- * Author: O2S
+ * Author: shaunsingh
  * License: free
  * Description: HP41 emulator
  *--------------------------------------
@@ -11,15 +11,13 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "nut.h"
-#include "lcd.h"
-#include "scanner.h"
-#include "keys.h"
-#include "phi.h"
+#include "emu/nut.h"
+#include "lcd/lcd.h"
+#include "keys/scanner.h"
+#include "keys/keys.h"
+#include "emu/phi.h"
 
 #include "../../api/extapp_api.h"
-
-// #define DEBUG
 
 int copy(uint8_t* dest, uint8_t* src, int len) {
     int l = len;

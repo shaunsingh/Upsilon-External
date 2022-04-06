@@ -1,17 +1,15 @@
 /*
  *--------------------------------------
  * Program Name: hp41c
- * Author: O2S
+ * Author: shaunsingh
  * License: free
  * Description: lcd display emulator
  *--------------------------------------
 */
 
 #include "gfx.h"
-
-#include "main.h"
-
-#include "../../api/extapp_api.h"
+#include "../main.h"
+#include "../../../api/extapp_api.h"
 
 #define LCDY 180
 
