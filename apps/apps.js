@@ -11,5 +11,4 @@ angular.module('nwas').service('apps', function() {
     { name: "CHIP-8", description: {en: "CHIP-8 interpreter", fr: "Interpréteur CHIP-8"} },
     { name: "nw-41", description: {en: "41CX Emulator", fr: "Émulateur 41CX"} },
   ];
-  ];
 });
