@@ -10,7 +10,6 @@ OBJS = main.o emu/nut.o lcd/lcd.o keys/keys.o keys/scanner.o emu/phi.o
 
 app.elf: $(OBJS)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
-	arm-none-eabi-strip $@
 
 FORCE:
 
